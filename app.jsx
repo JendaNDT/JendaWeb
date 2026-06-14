@@ -168,21 +168,6 @@ function App() {
     } catch {}
   }, [playerTrack]);
 
-  // Ambient theming — update CSS vars based on currently playing album
-  __useE_app(() => {
-    const r = document.documentElement;
-    if (playerTrack) {
-      const al = (window.ALBUMS || []).find(a => a.id === playerTrack.album);
-      if (al) {
-        r.style.setProperty('--ambient1', al.g1);
-        r.style.setProperty('--ambient2', al.g2);
-        return;
-      }
-    }
-    r.style.removeProperty('--ambient1');
-    r.style.removeProperty('--ambient2');
-  }, [playerTrack]);
-
   const handleClose = __useC_app(() => {
     setPlayerTrack(null); setPlaying(false);
     try { localStorage.removeItem(PLAYER_STORAGE_KEY); } catch {}
@@ -191,13 +176,6 @@ function App() {
 
   return (
     <div style={{ minHeight:'100vh', paddingBottom: playerTrack ? 130 : 0, position:'relative' }}>
-      {/* Ambient wash */}
-      {playerTrack && <div aria-hidden style={{
-        position:'fixed', inset:0, pointerEvents:'none', zIndex:0,
-        background:'radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--ambient1, transparent) 18%, transparent), transparent 55%), radial-gradient(circle at 12% 92%, color-mix(in srgb, var(--ambient2, transparent) 14%, transparent), transparent 50%)',
-        transition:'background 1.6s ease',
-        mixBlendMode:'screen',
-      }} />}
       <Nav lang={lang} setLang={setLang} mode={tw.mode || 'auto'} setMode={(v) => setTweak('mode', v)} />
       <Hero lang={lang} />
       <AppsSection lang={lang} />
