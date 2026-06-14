@@ -1,63 +1,80 @@
 # JendaWeb — Handoff Document
 
-Personal portfolio site for "Jenda — Vibe Coder & AI Music". A React SPA built with inline Babel + JSX, no build step. Installable PWA, bilingual (CZ / EN), dark/light mode with multiple accent themes.
+Personal portfolio site for "Jenda — Vibe Coder & AI Music". A React SPA built with inline Babel + JSX, **no build step**. Installable, **fully offline-capable** PWA, bilingual (CZ / EN), dark/light mode with accent themes.
+
+- **Live:** https://jenda-web.vercel.app
+- **Repo:** https://github.com/JendaNDT/JendaWeb — push to `main` → Vercel auto-deploys.
 
 ## Tech stack
 
-- React 18 + ReactDOM via UMD scripts
-- @babel/standalone (in-browser JSX transformation, no bundler)
-- Plain CSS in `<style>` block + inline-style JSX
-- Service Worker for offline PWA cache
-- No npm, no build, no node_modules — open `index.html` and it runs.
+- **React 18 + ReactDOM** — vendored locally in `vendor/` (production UMD builds), **not from CDN**.
+- **@babel/standalone** — vendored locally (`vendor/babel.min.js`); transpiles JSX in the browser, no bundler.
+- **Fonts (Syne, DM Sans)** — self-hosted in `vendor/fonts/` + `vendor/fonts.css` (no Google Fonts).
+- Plain CSS in `<style>` block + inline-style JSX.
+- Service Worker for offline PWA cache (precaches the whole boot).
+- No npm, no build, no node_modules. Must be served over **http(s)** (or localhost) — `file://` won't run the SW.
+
+### Offline-capable (important)
+Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same-origin, and precached** by `sw.js`. There are **no external CDN dependencies**, so the installed PWA works offline. (Earlier these came from unpkg/Google CDN, which broke offline boot; fixed by vendoring on 14 Jun 2026.)
+
+## Hosting & deploy
+
+- **GitHub:** `JendaNDT/JendaWeb`, branch `main`.
+- **Vercel:** connected to the repo. **Push to `main` auto-deploys.** Framework preset "Other" (pure static, no build).
+- The site assumes deployment at the **domain root** — `sw.js` and the manifest use absolute paths (`/...`). A subpath deploy would need path tweaks.
+- After changing any cached asset, **bump `VERSION` in `sw.js`** (currently `jw-v26`) so clients pick up new content.
 
 ## File map
 
 ```
 .
-├── index.html                  # HTML shell, CSS tokens, script load order, mesh background
-├── data.js                     # All content: apps, albums, tracks, socials, strings, stats, config keys
-├── app.jsx                     # Root App component, lang/mode state, hash routing, keyboard shortcuts
-├── shared.jsx                  # Themes, hooks (useInView, useCountUp), icons, base components, art generators
-├── nav-hero.jsx                # Nav + Hero sections
-├── apps-music.jsx              # AppCard, AppsSection, AlbumCard, TrackRow, MusicSection
-├── player-contact.jsx          # AudioPlayer (mini), ShortcutsOverlay, ContactForm, ContactSection, Footer
-├── player-expand.jsx           # ExpandMode full-screen player + AnalyzerOverlay
-├── search.jsx                  # Cmd+K SearchOverlay (cross-content search)
-├── queue.jsx                   # QueueDrawer (Q to open)
-├── extras.jsx                  # NewsletterSection, StatsSection, ComparisonSection, MostPlayedSection, DonationButton
-├── tweaks-panel.jsx            # Reusable Tweaks panel scaffold (omelette starter)
-├── sw.js                       # Service worker (cache shell + network-first HTML)
-├── manifest.webmanifest        # PWA manifest
-├── og-image.svg                # 1200×630 social card
-├── robots.txt
-├── sitemap.xml
-├── feed.xml                    # RSS feed for music releases
-├── 404.html                    # Themed 404 page
-├── embed.html                  # Embeddable mini-player (?id=trackId)
-└── case-studies/
-    ├── style.css               # Shared case study styles (matches main site tokens)
-    ├── meditapp.html           # MeditApp case study
-    ├── beatcraft.html          # BeatCraft case study
-    └── chordlens.html          # ChordLens case study
+├── index.html              # HTML shell, CSS tokens, script load order, mesh background + noise
+├── data.js                 # All content: apps, albums, tracks, socials, strings, stats, config keys
+├── app.jsx                 # Root App, lang/mode state, hash routing, keyboard shortcuts
+├── shared.jsx              # Themes, hooks (useInView, useCountUp), icons, base components, art generators
+├── nav-hero.jsx            # Nav + Hero
+├── apps-music.jsx          # AppCard, AppsSection, AlbumCard, TrackRow, MusicSection
+├── player-contact.jsx      # AudioPlayer (mini), ShortcutsOverlay, ContactForm, ContactSection, Footer
+├── player-expand.jsx       # ExpandMode full-screen player + AnalyzerOverlay
+├── search.jsx              # Cmd+K SearchOverlay
+├── queue.jsx               # QueueDrawer (Q)
+├── extras.jsx              # Newsletter, Stats, Comparison, MostPlayed, DonationButton
+├── tweaks-panel.jsx        # Reusable Tweaks panel scaffold
+├── vendor/                 # LOCAL deps (offline)
+│   ├── react.production.min.js
+│   ├── react-dom.production.min.js
+│   ├── babel.min.js
+│   ├── fonts.css           # @font-face for self-hosted fonts
+│   └── fonts/              # Syne + DM Sans (woff2/woff, latin subset)
+├── icons/                  # PNG app icons 180/192/512 (iOS apple-touch + maskable)
+├── sw.js                   # Service worker (precache shell + network-first HTML)
+├── manifest.webmanifest    # PWA manifest (icons point to icons/*.png)
+├── og-image.svg            # 1200×630 social card
+├── robots.txt · sitemap.xml · feed.xml · 404.html · embed.html
+├── PROJECT_STATUS.md       # Living project status (vibecoding tracker)
+├── HANDOFF.md              # This file
+├── case-studies/           # meditapp / beatcraft / chordlens + shared style.css
+└── handoff/                # ⚠️ Frozen backup of the OLD 4-file version — NOT current, do not use
 ```
 
 ## Architecture — IMPORTANT
 
-Because each `<script type="text/babel">` gets its own scope when transpiled by in-browser Babel, **inter-file communication uses `window` globals**.
-
-At the end of each `.jsx` file:
+Because each `<script type="text/babel">` gets its own scope when transpiled by in-browser Babel, **inter-file communication uses `window` globals**. At the end of each `.jsx` file:
 ```js
 Object.assign(window, { ComponentA, ComponentB, helperFn, ... });
 ```
-
-In other files, those identifiers resolve via the global scope (`window.ComponentA` looks the same as bare `ComponentA`).
+In other files those identifiers resolve via the global scope.
 
 ### Script load order in `index.html`
-
 ```html
+<!-- in <head>: local libs, must load before the babel scripts -->
+<script src="vendor/react.production.min.js"></script>
+<script src="vendor/react-dom.production.min.js"></script>
+<script src="vendor/babel.min.js"></script>
+<!-- ...at end of <body>: -->
 <script type="text/babel" src="tweaks-panel.jsx"></script>
 <script src="data.js"></script>                       <!-- plain JS, sets window.APPS_DATA etc. -->
-<script type="text/babel" src="shared.jsx"></script>  <!-- themes, hooks, icons, helpers -->
+<script type="text/babel" src="shared.jsx"></script>
 <script type="text/babel" src="nav-hero.jsx"></script>
 <script type="text/babel" src="apps-music.jsx"></script>
 <script type="text/babel" src="player-contact.jsx"></script>
@@ -67,16 +84,10 @@ In other files, those identifiers resolve via the global scope (`window.Componen
 <script type="text/babel" src="search.jsx"></script>
 <script type="text/babel" src="app.jsx"></script>     <!-- App root, renders ReactDOM -->
 ```
-
 **Do not change this order.** Files depend on globals defined earlier.
 
 ### React hooks aliased per file
-
-To avoid Babel scope collisions, each file does its own destructure with unique names:
-```js
-const { useState: __useS_app, useEffect: __useE_app, ... } = React;
-```
-This is intentional. If you add a new file, follow the same pattern (`__useS_xxx` etc.).
+To avoid Babel scope collisions each file destructures with unique names: `const { useState: __useS_app, ... } = React;`. Follow the same pattern (`__useS_xxx`) in any new file.
 
 ## State persistence (localStorage)
 
@@ -92,96 +103,79 @@ This is intentional. If you add a new file, follow the same pattern (`__useS_xxx
 | `jw_viz`           | 'bars' \| 'radial' \| 'mirror'          |
 | `jw_plays`         | { trackId: count } — listening stats    |
 
-Tweaks state (theme, mode) also persists via the tweaks-panel scaffold's own storage.
-
 ## URL hash routing
 
-- `#track=N` — loads track ID N into player (paused)
+- `#track=N` — loads track ID N (paused)
 - `#album=ID` — loads first track of album, sets playlist to album tracks
-- `#track=N&t=84` — also seeks to 84 seconds (used by share-with-timestamp)
+- `#track=N&t=84` — also seeks to 84 seconds (share-with-timestamp)
+- `#apps` / `#music` / `#contact` — scroll to section
 
 ## Keyboard shortcuts (global)
 
-| Key             | Action                       |
-|-----------------|------------------------------|
-| `Cmd/Ctrl+K`    | Search overlay               |
-| `?`             | Shortcuts overlay            |
-| `Space`         | Play / pause                 |
-| `← / →`         | Prev / next track            |
-| `Shift+← / →`   | Seek 5s back / forward       |
-| `M`             | Mute                         |
-| `E`             | Expand player                |
-| `Q`             | Queue drawer                 |
-| `V`             | Cycle visualizer mode        |
-| `D`             | Audio analyzer overlay       |
-| `A`             | Set loop start               |
-| `B`             | Set loop end                 |
-| `Z`             | Clear loop                   |
-| `L`             | Toggle language              |
-| `Esc`           | Close current overlay        |
+`Cmd/Ctrl+K` search · `?` shortcuts · `Space` play/pause · `← / →` prev/next · `Shift+← / →` seek 5s · `M` mute · `E` expand · `Q` queue · `V` visualizer · `D` analyzer · `A`/`B`/`Z` loop start/end/clear · `L` language · `Esc` close overlay.
 
-## Configurable values — TODO before going live
+## Configurable values — TODO before fully live
 
 In **`data.js`**:
 
-| Constant                | What to set it to                                                |
-|-------------------------|------------------------------------------------------------------|
-| `window.CONTACT_ENDPOINT` | Formspree URL like `'https://formspree.io/f/xxxxxxxx'`. Falls back to `mailto:` if null. |
-| `window.CONTACT_EMAIL`   | Your real email                                                  |
-| `window.NEWSLETTER_ENDPOINT` | Buttondown embed URL. Falls back to friendly "thanks" if null.   |
-| `window.KOFI_USERNAME`   | Your Ko-fi username — donation button activates                  |
-| `window.GISCUS_CONFIG`   | `{ repo, repoId, category, categoryId }` from giscus.app         |
-| `window.APPS_DATA`       | Replace placeholder `link:'#'` with real app URLs                |
-| `window.TRACKS_DATA`     | Replace `audioUrl: null` with real Suno URLs + `downloadUrl`     |
-| `window.SOCIALS`         | Replace `url:'#'` with real social profiles                      |
-| `window.CASE_STUDIES`    | Map of `appId -> case study URL` (currently 3 entries)           |
-| `window.PUBLIC_STATS`    | Update with real numbers                                         |
-| `window.BUILD_LOG`       | Replace placeholder monthly entries                              |
+| Constant | What to set it to |
+|----------|-------------------|
+| `window.TRACKS_DATA` | Replace `audioUrl: null` with real Suno URLs + `downloadUrl` **(biggest remaining gap — player is silent until done)** |
+| `window.APPS_DATA` | Replace placeholder `link:'#'` with real app URLs |
+| `window.SOCIALS` | Replace `url:'#'` with real social profiles |
+| `window.CONTACT_ENDPOINT` | Formspree URL; falls back to `mailto:` if null |
+| `window.CONTACT_EMAIL` | Real email (currently `jenda@example.com`) |
+| `window.NEWSLETTER_ENDPOINT` | Buttondown embed URL; degrades to a "thanks" message if null |
+| `window.KOFI_USERNAME` | Ko-fi username — activates donation button |
+| `window.GISCUS_CONFIG` | `{ repo, repoId, category, categoryId }` from giscus.app |
+| `window.CASE_STUDIES` | Map of `appId -> case study URL` (3 entries) |
+| `window.PUBLIC_STATS` / `window.BUILD_LOG` | Replace placeholder numbers/entries |
 
-In **`index.html`**:
-- Uncomment Plausible script + set `data-domain` for analytics
-- Update OG meta tags to absolute URLs once you have a real domain
-
-In **`sw.js`**:
-- Bump `VERSION` constant whenever you change cached assets, to invalidate old SW cache
-
-In **case study HTML files**:
-- Uncomment the giscus `<script>` block at the bottom of each, fill in `data-repo` etc.
+In **`index.html`**: uncomment Plausible + set `data-domain`; set OG meta tags to absolute URLs (`https://jenda-web.vercel.app/...`).
+In **`sw.js`**: bump `VERSION` on any cached-asset change.
+In **case study HTML**: uncomment giscus block + fill `data-repo` etc.
 
 ## Theming
 
-- **Themes** (accent palettes): `ember` (default), `velvet`, `desert` — defined in `shared.jsx` `THEMES` object
-- **Mode**: `auto` (follows OS) / `light` / `dark`
-- Both selectable via Tweaks panel + nav button (mode only)
-- CSS tokens in `index.html` `:root` and `html[data-mode="light"]`
-- `--ambient1` / `--ambient2` are set dynamically from currently-playing album colors
+- **Themes** (accents): `ember` (default), `velvet`, `desert` — `THEMES` in `shared.jsx`.
+- **Mode**: `auto` / `light` / `dark`. CSS tokens in `index.html` `:root` and `html[data-mode="light"]`.
+- `--ambient1` / `--ambient2` set dynamically from the currently-playing album colors.
+
+## Background (mesh) — how it works + rules
+
+- **One fixed ambient layer:** `.mesh-bg` (`position:fixed; inset:0; z-index:-1`) holds 4 blurred radial orbs (mesh-1 teal, mesh-2 indigo, mesh-3 amber, mesh-4 purple) + a fine noise overlay `.mesh-noise`.
+- **Spans the whole page:** all page sections use `background:transparent`, so the fixed mesh shows continuously top-to-bottom. Don't give a section an opaque background unless you intend to hide the mesh there.
+- **RULE — orbs must NOT animate `opacity` (only `transform`).** Animating opacity + big `scale` makes the background progressively brighten / wash out over time (4 orbs with different periods drift into phase). Keep opacity constant on each orb, scale ≤ ~1.06, gentle drift. `prefers-reduced-motion` disables animation.
+- **Warm-balanced:** amber (mesh-3) is the larger/central warm orb; teal (mesh-1) is toned down — matches the warm brand and keeps orange present.
+- **Noise (`.mesh-noise`)** dithers gradient banding. Note: faint "stripes" some displays show on huge soft gradients are **Mach bands / display-side**, not in the pixel data — noise can't fully remove them, don't chase it.
+- The hero has **no local orbs** (removed) and no separate noise — it shares the global mesh, so there's no seam at the hero boundary.
 
 ## Notable features (so you don't reinvent them)
 
-- **Procedural artwork** — `trackArt(seed, album)` and `albumArt(album)` in `shared.jsx`. Deterministic SVG data URIs, mesh gradients + noise.
-- **Drifting mesh background** — 4 animated orbs in `index.html` body (mesh-1 teal, mesh-2 indigo, mesh-3 amber, mesh-4 plum). `prefers-reduced-motion` aware.
-- **Brand watermark** — fixed "J" in bottom-left, 22vw, very low opacity.
-- **Floating-label form fields** — `.field` CSS class, placeholder=" " trick.
-- **Animated number counters** — `useCountUp(target)` hook, intersection-triggered, easeOutQuart.
-- **A/B loop** — A/B/Z keys, markers shown in ExpandMode bars-mode waveform.
-- **Audio analyzer overlay** — D key in ExpandMode, real-time peakHz / rms / range from AnalyserNode.
+- **Procedural artwork** — `trackArt(seed, album)` / `albumArt(album)` in `shared.jsx` (deterministic SVG data URIs).
+- **Floating-label form fields** — `.field` CSS class, `placeholder=" "` trick.
+- **Animated number counters** — `useCountUp(target)` hook, intersection-triggered.
+- **A/B loop** — A/B/Z keys, markers in ExpandMode bars-mode waveform.
+- **Audio analyzer overlay** — D key, real-time peakHz / rms / range from AnalyserNode.
 - **Visualizer modes** — V cycles bars / radial / mirror.
 - **Most Played section** — reads `localStorage.jw_plays`, hidden if empty.
 
 ## Things deliberately not done
 
-- **Crossfade** — would require dual-audio engine (two `<audio>` elements with overlapping fade-in/out). Skipped because of complexity and lack of real audio to test against.
+- **Crossfade** — needs a dual-audio engine; skipped (complexity + no real audio to test).
 - **Pre-cache next track** — meaningless until `audioUrl` is real.
-- **Quality switcher** — Suno doesn't expose multiple bitrate URLs in a public way.
+- **Quality switcher** — Suno doesn't expose multiple bitrate URLs publicly.
 - **Smart skip ML signal** — needs real listening data first.
 
 ## Recommended next steps for a fresh agent
 
-1. Open the site, hit `?` and `Cmd+K` to see the feature surface.
-2. Read `shared.jsx` first (helpers everyone uses), then `app.jsx` (root + state shape), then any specific section you need to touch.
-3. When adding a new component, follow the established pattern: define in a `.jsx` file, alias React hooks with file-specific suffixes, `Object.assign(window, {...})` at the end, add `<script type="text/babel">` to `index.html` in the right load order.
-4. Bump `sw.js` `VERSION` after any change to cached assets.
-5. Avoid `scrollIntoView` (per project convention) — use `window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 80 })` instead.
-6. Each Babel script gets its own scope; never assume an identifier from another file is visible without going through `window`.
+1. Read **`PROJECT_STATUS.md`** first — current state, next step, known decisions.
+2. Open the live site, hit `?` and `Cmd+K` to see the feature surface.
+3. Read `shared.jsx` (shared helpers), then `app.jsx` (root + state), then the section you need.
+4. New component: define in a `.jsx`, alias React hooks (`__useS_xxx`), `Object.assign(window, {...})` at the end, add a `<script type="text/babel">` to `index.html` in the right load order.
+5. **Bump `sw.js` `VERSION`** after any cached-asset change.
+6. Avoid `scrollIntoView` (project convention) — use `window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 80 })`.
+7. **Deploy = `git push` to `main`** (Vercel auto-deploys). No manual build.
+8. `handoff/` is a frozen old-version backup — ignore it for current work.
 
-— Generated handoff for Cowork import.
+— Maintained for the Cowork + GitHub/Vercel workflow. Last updated 14 Jun 2026.
