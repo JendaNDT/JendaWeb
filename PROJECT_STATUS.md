@@ -51,13 +51,15 @@ V `data.js` má všech 15 skladeb `audioUrl: null`, takže přehrávač zatím n
 - **Mesh pozadí — jemné „pruhy" jsou Machovy pruhy / věc displeje, ne dat.** Ověřeno měřením (gradient ~18 úrovní jasu na 1434 px; po roztažení kontrastu jsou pixely hladké + ditherované, žádné tvrdé schody). Šum (`.mesh-noise`) to neopraví, protože v datech není co opravit. Po dohodě s Jendou **ponecháno beze změny** (14. 06. 2026) — nevracet se k tomu.
 - **Mesh orby NESMÍ animovat `opacity` (jen `transform`).** Když orby pulzují krytím + velkým `scale`, čtyři různě rychlé orby (72/94/116/84 s) se časem sejdou ve fázi → pozadí v čase „světlá" a vymývá barvy. Originál v `handoff/` to dělal správně: konstantní opacity, jen jemný drift (`float1/2`, scale ≤1.12). Opraveno 14. 06. 2026 (jw-v23) — opacity konstantní, scale ≤1.06.
 - **Pozadí přes celou stránku:** všechny sekce mají `background:transparent`, takže fixní mesh prosvítá nepřetržitě. Hero nemá lokální orby (odebrány) — sdílí globální mesh, takže není šev na hranici hero/obsah.
+- **Odebrán „Ambient wash" (app.jsx):** pozadí se už nebarví podle hraného alba (overlay s `mix-blend-mode: screen`). Tohle byl hlavní zdroj dřívějšího „moc tyrkysové" + „vyblité" — hrálo album Northern Lights (teal+modré), které stránku barvilo a zesvětlovalo. Pozadí je teď konzistentní bez ohledu na přehrávač (jw-v29, 14. 06. 2026).
+- **OLED základ:** `--bg` = čistá černá `#000000`; orby + teplá záře jsou barevné akcenty proti ní.
 - **Knihovny i fonty lokálně (ne CDN):** kvůli skutečnému offline běhu. Vše v `vendor/`, precache v `sw.js`.
 - **Produkční buildy React/ReactDOM** — menší a rychlejší; API stejné.
 - **PNG ikony místo SVG** — iOS spolehlivě nepodporuje SVG ikonu na ploše. Full-bleed = maskable i apple-touch.
 - **Bez build stepu:** JSX transpiluje Babel v prohlížeči. Nutný http server / hosting (`file://` nefunguje).
 - **Komunikace mezi soubory přes `window` globály** — pořadí skriptů v `index.html` se nesmí měnit.
 - **Web předpokládá nasazení v kořeni domény** — `sw.js`/manifest mají absolutní cesty (`/...`).
-- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v26`).
+- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v29`).
 - **Nepoužívat `scrollIntoView`** — místo toho `window.scrollTo({...})`.
 - **`handoff/` je starší 4souborová záloha**, ne aktuální verze.
 
