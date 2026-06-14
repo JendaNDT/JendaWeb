@@ -98,7 +98,7 @@ function AppsSection({ lang }) {
   ];
 
   return (
-    <section id="apps" style={{ padding:'110px 24px', background:'var(--bg2)' }}>
+    <section id="apps" style={{ padding:'110px 24px', background:'transparent' }}>
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:1200, margin:'0 auto' }}>
         <SectionLabel color="a1" num="01">{tx(lang,'apps_title')}</SectionLabel>
         <p style={{ color:'var(--muted)', fontSize:16, marginBottom:28 }}>

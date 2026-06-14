@@ -606,7 +606,7 @@ function ContactSection({ lang }) {
   const [ref, vis] = useInView();
   const socials = window.SOCIALS || [];
   return (
-    <section id="contact" style={{ padding:'110px 24px', background:'var(--bg2)' }}>
+    <section id="contact" style={{ padding:'110px 24px', background:'transparent' }}>
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:660, margin:'0 auto', textAlign:'center' }}>
         <SectionLabel color="a1" num="04">{tx(lang,'contact_title')}</SectionLabel>
         <p style={{ color:'var(--muted)', fontSize:18, lineHeight:1.65, marginBottom:36 }}>

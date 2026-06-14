@@ -22,7 +22,7 @@ function NewsletterSection({ lang }) {
   };
 
   return (
-    <section style={{ padding:'80px 24px', background:'var(--bg)' }}>
+    <section style={{ padding:'80px 24px', background:'transparent' }}>
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{
         maxWidth:680, margin:'0 auto',
         padding:'44px 36px',
@@ -98,7 +98,7 @@ function StatsSection({ lang }) {
   const log = window.BUILD_LOG || [];
 
   return (
-    <section style={{ padding:'90px 24px', background:'var(--bg2)' }}>
+    <section style={{ padding:'90px 24px', background:'transparent' }}>
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:1100, margin:'0 auto' }}>
         <SubLabel>{tx(lang,'stats_title')}</SubLabel>
 
@@ -177,7 +177,7 @@ function ComparisonSection({ lang }) {
   };
 
   return (
-    <section style={{ padding:'90px 24px', background:'var(--bg)' }}>
+    <section style={{ padding:'90px 24px', background:'transparent' }}>
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:1000, margin:'0 auto' }}>
         <SectionLabel color="a2" num="03">{tx(lang,'compare_title')}</SectionLabel>
         <p style={{ color:'var(--muted)', fontSize:16, marginBottom:36 }}>
@@ -292,7 +292,7 @@ function MostPlayedSection({ lang, onPlay, currentTrack, playing }) {
   const max = top[0].count;
 
   return (
-    <section style={{ padding:'80px 24px', background:'var(--bg)' }}>
+    <section style={{ padding:'80px 24px', background:'transparent' }}>
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:760, margin:'0 auto' }}>
         <SubLabel>{lang === 'cs' ? 'Nejvíce poslouchaňé' : 'Most played'}</SubLabel>
         <div style={{
