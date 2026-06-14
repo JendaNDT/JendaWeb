@@ -298,7 +298,7 @@
       width: 56vw; height: 56vw;
       background: #4f46e5;
       bottom: -22%; right: -18%;
-      opacity: 0.14;
+      opacity: 0.11;
       animation: meshDrift2 94s ease-in-out infinite alternate;
     }
     .mesh-3 {
@@ -324,25 +324,22 @@
       opacity: 0.06;
       pointer-events: none;
     }
+    /* Jen jemný pohyb — opacity konstantní (jako v originále), ať pozadí v čase nesvětlá */
     @keyframes meshDrift1 {
-      0%   { transform: translate(0, 0)        scale(1);    opacity: 0.08; }
-      50%  { transform: translate(14vw, 11vh)  scale(1.08); opacity: 0.13; }
-      100% { transform: translate(26vw, 20vh)  scale(1.16); opacity: 0.08; }
+      0%   { transform: translate(0, 0)      scale(1);    }
+      100% { transform: translate(10vw, 8vh) scale(1.06); }
     }
     @keyframes meshDrift2 {
-      0%   { transform: translate(0, 0)         scale(1);    opacity: 0.11; }
-      50%  { transform: translate(-21vw, -15vh) scale(1.12); opacity: 0.20; }
-      100% { transform: translate(-42vw, -30vh) scale(1.30); opacity: 0.11; }
+      0%   { transform: translate(0, 0)       scale(1);    }
+      100% { transform: translate(-9vw, -7vh) scale(1.06); }
     }
     @keyframes meshDrift3 {
-      0%   { transform: translate(0, 0)       scale(1);    opacity: 0.12; }
-      50%  { transform: translate(9vw, -7vh)  scale(1.15); opacity: 0.17; }
-      100% { transform: translate(18vw, -13vh) scale(1.28); opacity: 0.12; }
+      0%   { transform: translate(0, 0)      scale(1);    }
+      100% { transform: translate(7vw, -6vh) scale(1.05); }
     }
     @keyframes meshDrift4 {
-      0%   { transform: translate(0, 0)         scale(1);    opacity: 0.05; }
-      50%  { transform: translate(-18vw, 13vh)  scale(1.15); opacity: 0.12; }
-      100% { transform: translate(-36vw, 26vh)  scale(1.35); opacity: 0.05; }
+      0%   { transform: translate(0, 0)       scale(1);    }
+      100% { transform: translate(-8vw, 6vh)  scale(1.06); }
     }
     html[data-mode="light"] .mesh-bg { filter: opacity(0.7); }
     @media (prefers-reduced-motion: reduce) {
