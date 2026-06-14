@@ -284,56 +284,56 @@
     .mesh-orb {
       position: absolute;
       border-radius: 50%;
-      filter: blur(130px);
+      filter: blur(90px);
       will-change: transform;
     }
     .mesh-1 {
-      width: 66vw; height: 66vw;
-      background: radial-gradient(circle, #06b6d4 0%, transparent 72%);
+      width: 62vw; height: 62vw;
+      background: #06b6d4;
       top: -18%; left: -14%;
-      opacity: 0.16;
+      opacity: 0.13;
       animation: meshDrift1 72s ease-in-out infinite alternate;
     }
     .mesh-2 {
-      width: 60vw; height: 60vw;
-      background: radial-gradient(circle, #4f46e5 0%, transparent 72%);
+      width: 56vw; height: 56vw;
+      background: #4f46e5;
       bottom: -22%; right: -18%;
-      opacity: 0.17;
+      opacity: 0.14;
       animation: meshDrift2 94s ease-in-out infinite alternate;
     }
     .mesh-3 {
-      width: 46vw; height: 46vw;
-      background: radial-gradient(circle, var(--a2) 0%, transparent 72%);
+      width: 42vw; height: 42vw;
+      background: var(--a2);
       top: 28%; left: 32%;
-      opacity: 0.11;
+      opacity: 0.08;
       animation: meshDrift3 116s ease-in-out infinite alternate;
     }
     .mesh-4 {
-      width: 40vw; height: 40vw;
-      background: radial-gradient(circle, #a855f7 0%, transparent 72%);
+      width: 36vw; height: 36vw;
+      background: #a855f7;
       top: 55%; right: 18%;
-      opacity: 0.10;
+      opacity: 0.07;
       animation: meshDrift4 84s ease-in-out infinite alternate;
     }
     @keyframes meshDrift1 {
-      0%   { transform: translate(0, 0)        scale(1);    opacity: 0.13; }
-      50%  { transform: translate(22vw, 18vh)  scale(1.10); opacity: 0.22; }
-      100% { transform: translate(45vw, 35vh)  scale(1.25); opacity: 0.13; }
+      0%   { transform: translate(0, 0)        scale(1);    opacity: 0.10; }
+      50%  { transform: translate(22vw, 18vh)  scale(1.10); opacity: 0.18; }
+      100% { transform: translate(45vw, 35vh)  scale(1.25); opacity: 0.10; }
     }
     @keyframes meshDrift2 {
-      0%   { transform: translate(0, 0)         scale(1);    opacity: 0.14; }
-      50%  { transform: translate(-21vw, -15vh) scale(1.12); opacity: 0.23; }
-      100% { transform: translate(-42vw, -30vh) scale(1.30); opacity: 0.14; }
+      0%   { transform: translate(0, 0)         scale(1);    opacity: 0.11; }
+      50%  { transform: translate(-21vw, -15vh) scale(1.12); opacity: 0.20; }
+      100% { transform: translate(-42vw, -30vh) scale(1.30); opacity: 0.11; }
     }
     @keyframes meshDrift3 {
-      0%   { transform: translate(0, 0)        scale(0.9);  opacity: 0.07; }
-      50%  { transform: translate(15vw, -11vh) scale(1.20); opacity: 0.16; }
-      100% { transform: translate(30vw, -22vh) scale(1.45); opacity: 0.07; }
+      0%   { transform: translate(0, 0)        scale(0.9);  opacity: 0.05; }
+      50%  { transform: translate(15vw, -11vh) scale(1.20); opacity: 0.13; }
+      100% { transform: translate(30vw, -22vh) scale(1.45); opacity: 0.05; }
     }
     @keyframes meshDrift4 {
-      0%   { transform: translate(0, 0)         scale(1);    opacity: 0.07; }
-      50%  { transform: translate(-18vw, 13vh)  scale(1.15); opacity: 0.15; }
-      100% { transform: translate(-36vw, 26vh)  scale(1.35); opacity: 0.07; }
+      0%   { transform: translate(0, 0)         scale(1);    opacity: 0.05; }
+      50%  { transform: translate(-18vw, 13vh)  scale(1.15); opacity: 0.12; }
+      100% { transform: translate(-36vw, 26vh)  scale(1.35); opacity: 0.05; }
     }
     html[data-mode="light"] .mesh-bg { filter: opacity(0.7); }
     @media (prefers-reduced-motion: reduce) {
