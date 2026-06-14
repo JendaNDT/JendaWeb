@@ -180,7 +180,7 @@ window.STRINGS = {
     hero_tag:'Vibe coder & AI hudebník',
     hero_desc:'Tvořím mobilní aplikace a experimentální elektronickou hudbu pomocí AI.',
     cta_apps:'Prozkoumat aplikace', cta_music:'Poslechnout hudbu',
-    stat_apps:'aplikací', stat_tracks:'skladeb', stat_albums:'alba',
+    stat_apps:'aplikací', stat_tracks:'skladeb', stat_albums:'alb',
     apps_title:'Aplikace', apps_all:'Vše',
     apps_open:'Otevřít', apps_dl:'Stáhnout',
     apps_search:'Hledat aplikaci…',
