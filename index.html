@@ -315,6 +315,15 @@
       opacity: 0.07;
       animation: meshDrift4 84s ease-in-out infinite alternate;
     }
+    /* Fine noise overlay — dithers gradient banding */
+    .mesh-noise {
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 180px 180px;
+      opacity: 0.08;
+      pointer-events: none;
+    }
     @keyframes meshDrift1 {
       0%   { transform: translate(0, 0)        scale(1);    opacity: 0.10; }
       50%  { transform: translate(22vw, 18vh)  scale(1.10); opacity: 0.18; }
@@ -445,6 +454,7 @@
     <div class="mesh-orb mesh-2"></div>
     <div class="mesh-orb mesh-3"></div>
     <div class="mesh-orb mesh-4"></div>
+    <div class="mesh-noise"></div>
   </div>
   <div id="root"></div>
   <script>
