@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MeditApp — Case Study · Jenda</title>
+  <meta name="description" content="Jak vznikla offline-first PWA aplikace na meditaci s procedurálně generovanými zvuky.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // Sync mode + lang preference from main site
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.dev</a>
+    <a href="../index.html#apps" class="back-link" data-i18n="back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-pwa">PWA</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2024 · 3 týdny</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #7c5cfc28, #7c5cfc50); border:1px solid #7c5cfc40; color:#7c5cfc;">M</div>
+      <div>
+        <h1>MeditApp</h1>
+        <p class="subtitle" data-cs="Offline-first PWA pro meditaci s procedurálně generovanými ambientními zvuky. Žádné předplatné, žádný cloud, žádné cookies."
+                            data-en="Offline-first PWA for meditation with procedurally generated ambient sounds. No subscription, no cloud, no cookies.">
+          Offline-first PWA pro meditaci s procedurálně generovanými ambientními zvuky. Žádné předplatné, žádný cloud, žádné cookies.
+        </p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Existující meditační aplikace jsou předplaceným softwarem napěchovaným analytikou. Většina obsahu je za paywallem, dlouhé sezení vyžadují účet, a všechny chtějí mít na pozadí běžící cloud spojení. Pro někoho, kdo si jen chce na pět minut sednout, je to overkill."
+              data-en="Existing meditation apps are subscription-walled software stuffed with analytics. Most content is paywalled, long sessions require an account, and everything wants a background cloud connection. For anyone who just wants to sit for five minutes, that's overkill.">
+      Existující meditační aplikace jsou předplaceným softwarem napěchovaným analytikou. Většina obsahu je za paywallem, dlouhé sezení vyžadují účet, a všechny chtějí mít na pozadí běžící cloud spojení. Pro někoho, kdo si jen chce na pět minut sednout, je to overkill.
+    </p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="PWA s instalací jedním klikem — žádný app store, žádné verzování"
+          data-en="PWA installable in one click — no app store, no versioning">PWA s instalací jedním klikem — žádný app store, žádné verzování</li>
+      <li data-cs="Ambientní zvuky generované procedurálně přes Web Audio API (déšť, oceán, šum lesa, čisté frekvence) — zero downloadu zvukových souborů"
+          data-en="Ambient sounds generated procedurally via Web Audio API (rain, ocean, forest noise, pure frequencies) — zero audio file downloads">Ambientní zvuky generované procedurálně přes Web Audio API (déšť, oceán, šum lesa, čisté frekvence) — zero downloadu zvukových souborů</li>
+      <li data-cs="Service Worker pro plný offline režim; sezení se ukládají do IndexedDB"
+          data-en="Service Worker for full offline mode; sessions saved to IndexedDB">Service Worker pro plný offline režim; sezení se ukládají do IndexedDB</li>
+      <li data-cs="Řízené dýchání (4-7-8, box, koherentní) s vizuální oporou"
+          data-en="Guided breathing (4-7-8, box, coherent) with visual cue">Řízené dýchání (4-7-8, box, koherentní) s vizuální oporou</li>
+      <li data-cs="Bez registrace, bez sledování, bez síťových requestů kromě úvodního loadu"
+          data-en="No signup, no tracking, no network requests after initial load">Bez registrace, bez sledování, bez síťových requestů kromě úvodního loadu</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">5,2 k</div><div class="lbl" data-cs="instalací" data-en="installs">instalací</div></div>
+      <div class="metric"><div class="num">4,6 ★</div><div class="lbl" data-cs="průměrné hodnocení" data-en="avg. rating">průměrné hodnocení</div></div>
+      <div class="metric"><div class="num">92 %</div><div class="lbl" data-cs="retence týden 1" data-en="week-1 retention">retence týden 1</div></div>
+      <div class="metric"><div class="num">~38 KB</div><div class="lbl" data-cs="gzipnutá velikost" data-en="gzipped size">gzipnutá velikost</div></div>
+    </div>
+    <p data-cs="Po launchi v komunitách kolem mindfulness a HN se aplikace organicky rozšířila. Žádná marketing kampaň. Třicetinásobně levnější údržba než ekvivalent v native iOS+Android."
+        data-en="After launching to mindfulness and HN communities, the app spread organically. Zero marketing spend. ~30× cheaper to maintain than native iOS+Android equivalents.">
+      Po launchi v komunitách kolem mindfulness a HN se aplikace organicky rozšířila. Žádná marketing kampaň. Třicetinásobně levnější údržba než ekvivalent v native iOS+Android.
+    </p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">Vanilla JS</span>
+      <span class="chip">Web Audio API</span>
+      <span class="chip">IndexedDB</span>
+      <span class="chip">Service Worker</span>
+      <span class="chip">Vite</span>
+      <span class="chip">PWA manifest</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Líbí se ti tahle případová studie?" data-en="Like this case study?">Líbí se ti tahle případová studie?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+
+    <section style="margin-top: 60px; padding: 28px 24px; border: 1px dashed var(--border); border-radius: var(--r); text-align: center;">
+      <h3 style="font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em;">
+        <span data-cs="Diskuze" data-en="Discussion">Diskuze</span>
+      </h3>
+      <p style="color: var(--muted); font-size: 14px; line-height: 1.55; max-width: 420px; margin: 0 auto;">
+        <span data-cs="Komentáře přes giscus (GitHub Discussions). Nakonfiguruj repo + categoryId v giscus.app a odkomentuj script níž."
+              data-en="Comments via giscus (GitHub Discussions). Configure repo + categoryId at giscus.app and uncomment the script below.">
+          Komentáře přes giscus (GitHub Discussions). Nakonfiguruj repo + categoryId v giscus.app a odkomentuj script níž.
+        </span>
+      </p>
+      <!--
+        Once configured, uncomment to enable comments:
+        <script src="https://giscus.app/client.js"
+                data-repo="USER/REPO"
+                data-repo-id="R_xxxx"
+                data-category="Comments"
+                data-category-id="DIC_xxxx"
+                data-mapping="pathname"
+                data-strict="0"
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-input-position="top"
+                data-theme="preferred_color_scheme"
+                data-lang="cs"
+                crossorigin="anonymous"
+                async>
+        </script>
+      -->
+    </section>
+
+  </main>
+
+  <script>
+    // Language swap based on persisted preference
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>

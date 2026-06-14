@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>Jenda — AI Music</title>
+    <link>https://jenda.dev/</link>
+    <atom:link href="https://jenda.dev/feed.xml" rel="self" type="application/rss+xml"/>
+    <description>Experimentální elektronická hudba a fúze etnických rytmů, generovaná pomocí AI.</description>
+    <language>cs-cz</language>
+    <copyright>© Jenda</copyright>
+    <itunes:author>Jenda</itunes:author>
+    <itunes:explicit>false</itunes:explicit>
+
+    <item>
+      <title>Celtic Code (album)</title>
+      <link>https://jenda.dev/#music</link>
+      <guid isPermaLink="false">album-celtic-2026</guid>
+      <pubDate>Mon, 06 Jan 2026 12:00:00 +0100</pubDate>
+      <description>6 skladeb · Celtic Electronic · keltské melodie v moderním elektronickém hávu.</description>
+    </item>
+    <item>
+      <title>Mantra Machine (album)</title>
+      <link>https://jenda.dev/#music</link>
+      <guid isPermaLink="false">album-mantra-2025</guid>
+      <pubDate>Mon, 12 May 2025 12:00:00 +0200</pubDate>
+      <description>6 skladeb · Indian Techno · sitar, tabla a těžké techno beaty v jednom.</description>
+    </item>
+    <item>
+      <title>Northern Lights (album)</title>
+      <link>https://jenda.dev/#music</link>
+      <guid isPermaLink="false">album-nordic-2025</guid>
+      <pubDate>Mon, 03 Mar 2025 12:00:00 +0100</pubDate>
+      <description>9 skladeb · Nordic Ambient · severská lidová hudba transformovaná do digitálního světa.</description>
+    </item>
+    <item>
+      <title>Balkan Bass (album)</title>
+      <link>https://jenda.dev/#music</link>
+      <guid isPermaLink="false">album-balkan-2024</guid>
+      <pubDate>Mon, 09 Sep 2024 12:00:00 +0200</pubDate>
+      <description>7 skladeb · Balkan Fusion · živé mosazné nástroje, elektronické basy a balkánský oheň.</description>
+    </item>
+    <item>
+      <title>Sahara Circuit (album)</title>
+      <link>https://jenda.dev/#music</link>
+      <guid isPermaLink="false">album-sahara-2024</guid>
+      <pubDate>Mon, 22 Apr 2024 12:00:00 +0200</pubDate>
+      <description>8 skladeb · Ethnic Electronic · setkání severoafrických rytmů s modulárním syntetizátorem.</description>
+    </item>
+  </channel>
+</rss>

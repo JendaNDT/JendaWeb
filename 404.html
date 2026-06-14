@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — Tady to nehraje · Jenda</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+  <style>
+    *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0805; --bg2: #160d07;
+      --text: #f5f0ea; --muted: #a89684;
+      --a1: #f97316; --a2: #fbbf24;
+      --border: rgba(255,255,255,0.08);
+    }
+    html[data-mode="light"] {
+      --bg: #fbf7f2; --bg2: #f4ece1;
+      --text: #1a1108; --muted: #6b5847;
+      --a1: #c2410c; --a2: #b45309;
+      --border: rgba(20,12,5,0.10);
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px 24px;
+      text-align: center;
+      transition: background 0.45s ease, color 0.45s ease;
+    }
+    .glitch {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(120px, 26vw, 280px);
+      font-weight: 800; line-height: 0.9;
+      letter-spacing: -0.06em;
+      background: linear-gradient(135deg, var(--a1), var(--a2));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      margin-bottom: 12px;
+      animation: flicker 5s ease-in-out infinite;
+    }
+    @keyframes flicker {
+      0%, 100%       { opacity: 1; }
+      10.7%, 11.3%   { opacity: 0.4; }
+      45%, 46%       { opacity: 0.7; }
+      72.5%, 73%     { opacity: 0.55; }
+    }
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+    p {
+      color: var(--muted);
+      max-width: 460px;
+      margin: 0 auto 28px;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+    a {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 28px; border-radius: 50px;
+      background: var(--a1); color: #fff;
+      text-decoration: none; font-weight: 600; font-size: 15px;
+      box-shadow: 0 0 24px rgba(249,115,22,0.25);
+      transition: transform 0.2s;
+    }
+    a:hover { transform: translateY(-2px); }
+    .meta {
+      margin-top: 36px;
+      font-size: 12px; color: var(--muted);
+      opacity: 0.55;
+      letter-spacing: 0.06em;
+      font-family: ui-monospace, monospace;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="glitch">404</div>
+    <h1 data-cs="Tady to nehraje" data-en="No music here">Tady to nehraje</h1>
+    <p data-cs="Stránku, kterou hledáš, jsem ještě nevyrobil — nebo ji možná smazal. Co takhle se vrátit zpátky a poslechnout si album?"
+        data-en="The page you're looking for doesn't exist — maybe I deleted it, maybe it was never here. How about going back and listening to an album instead?">
+      Stránku, kterou hledáš, jsem ještě nevyrobil — nebo ji možná smazal. Co takhle se vrátit zpátky a poslechnout si album?
+    </p>
+    <a href="/" data-cs="← Zpět domů" data-en="← Back home">← Zpět domů</a>
+    <div class="meta">err_404 · request_lost_in_the_mix</div>
+  </main>
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>

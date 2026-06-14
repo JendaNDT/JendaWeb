@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BeatCraft — Case Study · Jenda</title>
+  <meta name="description" content="Android aplikace pro generování beatů s on-device AI modelem.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.dev</a>
+    <a href="../index.html#apps" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-android">Android</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2025 · 6 týdnů</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #f59e0b28, #f59e0b50); border:1px solid #f59e0b40; color:#f59e0b;">B</div>
+      <div>
+        <h1>BeatCraft</h1>
+        <p class="subtitle" data-cs="On-device AI generátor beatů pro lidi, kteří „nikdy nedělali muziku". Jeden tap → kompletní 16-bar smyčka, kterou si můžeš naladit."
+                            data-en='On-device AI beat generator for people who "never made music." One tap → a complete 16-bar loop you can tweak.'>
+          On-device AI generátor beatů pro lidi, kteří „nikdy nedělali muziku". Jeden tap → kompletní 16-bar smyčka, kterou si můžeš naladit.
+        </p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Tradiční DAWy a beat-makery předpokládají, že víš co je BPM, swing a quantize. Lidé, kteří si chtějí jen pohrát s rytmem, ti několik prvních minut hledají play tlačítko. Druhý problém: většina AI hudebních appek posílá audio na server — pomalé a privacy-neukázněné."
+              data-en="Traditional DAWs and beat-makers assume you know what BPM, swing and quantize are. People who just want to play with rhythm spend the first few minutes looking for the play button. Second problem: most AI music apps send audio to a server — slow and privacy-unfriendly.">
+      Tradiční DAWy a beat-makery předpokládají, že víš co je BPM, swing a quantize. Lidé, kteří si chtějí jen pohrát s rytmem, ti několik prvních minut hledají play tlačítko. Druhý problém: většina AI hudebních appek posílá audio na server — pomalé a privacy-neukázněné.
+    </p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="„Surprise me" tlačítko jako primární akce — vybere žánr, tempo, drum kit a strukturu"
+          data-en='"Surprise me" button as the primary action — picks genre, tempo, drum kit and structure'>„Surprise me" tlačítko jako primární akce — vybere žánr, tempo, drum kit a strukturu</li>
+      <li data-cs="Drobný TFLite model (8 MB) detekuje žánrové preference podle posledních pár generací"
+          data-en="Tiny TFLite model (8 MB) detects genre preferences from the last few generations">Drobný TFLite model (8 MB) detekuje žánrové preference podle posledních pár generací</li>
+      <li data-cs="4×16 step sequencer s velkými dotykovými cíli — žádné cílení na 8px buňku"
+          data-en="4×16 step sequencer with large touch targets — no aiming at 8px cells">4×16 step sequencer s velkými dotykovými cíli — žádné cílení na 8px buňku</li>
+      <li data-cs="Šablony patternů odvozené z výstupů Suno AI — naučili jsme model, co zní „dobře""
+          data-en='Pattern templates derived from Suno AI outputs — taught the model what "sounds good"'>Šablony patternů odvozené z výstupů Suno AI — naučili jsme model, co zní „dobře"</li>
+      <li data-cs="Vše běží lokálně přes oboe (low-latency audio); export do MP3/WAV bez síťového volání"
+          data-en="Everything runs locally via oboe (low-latency audio); MP3/WAV export with no network call">Vše běží lokálně přes oboe (low-latency audio); export do MP3/WAV bez síťového volání</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">12 k</div><div class="lbl" data-cs="stažení" data-en="downloads">stažení</div></div>
+      <div class="metric"><div class="num">4,4 ★</div><div class="lbl" data-cs="průměrné hodnocení" data-en="avg. rating">průměrné hodnocení</div></div>
+      <div class="metric"><div class="num">12 ms</div><div class="lbl" data-cs="touch latence" data-en="touch latency">touch latence</div></div>
+      <div class="metric"><div class="num">★</div><div class="lbl" data-cs="„Novinka na Play" feature" data-en='"New on Play" feature'>„Novinka na Play" feature</div></div>
+    </div>
+    <p data-cs="Featured v Play Store kategorie „New & Updated" během prvního měsíce. Mainstreamový hit to není — ale 78 % uživatelů otevře aplikaci aspoň 3× za první týden, což pro casual hudební aplikaci znamená masivní retention."
+        data-en='Featured in Play Store "New & Updated" within the first month. Not a mainstream hit — but 78% of users open the app at least 3× in week one, which is huge retention for a casual music app.'>
+      Featured v Play Store kategorie „New & Updated" během prvního měsíce. Mainstreamový hit to není — ale 78 % uživatelů otevře aplikaci aspoň 3× za první týden, což pro casual hudební aplikaci znamená masivní retention.
+    </p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">Kotlin</span>
+      <span class="chip">Jetpack Compose</span>
+      <span class="chip">TensorFlow Lite</span>
+      <span class="chip">Oboe (audio)</span>
+      <span class="chip">Coroutines</span>
+      <span class="chip">DataStore</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Chceš podobnou aplikaci?" data-en="Want something similar?">Chceš podobnou aplikaci?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+
+    <section style="margin-top: 60px; padding: 28px 24px; border: 1px dashed var(--border); border-radius: var(--r); text-align: center;">
+      <h3 style="font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em;">
+        <span data-cs="Diskuze" data-en="Discussion">Diskuze</span>
+      </h3>
+      <p style="color: var(--muted); font-size: 14px; line-height: 1.55; max-width: 420px; margin: 0 auto;">
+        <span data-cs="Komentáře přes giscus (GitHub Discussions). Nakonfiguruj repo + categoryId v giscus.app a odkomentuj script níž."
+              data-en="Comments via giscus (GitHub Discussions). Configure repo + categoryId at giscus.app and uncomment the script below.">
+          Komentáře přes giscus (GitHub Discussions). Nakonfiguruj repo + categoryId v giscus.app a odkomentuj script níž.
+        </span>
+      </p>
+      <!--
+        Once configured, uncomment to enable comments:
+        <script src="https://giscus.app/client.js"
+                data-repo="USER/REPO"
+                data-repo-id="R_xxxx"
+                data-category="Comments"
+                data-category-id="DIC_xxxx"
+                data-mapping="pathname"
+                data-strict="0"
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-input-position="top"
+                data-theme="preferred_color_scheme"
+                data-lang="cs"
+                crossorigin="anonymous"
+                async>
+        </script>
+      -->
+    </section>
+
+  </main>
+
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>

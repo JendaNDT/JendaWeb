@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChordLens — Case Study · Jenda</title>
+  <meta name="description" content="PWA pro real-time rozpoznávání kytarových akordů z mikrofonu, bez serveru.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.dev</a>
+    <a href="../index.html#apps" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-pwa">PWA</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2025 · 4 týdny</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #ec489928, #ec489950); border:1px solid #ec489940; color:#ec4899;">C</div>
+      <div>
+        <h1>ChordLens</h1>
+        <p class="subtitle" data-cs="Real-time rozpoznávání kytarových akordů z mikrofonu. Žádný server, žádný upload, žádná čekací doba. Stačí zahrát."
+                            data-en="Real-time guitar chord recognition from your mic. No server, no upload, no waiting. Just play.">
+          Real-time rozpoznávání kytarových akordů z mikrofonu. Žádný server, žádný upload, žádná čekací doba. Stačí zahrát.
+        </p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Stávající chord-finder appky vyžadují buď psaní (toporné) nebo screenshot tabů (nepraktické). Když si chceš zjistit akord, který hraješ, musíš přerušit hraní. Cílem bylo nechat kytaru rozeznat akord sama tím, že jí ho zahraješ."
+              data-en="Existing chord-finder apps require either typing (clunky) or screenshotting tabs (impractical). To identify the chord you're playing, you have to stop playing. The goal was to let the app recognize the chord by just listening to you play it.">
+      Stávající chord-finder appky vyžadují buď psaní (toporné) nebo screenshot tabů (nepraktické). Když si chceš zjistit akord, který hraješ, musíš přerušit hraní. Cílem bylo nechat kytaru rozeznat akord sama tím, že jí ho zahraješ.
+    </p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="WebAudio AnalyserNode pro FFT v reálném čase přímo v prohlížeči"
+          data-en="WebAudio AnalyserNode for real-time FFT directly in the browser">WebAudio AnalyserNode pro FFT v reálném čase přímo v prohlížeči</li>
+      <li data-cs="Vlastní pitch detection algoritmus (HPS — harmonic product spectrum) běžící ve Web Workeru"
+          data-en="Custom pitch detection algorithm (HPS — harmonic product spectrum) running in a Web Worker">Vlastní pitch detection algoritmus (HPS — harmonic product spectrum) běžící ve Web Workeru</li>
+      <li data-cs="Akordy se matchují proti šabloně 120 standardních pozic (dur, mol, 7, sus, …) s tolerancí ladění"
+          data-en="Chords matched against a template of 120 standard positions (major, minor, 7, sus, ...) with tuning tolerance">Akordy se matchují proti šabloně 120 standardních pozic (dur, mol, 7, sus, …) s tolerancí ladění</li>
+      <li data-cs="3D fretboard s podsvícením prstů (Three.js, ~60fps i na slabších telefonech)"
+          data-en="3D fretboard with highlighted fingers (Three.js, ~60fps even on weaker phones)">3D fretboard s podsvícením prstů (Three.js, ~60fps i na slabších telefonech)</li>
+      <li data-cs="Plně offline po prvním načtení (Service Worker); historie posledních 50 akordů"
+          data-en="Fully offline after first load (Service Worker); history of last 50 chords">Plně offline po prvním načtení (Service Worker); historie posledních 50 akordů</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">8,1 k</div><div class="lbl" data-cs="měsíční uživatelé" data-en="monthly users">měsíční uživatelé</div></div>
+      <div class="metric"><div class="num">94 %</div><div class="lbl" data-cs="přesnost akordů" data-en="chord accuracy">přesnost akordů</div></div>
+      <div class="metric"><div class="num">< 50 ms</div><div class="lbl" data-cs="latence detekce" data-en="detection latency">latence detekce</div></div>
+      <div class="metric"><div class="num">2</div><div class="lbl" data-cs="hudební školy" data-en="music schools">hudební školy</div></div>
+    </div>
+    <p data-cs="Aplikaci si vybraly dvě menší hudební školy jako pomůcku pro výuku — učitelé oceňují, že žák uvidí, jak akord vypadá na hmatníku ve chvíli, kdy ho zahraje. Bez registrace, bez sledování, beze ztráty soukromí žáka."
+        data-en="Two small music schools adopted the app as a teaching tool — teachers love that students can see what a chord looks like on the fretboard the moment they play it. No signup, no tracking, no privacy loss for the student.">
+      Aplikaci si vybraly dvě menší hudební školy jako pomůcku pro výuku — učitelé oceňují, že žák uvidí, jak akord vypadá na hmatníku ve chvíli, kdy ho zahraje. Bez registrace, bez sledování, beze ztráty soukromí žáka.
+    </p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">Web Audio API</span>
+      <span class="chip">Web Workers</span>
+      <span class="chip">Custom DSP</span>
+      <span class="chip">Three.js</span>
+      <span class="chip">TypeScript</span>
+      <span class="chip">Service Worker</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Inspirovalo tě to k podobnému projektu?" data-en="Inspired to build something similar?">Inspirovalo tě to k podobnému projektu?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+
+    <section style="margin-top: 60px; padding: 28px 24px; border: 1px dashed var(--border); border-radius: var(--r); text-align: center;">
+      <h3 style="font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em;">
+        <span data-cs="Diskuze" data-en="Discussion">Diskuze</span>
+      </h3>
+      <p style="color: var(--muted); font-size: 14px; line-height: 1.55; max-width: 420px; margin: 0 auto;">
+        <span data-cs="Komentáře přes giscus (GitHub Discussions). Nakonfiguruj repo + categoryId v giscus.app a odkomentuj script níž."
+              data-en="Comments via giscus (GitHub Discussions). Configure repo + categoryId at giscus.app and uncomment the script below.">
+          Komentáře přes giscus (GitHub Discussions). Nakonfiguruj repo + categoryId v giscus.app a odkomentuj script níž.
+        </span>
+      </p>
+      <!--
+        Once configured, uncomment to enable comments:
+        <script src="https://giscus.app/client.js"
+                data-repo="USER/REPO"
+                data-repo-id="R_xxxx"
+                data-category="Comments"
+                data-category-id="DIC_xxxx"
+                data-mapping="pathname"
+                data-strict="0"
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-input-position="top"
+                data-theme="preferred_color_scheme"
+                data-lang="cs"
+                crossorigin="anonymous"
+                async>
+        </script>
+      -->
+    </section>
+
+  </main>
+
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>
