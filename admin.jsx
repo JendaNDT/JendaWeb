@@ -927,11 +927,86 @@ function TextsTab({ data, reload, notify }) {
   );
 }
 
+/* ---------------- overview / stats ---------------- */
+function fmtBytes(b) {
+  if (!b) return '0 MB';
+  var mb = b / 1048576;
+  return (mb >= 100 ? Math.round(mb) : mb.toFixed(1)) + ' MB';
+}
+function totalDurationStr(tracks) {
+  var s = 0;
+  tracks.forEach(function (t) {
+    if (t.duration) { var p = String(t.duration).split(':'); if (p.length === 2) { s += (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0); } }
+  });
+  var h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+  return s ? (h ? (h + ' h ' + m + ' min') : (m + ' min')) : '0 min';
+}
+function StatCard({ num, lbl, sub }) {
+  return <div className="stat"><div className="num">{num}</div><div className="lbl">{lbl}</div>{sub ? <div className="sub2">{sub}</div> : null}</div>;
+}
+function OverviewTab({ data, goTab }) {
+  const [storage, setStorage] = useState(null);
+  useEffect(() => {
+    sbReq('POST', 'rpc/storage_usage').then(function (rows) {
+      var bytes = 0, files = 0, audio = 0, images = 0;
+      (rows || []).forEach(function (r) {
+        var b = Number(r.bytes) || 0; bytes += b; files += Number(r.files) || 0;
+        if (r.bucket === 'audio') audio = b; if (r.bucket === 'images') images = b;
+      });
+      setStorage({ bytes: bytes, files: files, audio: audio, images: images });
+    }).catch(function () { setStorage({ err: true }); });
+  }, []);
+  const t = data.tracks, al = data.albums, ap = data.apps, so = data.socials;
+  const withAudio = t.filter(function (x) { return x.audio_url; }).length;
+  const noAudio = t.length - withAudio;
+  const withLyrics = t.filter(function (x) { return x.lyrics_cs || x.lyrics_en; }).length;
+  const pwa = ap.filter(function (x) { return x.platform === 'PWA'; }).length;
+  const android = ap.length - pwa;
+  const appNoLink = ap.filter(function (x) { return !x.link || x.link === '#'; }).length;
+  const socNoLink = so.filter(function (x) { return !x.url || x.url === '#'; }).length;
+  const FREE = 1024 * 1048576;
+  const pct = storage && !storage.err ? Math.min(100, Math.round(storage.bytes / FREE * 100)) : 0;
+  return (
+    <div>
+      <div className="sectionlabel">Hudba</div>
+      <div className="statgrid">
+        <StatCard num={t.length} lbl="skladeb" sub={withAudio + ' s audiem · ' + noAudio + ' bez'} />
+        <StatCard num={totalDurationStr(t)} lbl="celková délka" />
+        <StatCard num={al.length} lbl="alb" />
+        <StatCard num={withLyrics} lbl="skladeb s textem" />
+      </div>
+      <div className="sectionlabel">Aplikace & sítě</div>
+      <div className="statgrid">
+        <StatCard num={ap.length} lbl="aplikací" sub={pwa + '× PWA · ' + android + '× Android'} />
+        <StatCard num={ap.length - appNoLink} lbl="appek s odkazem" sub={appNoLink ? (appNoLink + ' bez odkazu') : 'všechny s odkazem'} />
+        <StatCard num={so.length} lbl="sociálních sítí" sub={socNoLink ? (socNoLink + ' bez odkazu') : 'všechny s odkazem'} />
+      </div>
+      <div className="sectionlabel">Úložiště (free ~1 GB)</div>
+      <div className="stat" style={{ marginBottom: 20 }}>
+        <div className="num">{storage ? (storage.err ? '—' : fmtBytes(storage.bytes)) : '…'}</div>
+        <div className="lbl">{storage && !storage.err ? (storage.files + ' souborů · mp3 ' + fmtBytes(storage.audio) + ' · obrázky ' + fmtBytes(storage.images)) : 'využité místo'}</div>
+        {storage && !storage.err && <div className="bar"><i style={{ width: Math.max(2, pct) + '%' }} /></div>}
+        {storage && !storage.err && <div className="sub2" style={{ marginTop: 6 }}>{pct}% z ~1 GB</div>}
+      </div>
+      <div className="sectionlabel">K dokončení</div>
+      {noAudio > 0
+        ? <div className="todo" onClick={() => goTab('tracks')}>🎵 {noAudio} skladeb ještě nemá audio →</div>
+        : <div className="todo done">✅ Všechny skladby mají audio</div>}
+      {appNoLink > 0
+        ? <div className="todo" onClick={() => goTab('apps')}>🔗 {appNoLink} aplikací nemá reálný odkaz →</div>
+        : <div className="todo done">✅ Všechny aplikace mají odkaz</div>}
+      {socNoLink > 0
+        ? <div className="todo" onClick={() => goTab('texts')}>🔗 {socNoLink} sociálních sítí nemá odkaz →</div>
+        : <div className="todo done">✅ Všechny sítě mají odkaz</div>}
+    </div>
+  );
+}
+
 /* ---------------- admin shell ---------------- */
-const TABS = [['tracks', 'Skladby'], ['albums', 'Alba'], ['apps', 'Aplikace'], ['texts', 'Texty & odkazy']];
+const TABS = [['overview', 'Přehled'], ['tracks', 'Skladby'], ['albums', 'Alba'], ['apps', 'Aplikace'], ['texts', 'Texty & odkazy']];
 
 function AdminApp({ session, onLogout }) {
-  const [tab, setTab] = useState('tracks');
+  const [tab, setTab] = useState('overview');
   const [data, setData] = useState(null);
   const [err, setErr] = useState('');
   const [toast, setToast] = useState(null);
@@ -980,6 +1055,7 @@ function AdminApp({ session, onLogout }) {
       {err && <div className="toast err" style={{ position: 'static', transform: 'none', marginBottom: 14 }}>{err} <button className="btn btn-ghost btn-sm" onClick={load} style={{ marginLeft: 8 }}>Zkusit znovu</button></div>}
       {!data && !err && <div style={{ color: 'var(--muted)' }}><span className="spin" style={{ borderTopColor: 'var(--a1)' }} /> Načítám…</div>}
 
+      {data && tab === 'overview' && <OverviewTab data={data} goTab={setTab} />}
       {data && tab === 'tracks' && <TracksTab data={data} reload={load} notify={notify} />}
       {data && tab === 'albums' && <AlbumsTab data={data} reload={load} notify={notify} />}
       {data && tab === 'apps' && <AppsTab data={data} reload={load} notify={notify} />}
