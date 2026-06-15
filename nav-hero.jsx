@@ -16,6 +16,9 @@ function HeroCanvas() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     let W = 0, H = 0, particles = [], raf = null, running = false, t = 0, frame = 0;
     const col = { a1:[249,115,22], a2:[251,191,36], dark:true };
+    // reaktivní stav: obálky (rychlý náběh / pomalé doznívání), spektrum, beat, prstence
+    const env = { bass:0, level:0, surge:0, flash:0 };
+    let binEnv = new Float32Array(128), bassHist = [], beatCool = 0, rings = [];
 
     function parseColor(str, fb) {
       str = (str || '').trim();
@@ -37,7 +40,10 @@ function HeroCanvas() {
     function mk() {
       return { x:Math.random()*W, y:Math.random()*H, r:1+Math.random()*2.4,
         vx:(Math.random()-0.5)*0.18, vy:-(0.06+Math.random()*0.22),
-        ph:Math.random()*Math.PI*2, warm:Math.random() };
+        ph:Math.random()*Math.PI*2, warm:Math.random(),
+        bin: 2 + Math.floor(Math.random()*86),   // „svoje" frekvenční pásmo
+        react: 0.7 + Math.random()*0.7,           // jak silně reaguje
+        _x:0, _y:0 };
     }
     function resize() {
       W = canvas.clientWidth; H = canvas.clientHeight;
@@ -50,12 +56,14 @@ function HeroCanvas() {
     function audioLevels() {
       const an = window.__jwAnalyser; if (!an) return null;
       try {
-        const bins = new Uint8Array(an.frequencyBinCount);
+        const n = an.frequencyBinCount;
+        const bins = new Uint8Array(n);
         an.getByteFrequencyData(bins);
-        const avg = (a,b) => { let s=0; for (let i=a;i<b;i++) s+=bins[i]; return s/((b-a)*255); };
-        const bass = avg(1,8), mid = avg(8,40), treble = avg(40,90);
-        if (bass+mid+treble < 0.02) return null; // ticho / pauza → generativní režim
-        return { bass, mid, treble };
+        const avg = (a,b) => { a=Math.min(a,n); b=Math.min(b,n); let s=0; for (let i=a;i<b;i++) s+=bins[i]; return s/Math.max(1,(b-a)*255); };
+        const bass = avg(1,7), lowmid = avg(7,18), mid = avg(18,42), treble = avg(42,96);
+        if (bass+lowmid+mid+treble < 0.02) return null; // ticho / pauza → generativní režim
+        const level = bass*0.5 + lowmid*0.25 + mid*0.15 + treble*0.10;
+        return { bass, lowmid, mid, treble, level, bins };
       } catch (e) { return null; }
     }
     function draw() {
@@ -64,33 +72,77 @@ function HeroCanvas() {
       ctx.clearRect(0,0,W,H);
       const a = audioLevels();
       const playing = !!a;
-      const bass = a ? a.bass : 0, treble = a ? a.treble : 0;
-      const idle = 0.5 + 0.5*Math.sin(t*0.6);
-      const amp = playing ? Math.min(1, bass*1.4) : 0.12*idle;
-      const speedM = playing ? (1 + treble*2.2) : 1;
-      const linkDist = (playing ? 130 : 108) + amp*60;
+      const treble = a ? a.treble : 0;
+
+      // --- obálky: rychlý náběh, pomalé doznívání = úderná reakce na beat ---
+      if (playing) {
+        const bins = a.bins;
+        for (let i=0;i<binEnv.length;i++) {
+          const v = i < bins.length ? bins[i]/255 : 0;
+          binEnv[i] = v > binEnv[i] ? v : binEnv[i]*0.86;
+        }
+        env.bass  = a.bass  > env.bass  ? a.bass  : env.bass*0.90;
+        env.level = a.level > env.level ? a.level : env.level*0.92;
+        // detekce beatu: aktuální basy výrazně nad krátkodobým průměrem
+        bassHist.push(a.bass); if (bassHist.length > 43) bassHist.shift();
+        let m=0; for (const b of bassHist) m+=b; m/=bassHist.length;
+        beatCool--;
+        if (a.bass > 0.11 && a.bass > m*1.38 && beatCool <= 0) {
+          env.flash = 1; env.surge = 1; beatCool = 7;
+          rings.push({ r: Math.min(W,H)*0.05, a: 0.9, w: 1 + a.bass*2 });
+        }
+      } else {
+        for (let i=0;i<binEnv.length;i++) binEnv[i] *= 0.90;
+        env.bass *= 0.90; env.level *= 0.90;
+      }
+      env.flash *= 0.90; env.surge *= 0.86;
+
+      const idle = playing ? 0 : 0.10*(0.5 + 0.5*Math.sin(t*0.6)); // jemné dýchání v klidu
+      const drive = Math.max(env.bass, idle);
+      const lvl   = Math.max(env.level, idle);
+      const cx = W/2, cy = H*0.42;
+      const bloom = drive*0.14;                       // basy „nadechnou" celé souhvězdí
+      const speedM = 1 + env.surge*2.6 + treble*1.1;  // beat zrychlí pohyb
+      const linkDist = (playing ? 132 : 108) + lvl*70;
 
       ctx.globalCompositeOperation = col.dark ? 'lighter' : 'source-over';
+
+      // expandující prstence vyslané na beat
+      for (let i=rings.length-1;i>=0;i--) {
+        const rg = rings[i];
+        rg.r += 7 + env.level*10; rg.a *= 0.93;
+        if (rg.a < 0.03) { rings.splice(i,1); continue; }
+        ctx.strokeStyle = `rgba(${col.a1[0]},${col.a1[1]},${col.a1[2]},${rg.a*0.22})`;
+        ctx.lineWidth = rg.w;
+        ctx.beginPath(); ctx.arc(cx, cy, rg.r, 0, Math.PI*2); ctx.stroke();
+      }
+
+      // částice — každá svítí/roste podle „své" frekvence
       for (const p of particles) {
-        p.x += p.vx*speedM; p.y += p.vy*speedM; p.ph += 0.02 + treble*0.06;
-        if (p.y < -10) { p.y = H+10; p.x = Math.random()*W; }
-        if (p.x < -10) p.x = W+10; else if (p.x > W+10) p.x = -10;
-        const rr = Math.max(0.4, p.r*(1+amp*1.7) + Math.sin(p.ph)*0.4);
+        p.x += p.vx*speedM; p.y += p.vy*speedM; p.ph += 0.02 + treble*0.12;
+        if (p.y < -12) { p.y = H+12; p.x = Math.random()*W; }
+        if (p.x < -12) p.x = W+12; else if (p.x > W+12) p.x = -12;
+        const be = binEnv[p.bin] * p.react;          // 0..~1 dle spektra
+        const dx = p.x + (p.x-cx)*bloom, dy = p.y + (p.y-cy)*bloom;
+        p._x = dx; p._y = dy;
+        const rr = Math.max(0.4, p.r*(1 + drive*0.7 + be*2.6 + env.flash*0.7) + Math.sin(p.ph)*0.4);
         const c = p.warm < 0.5 ? col.a1 : col.a2;
-        const al = Math.min(0.85, (col.dark ? 0.16 : 0.22) + amp*0.5);
+        const al = Math.min(0.95, (col.dark ? 0.14 : 0.20) + be*0.6 + env.flash*0.22);
         ctx.beginPath();
         ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${al})`;
-        ctx.arc(p.x, p.y, rr, 0, Math.PI*2); ctx.fill();
+        ctx.arc(dx, dy, rr, 0, Math.PI*2); ctx.fill();
       }
+
+      // propojení — jas roste s hlasitostí a problikne na beat
       for (let i=0;i<particles.length;i++) {
         for (let j=i+1;j<particles.length;j++) {
           const A = particles[i], B = particles[j];
-          const dx = A.x-B.x, dy = A.y-B.y, d = Math.hypot(dx,dy);
+          const dx = A._x-B._x, dy = A._y-B._y, d = Math.hypot(dx,dy);
           if (d < linkDist) {
-            const o = (1 - d/linkDist) * (col.dark ? 0.10 : 0.14) * (0.5 + amp);
-            ctx.strokeStyle = `rgba(${col.a1[0]},${col.a1[1]},${col.a1[2]},${o})`;
+            const o = (1 - d/linkDist) * (col.dark ? 0.10 : 0.14) * (0.45 + lvl*1.4 + env.flash*0.5);
+            ctx.strokeStyle = `rgba(${col.a1[0]},${col.a1[1]},${col.a1[2]},${Math.min(0.5,o)})`;
             ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(A._x,A._y); ctx.lineTo(B._x,B._y); ctx.stroke();
           }
         }
       }
