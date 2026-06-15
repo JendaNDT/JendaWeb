@@ -284,7 +284,8 @@ function Nav({ lang, setLang, mode, setMode }) {
 function Hero({ lang, onPlay }) {
   const playFeatured = () => {
     const tracks = window.TRACKS_DATA || [];
-    if (tracks.length && onPlay) onPlay(tracks[0], tracks);
+    const featured = tracks.find(t => t.audioUrl) || tracks[0];
+    if (featured && onPlay) onPlay(featured, tracks);
     const el = document.getElementById('music');
     if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 64, behavior: 'smooth' });
   };
