@@ -12,6 +12,8 @@
   var CACHE_KEY = 'jw_content_v1';
 
   window.__jwContentVersion = window.__jwContentVersion || 0;
+  // Vystavit přístup k Supabase i pro ostatní skripty (počítání přehrání atd.)
+  window.__jwSupa = { url: SUPABASE_URL, key: SUPABASE_KEY };
 
   // --- mapování: DB řádek (snake_case) -> tvar globálu (shodný s data.js) ---
   function mapApps(rows) {
@@ -30,7 +32,7 @@
     return rows.map(function (t) {
       var hasLyrics = (t.lyrics_cs != null) || (t.lyrics_en != null);
       return { id: t.id, title: t.title, album: t.album_id, duration: t.duration,
-               audioUrl: t.audio_url, downloadUrl: t.download_url,
+               audioUrl: t.audio_url, downloadUrl: t.download_url, plays: t.plays || 0,
                lyrics: hasLyrics ? { cs: t.lyrics_cs, en: t.lyrics_en } : null };
     });
   }

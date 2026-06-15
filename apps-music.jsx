@@ -263,6 +263,11 @@ function TrackRow({ track, album, idx, active, playing, onPlay }) {
         <div style={{ fontSize:12, color:'var(--muted)', marginTop:1 }}>{album?.title || ''}</div>
       </div>
       <div style={{ display:'flex', alignItems:'center', gap:10, flexShrink:0 }}>
+        {track.plays > 0 && (
+          <span title={`${track.plays}× přehráno`} style={{ fontSize:12, color:'var(--muted)', opacity:0.7, fontVariantNumeric:'tabular-nums', display:'flex', alignItems:'center', gap:3 }}>
+            <span style={{ fontSize:8 }}>▶</span>{track.plays >= 1000 ? (track.plays/1000).toFixed(1).replace('.0','')+'k' : track.plays}
+          </span>
+        )}
         {track.downloadUrl && (
           <a href={track.downloadUrl} onClick={e => e.stopPropagation()} aria-label="Download" style={{ color:'var(--muted)', opacity:0.6, display:'flex' }}><DlIco /></a>
         )}

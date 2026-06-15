@@ -62,6 +62,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
       audioCtxRef.current = ctx;
       sourceRef.current = source;
       analyserRef.current = analyser;
+      window.__jwAnalyser = analyser; // sdílené pro hero vizuál (audio-reaktivita)
     } catch { /* CORS or unsupported — fall back to seededBars */ }
   };
 
@@ -180,6 +181,23 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
       const m = raw ? JSON.parse(raw) : {};
       m[track.id] = (m[track.id] || 0) + 1;
       localStorage.setItem('jw_plays', JSON.stringify(m));
+    } catch {}
+    // Globální počítadlo (Supabase) — jednou na skladbu za návštěvu
+    try {
+      const seen = window.__jwCounted || (window.__jwCounted = new Set());
+      if (!seen.has(track.id)) {
+        seen.add(track.id);
+        track.plays = (track.plays || 0) + 1; // optimisticky → "Nejvíce poslouchané" reaguje hned
+        const sb = window.__jwSupa;
+        if (sb) {
+          fetch(sb.url + '/rest/v1/rpc/increment_play', {
+            method: 'POST',
+            headers: { apikey: sb.key, authorization: 'Bearer ' + sb.key, 'content-type': 'application/json' },
+            body: JSON.stringify({ track_id: track.id }),
+            keepalive: true,
+          }).catch(() => {});
+        }
+      }
     } catch {}
   }, [track?.id, isPlaying]);
 

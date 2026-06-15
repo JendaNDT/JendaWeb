@@ -960,6 +960,8 @@ function OverviewTab({ data, goTab }) {
   const withAudio = t.filter(function (x) { return x.audio_url; }).length;
   const noAudio = t.length - withAudio;
   const withLyrics = t.filter(function (x) { return x.lyrics_cs || x.lyrics_en; }).length;
+  const totalPlays = t.reduce(function (s, x) { return s + (Number(x.plays) || 0); }, 0);
+  const topTrack = t.reduce(function (best, x) { return (Number(x.plays) || 0) > (Number(best && best.plays) || 0) ? x : best; }, null);
   const pwa = ap.filter(function (x) { return x.platform === 'PWA'; }).length;
   const android = ap.length - pwa;
   const appNoLink = ap.filter(function (x) { return !x.link || x.link === '#'; }).length;
@@ -974,6 +976,7 @@ function OverviewTab({ data, goTab }) {
         <StatCard num={totalDurationStr(t)} lbl="celková délka" />
         <StatCard num={al.length} lbl="alb" />
         <StatCard num={withLyrics} lbl="skladeb s textem" />
+        <StatCard num={totalPlays.toLocaleString('cs')} lbl="přehrání celkem" sub={topTrack && totalPlays > 0 ? ('nejvíc: ' + topTrack.title + ' (' + topTrack.plays + '×)') : 'zatím žádná'} />
       </div>
       <div className="sectionlabel">Aplikace & sítě</div>
       <div className="statgrid">

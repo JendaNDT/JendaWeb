@@ -276,11 +276,10 @@ function MostPlayedSection({ lang, onPlay, currentTrack, playing }) {
   }, []);
 
   const top = __useM_ex(() => {
-    let plays = {};
-    try { plays = JSON.parse(localStorage.getItem('jw_plays') || '{}'); } catch {}
+    // Reálná globální čísla z DB (window.TRACKS_DATA[].plays), průběžně i optimisticky.
     const tracks = window.TRACKS_DATA || [];
     return tracks
-      .map(t => ({ track: t, count: plays[t.id] || 0 }))
+      .map(t => ({ track: t, count: t.plays || 0 }))
       .filter(x => x.count > 0)
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
@@ -294,7 +293,7 @@ function MostPlayedSection({ lang, onPlay, currentTrack, playing }) {
   return (
     <section style={{ padding:'80px 24px', background:'transparent' }}>
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:760, margin:'0 auto' }}>
-        <SubLabel>{lang === 'cs' ? 'Nejvíce poslouchaňé' : 'Most played'}</SubLabel>
+        <SubLabel>{lang === 'cs' ? 'Nejvíce poslouchané' : 'Most played'}</SubLabel>
         <div style={{
           background:'var(--card)', border:'1px solid var(--border)',
           borderRadius:'var(--r)', padding:'6px',

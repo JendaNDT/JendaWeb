@@ -1,6 +1,131 @@
 // nav-hero.jsx — Top navigation + hero section
 // Depends on shared.jsx (window globals).
-const { useState: __useState_nh, useEffect: __useEffect_nh } = React;
+const { useState: __useState_nh, useEffect: __useEffect_nh, useRef: __useRef_nh } = React;
+
+// HeroCanvas — generativní "souhvězdí" částic za nadpisem.
+// Samo jemně plyne; když hraje hudba, reaguje na ni přes sdílený analyser
+// (window.__jwAnalyser z přehrávače): basy nafouknou/rozzáří částice,
+// výšky přidají rychlost a propojení. Respektuje prefers-reduced-motion,
+// pauzuje mimo obrazovku i na skryté kartě, ladí barvy dle motivu webu.
+function HeroCanvas() {
+  const ref = __useRef_nh(null);
+  __useEffect_nh(() => {
+    const canvas = ref.current; if (!canvas) return;
+    const ctx = canvas.getContext('2d'); if (!ctx) return;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let W = 0, H = 0, particles = [], raf = null, running = false, t = 0, frame = 0;
+    const col = { a1:[249,115,22], a2:[251,191,36], dark:true };
+
+    function parseColor(str, fb) {
+      str = (str || '').trim();
+      let m = str.match(/^#([0-9a-fA-F]{6})$/);
+      if (m) { const n = parseInt(m[1],16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+      m = str.match(/rgba?\(([^)]+)\)/);
+      if (m) { const p = m[1].split(',').map(s=>parseFloat(s)); return [p[0]||0,p[1]||0,p[2]||0]; }
+      return fb;
+    }
+    function sampleTheme() {
+      try {
+        const cs = getComputedStyle(document.documentElement);
+        col.a1 = parseColor(cs.getPropertyValue('--a1'), [249,115,22]);
+        col.a2 = parseColor(cs.getPropertyValue('--a2'), [251,191,36]);
+        const bg = parseColor(cs.getPropertyValue('--bg'), [0,0,0]);
+        col.dark = (0.2126*bg[0] + 0.7152*bg[1] + 0.0722*bg[2]) / 255 < 0.5;
+      } catch (e) {}
+    }
+    function mk() {
+      return { x:Math.random()*W, y:Math.random()*H, r:1+Math.random()*2.4,
+        vx:(Math.random()-0.5)*0.18, vy:-(0.06+Math.random()*0.22),
+        ph:Math.random()*Math.PI*2, warm:Math.random() };
+    }
+    function resize() {
+      W = canvas.clientWidth; H = canvas.clientHeight;
+      canvas.width = Math.max(1, Math.floor(W*dpr));
+      canvas.height = Math.max(1, Math.floor(H*dpr));
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      const target = Math.round(Math.min(86, Math.max(34, W/16)));
+      if (particles.length !== target) { particles = []; for (let i=0;i<target;i++) particles.push(mk()); }
+    }
+    function audioLevels() {
+      const an = window.__jwAnalyser; if (!an) return null;
+      try {
+        const bins = new Uint8Array(an.frequencyBinCount);
+        an.getByteFrequencyData(bins);
+        const avg = (a,b) => { let s=0; for (let i=a;i<b;i++) s+=bins[i]; return s/((b-a)*255); };
+        const bass = avg(1,8), mid = avg(8,40), treble = avg(40,90);
+        if (bass+mid+treble < 0.02) return null; // ticho / pauza → generativní režim
+        return { bass, mid, treble };
+      } catch (e) { return null; }
+    }
+    function draw() {
+      t += 0.016; frame++;
+      if (frame % 45 === 0) sampleTheme();
+      ctx.clearRect(0,0,W,H);
+      const a = audioLevels();
+      const playing = !!a;
+      const bass = a ? a.bass : 0, treble = a ? a.treble : 0;
+      const idle = 0.5 + 0.5*Math.sin(t*0.6);
+      const amp = playing ? Math.min(1, bass*1.4) : 0.12*idle;
+      const speedM = playing ? (1 + treble*2.2) : 1;
+      const linkDist = (playing ? 130 : 108) + amp*60;
+
+      ctx.globalCompositeOperation = col.dark ? 'lighter' : 'source-over';
+      for (const p of particles) {
+        p.x += p.vx*speedM; p.y += p.vy*speedM; p.ph += 0.02 + treble*0.06;
+        if (p.y < -10) { p.y = H+10; p.x = Math.random()*W; }
+        if (p.x < -10) p.x = W+10; else if (p.x > W+10) p.x = -10;
+        const rr = Math.max(0.4, p.r*(1+amp*1.7) + Math.sin(p.ph)*0.4);
+        const c = p.warm < 0.5 ? col.a1 : col.a2;
+        const al = Math.min(0.85, (col.dark ? 0.16 : 0.22) + amp*0.5);
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${al})`;
+        ctx.arc(p.x, p.y, rr, 0, Math.PI*2); ctx.fill();
+      }
+      for (let i=0;i<particles.length;i++) {
+        for (let j=i+1;j<particles.length;j++) {
+          const A = particles[i], B = particles[j];
+          const dx = A.x-B.x, dy = A.y-B.y, d = Math.hypot(dx,dy);
+          if (d < linkDist) {
+            const o = (1 - d/linkDist) * (col.dark ? 0.10 : 0.14) * (0.5 + amp);
+            ctx.strokeStyle = `rgba(${col.a1[0]},${col.a1[1]},${col.a1[2]},${o})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y); ctx.stroke();
+          }
+        }
+      }
+      ctx.globalCompositeOperation = 'source-over';
+      if (running) raf = requestAnimationFrame(draw);
+    }
+    function start() { if (!running) { running = true; raf = requestAnimationFrame(draw); } }
+    function stop() { running = false; if (raf) cancelAnimationFrame(raf); raf = null; }
+
+    sampleTheme(); resize();
+    const ro = ('ResizeObserver' in window) ? new ResizeObserver(resize) : null;
+    if (ro) ro.observe(canvas); else window.addEventListener('resize', resize);
+
+    let io = null, onVis = null;
+    if (reduce) { draw(); } // jediný statický snímek
+    else {
+      io = ('IntersectionObserver' in window) ? new IntersectionObserver(es => {
+        if (es[0].isIntersecting) start(); else stop();
+      }, { threshold:0.01 }) : null;
+      if (io) io.observe(canvas); else start();
+      onVis = () => { if (document.hidden) stop(); else start(); };
+      document.addEventListener('visibilitychange', onVis);
+      start();
+    }
+    return () => {
+      stop();
+      if (ro) ro.disconnect(); else window.removeEventListener('resize', resize);
+      if (io) io.disconnect();
+      if (onVis) document.removeEventListener('visibilitychange', onVis);
+    };
+  }, []);
+  return <canvas ref={ref} aria-hidden="true" style={{
+    position:'absolute', inset:0, width:'100%', height:'100%', zIndex:0, pointerEvents:'none',
+  }} />;
+}
 
 function Nav({ lang, setLang, mode, setMode }) {
   const [scrolled, setScrolled] = __useState_nh(false);
@@ -101,6 +226,7 @@ function Hero({ lang }) {
       textAlign:'center', padding:'90px 24px 80px',
       position:'relative', overflow:'hidden',
     }}>
+      <HeroCanvas />
       <div style={{ position:'relative', zIndex:1, maxWidth:820 }}>
         <div style={{
           display:'inline-flex', alignItems:'center', gap:8,
