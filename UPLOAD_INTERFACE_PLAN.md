@@ -2,6 +2,10 @@
 
 *Vytvořeno 14. 06. 2026. Tohle je kompletní spec pro samostatné vlákno, kde se to bude stavět. Čte to jak Jenda (přehled + co udělat on), tak AI (technické detaily).*
 
+> ✅ **STAV: HOTOVO a NASAZENO (15. 06. 2026).** Všech 7 fází je implementováno a živé na https://jenda-web.vercel.app + `/admin`. Tento dokument je **původní plán (historie)**; aktuální technické detaily jsou v **`SUPABASE_BACKEND.md`**, stav projektu v **`PROJECT_STATUS.md`**.
+>
+> **Hlavní odchylka od plánu:** web ani admin **nepoužívají `supabase-js`** — místo něj prostý `fetch` na Supabase REST / GoTrue / Storage (web jen čte přes `supabase-data.js`, admin píše s admin JWT), aby se do offline shellu nevendorovala velká knihovna. RLS zápis je navíc **zamčen na konkrétní admin `uid`** (ne „kdokoliv authenticated"). **Nad rámec plánu** přibylo: dashboard „Přehled" (+ SQL funkce `storage_usage`), návštěvnost přes **GoatCounter**, **počty přehrání** (`tracks.plays` + RPC `increment_play`), editor hlavních textů/build-logu/srovnání, obálky alb, a celostránkové **audio-reaktivní + paralaxní** pozadí.
+
 ---
 
 ## 1) Cíl

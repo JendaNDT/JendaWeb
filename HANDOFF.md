@@ -2,8 +2,11 @@
 
 Personal portfolio site for "Jenda — Vibe Coder & AI Music". A React SPA built with inline Babel + JSX, **no build step**. Installable, **fully offline-capable** PWA, bilingual (CZ / EN), dark/light mode with accent themes.
 
-- **Live:** https://jenda-web.vercel.app
+Content is now managed through a **Supabase-backed CMS** (login-protected `/admin`): the site reads apps/albums/tracks/socials/texts from the database with an offline localStorage cache (`data.js` is the fallback seed). A full-page **audio-reactive + parallax** particle background (`BackgroundFX`) runs behind all content. Backend specifics live in **`SUPABASE_BACKEND.md`**; current state + decisions in **`PROJECT_STATUS.md`**.
+
+- **Live:** https://jenda-web.vercel.app · **Admin:** https://jenda-web.vercel.app/admin
 - **Repo:** https://github.com/JendaNDT/JendaWeb — push to `main` → Vercel auto-deploys.
+- **Backend:** Supabase project `jendaweb` (ref `semdgbaearwhkhulkyts`, eu-central-1, free). Frontend uses the public anon/publishable key; writes are protected by RLS (locked to the admin uid). See `SUPABASE_BACKEND.md`.
 
 ## Tech stack
 
@@ -22,23 +25,28 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 - **GitHub:** `JendaNDT/JendaWeb`, branch `main`.
 - **Vercel:** connected to the repo. **Push to `main` auto-deploys.** Framework preset "Other" (pure static, no build).
 - The site assumes deployment at the **domain root** — `sw.js` and the manifest use absolute paths (`/...`). A subpath deploy would need path tweaks.
-- After changing any cached asset, **bump `VERSION` in `sw.js`** (currently `jw-v29`) so clients pick up new content.
+- After changing any cached asset, **bump `VERSION` in `sw.js`** (currently `jw-v38`) so clients pick up new content.
+- `/admin` is routed via `vercel.json` (rewrite `/admin` → `/admin.html`) and served **online-only** (SW bypasses cache for it) with `Cache-Control: no-store` headers so it's never stale.
+- **Pushing from the sandbox:** the mounted working copy's `.git` can't take git writes (lock files), so deploys go via a fresh `git clone` in `/tmp`, copy the changed files in, commit, and `git push https://<token>@github.com/JendaNDT/JendaWeb.git HEAD:main`. Token is provided per-session (in `Token/`, gitignored), never stored. Verify the deploy actually landed (Vercel occasionally misses the webhook) and that no caches serve stale files.
 
 ## File map
 
 ```
 .
-├── index.html              # HTML shell, CSS tokens, script load order, mesh background + noise
-├── data.js                 # All content: apps, albums, tracks, socials, strings, stats, config keys
-├── app.jsx                 # Root App, lang/mode state, hash routing, keyboard shortcuts
+├── index.html              # HTML shell, CSS tokens, script load order, mesh background + noise, GoatCounter
+├── data.js                 # Content seed (apps, albums, tracks, socials, strings, stats, config) — OFFLINE FALLBACK
+├── supabase-data.js        # Plain JS: fetches content from Supabase REST → overrides window.* globals + localStorage cache
+├── admin.html · admin.jsx  # /admin: login (Supabase Auth) + full CRUD + mp3/image upload + dashboard + analytics
+├── vercel.json             # Rewrite /admin → /admin.html + no-store headers for admin/sw
+├── app.jsx                 # Root App, lang/mode state, hash routing, keyboard shortcuts, <BackgroundFX/>
 ├── shared.jsx              # Themes, hooks (useInView, useCountUp), icons, base components, art generators
-├── nav-hero.jsx            # Nav + Hero
-├── apps-music.jsx          # AppCard, AppsSection, AlbumCard, TrackRow, MusicSection
-├── player-contact.jsx      # AudioPlayer (mini), ShortcutsOverlay, ContactForm, ContactSection, Footer
+├── nav-hero.jsx            # Nav + Hero + BackgroundFX (full-page audio-reactive + parallax particle canvas)
+├── apps-music.jsx          # AppCard, AppsSection, AlbumCard, TrackRow (▶ play counts), MusicSection
+├── player-contact.jsx      # AudioPlayer (mini, exposes window.__jwAnalyser + increments plays), Shortcuts, Contact, Footer
 ├── player-expand.jsx       # ExpandMode full-screen player + AnalyzerOverlay
 ├── search.jsx              # Cmd+K SearchOverlay
 ├── queue.jsx               # QueueDrawer (Q)
-├── extras.jsx              # Newsletter, Stats, Comparison, MostPlayed, DonationButton
+├── extras.jsx              # Newsletter, Stats, Comparison, MostPlayed (global plays), DonationButton
 ├── tweaks-panel.jsx        # Reusable Tweaks panel scaffold
 ├── vendor/                 # LOCAL deps (offline)
 │   ├── react.production.min.js
@@ -47,13 +55,16 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 │   ├── fonts.css           # @font-face for self-hosted fonts
 │   └── fonts/              # Syne + DM Sans (woff2/woff, latin subset)
 ├── icons/                  # PNG app icons 180/192/512 (iOS apple-touch + maskable)
-├── sw.js                   # Service worker (precache shell + network-first HTML)
+├── sw.js                   # Service worker (jw-v38; precache shell, network-first HTML, /admin online-only)
 ├── manifest.webmanifest    # PWA manifest (icons point to icons/*.png)
 ├── og-image.svg            # 1200×630 social card
 ├── robots.txt · sitemap.xml · feed.xml · 404.html · embed.html
-├── PROJECT_STATUS.md       # Living project status (vibecoding tracker)
+├── PROJECT_STATUS.md       # Living project status (vibecoding tracker) — READ FIRST
 ├── HANDOFF.md              # This file
-├── case-studies/           # meditapp / beatcraft / chordlens + shared style.css
+├── SUPABASE_BACKEND.md     # Backend: project ref, keys, schema, RLS, storage, RPC functions
+├── UPLOAD_INTERFACE_PLAN.md# Original admin/Supabase spec (now implemented)
+├── case-studies/           # meditapp / beatcraft / chordlens + shared style.css (+ GoatCounter)
+├── Token/                  # GitHub token drop (gitignored — never committed)
 └── handoff/                # ⚠️ Frozen backup of the OLD 4-file version — NOT current, do not use
 ```
 
@@ -73,7 +84,8 @@ In other files those identifiers resolve via the global scope.
 <script src="vendor/babel.min.js"></script>
 <!-- ...at end of <body>: -->
 <script type="text/babel" src="tweaks-panel.jsx"></script>
-<script src="data.js"></script>                       <!-- plain JS, sets window.APPS_DATA etc. -->
+<script src="data.js"></script>                       <!-- plain JS, sets window.APPS_DATA etc. (offline fallback seed) -->
+<script src="supabase-data.js"></script>              <!-- plain JS, overrides window.* globals from Supabase + cache -->
 <script type="text/babel" src="shared.jsx"></script>
 <script type="text/babel" src="nav-hero.jsx"></script>
 <script type="text/babel" src="apps-music.jsx"></script>
@@ -101,7 +113,9 @@ To avoid Babel scope collisions each file destructures with unique names: `const
 | `jw_shuffle`       | '1' or '0'                              |
 | `jw_repeat`        | 'off' \| 'all' \| 'one'                 |
 | `jw_viz`           | 'bars' \| 'radial' \| 'mirror'          |
-| `jw_plays`         | { trackId: count } — listening stats    |
+| `jw_plays`         | { trackId: count } — per-browser stats (global counts now live in `tracks.plays`) |
+| `jw_content_v1`    | cached Supabase content (set by `supabase-data.js`) |
+| `jw_admin_session` | admin auth session (only on `/admin`)   |
 
 ## URL hash routing
 
@@ -114,9 +128,9 @@ To avoid Babel scope collisions each file destructures with unique names: `const
 
 `Cmd/Ctrl+K` search · `?` shortcuts · `Space` play/pause · `← / →` prev/next · `Shift+← / →` seek 5s · `M` mute · `E` expand · `Q` queue · `V` visualizer · `D` analyzer · `A`/`B`/`Z` loop start/end/clear · `L` language · `Esc` close overlay.
 
-## Configurable values — TODO before fully live
+## Content & configurable values
 
-In **`data.js`**:
+**Primary content now lives in Supabase and is edited via `/admin`** (no code edits needed): tracks (incl. mp3 upload), albums (+ covers), apps (+ icons), socials, main site texts (CZ/EN), build log, comparison, and config keys (contact email/endpoint, newsletter, Ko-fi, giscus, public stats). `supabase-data.js` maps the DB onto the same `window.*` globals the components already use, so components didn't change. `data.js` remains the **offline fallback seed** (and documents the shape). The table below is what still needs real values — set them in `/admin` (or `data.js` for the fallback):
 
 | Constant | What to set it to |
 |----------|-------------------|
@@ -131,7 +145,7 @@ In **`data.js`**:
 | `window.CASE_STUDIES` | Map of `appId -> case study URL` (3 entries) |
 | `window.PUBLIC_STATS` / `window.BUILD_LOG` | Replace placeholder numbers/entries |
 
-In **`index.html`**: uncomment Plausible + set `data-domain`; set OG meta tags to absolute URLs (`https://jenda-web.vercel.app/...`).
+Analytics are already wired — **GoatCounter** (`data-goatcounter` script in `index.html` + the case-study pages), shown in the admin **Návštěvnost** tab. (This replaced the earlier Plausible plan.) Still TODO in `index.html`: set OG meta tags to absolute URLs (`https://jenda-web.vercel.app/...`).
 In **`sw.js`**: bump `VERSION` on any cached-asset change.
 In **case study HTML**: uncomment giscus block + fill `data-repo` etc.
 
@@ -150,6 +164,7 @@ In **case study HTML**: uncomment giscus block + fill `data-repo` etc.
 - **Warm-balanced:** amber (mesh-3) is the larger/central warm orb; teal (mesh-1) is toned down — matches the warm brand and keeps orange present.
 - **Noise (`.mesh-noise`)** dithers gradient banding. Note: faint "stripes" some displays show on huge soft gradients are **Mach bands / display-side**, not in the pixel data — noise can't fully remove them, don't chase it.
 - The hero has **no local orbs** (removed) and no separate noise — it shares the global mesh, so there's no seam at the hero boundary.
+- **Particle layer above the mesh:** `BackgroundFX` (in `nav-hero.jsx`, rendered once at the App root) is a `position:fixed; inset:0; z-index:-1; pointer-events:none` `<canvas>` drawing an orange particle "constellation" **above** `.mesh-bg` (it comes later in the DOM, inside `#root`) and **below** content (sections are transparent). It's **audio-reactive** (reads the player's shared `window.__jwAnalyser`: beat detection → flash + bass "bloom" + expanding rings, plus per-frequency size/brightness pulse) and has a **depth parallax** on scroll (each particle has a `depth`; nearer ones shift more and are a bit bigger/brighter). It reads `scrollY` inside its rAF loop (no scroll listener), re-samples theme colors, pauses when the tab is hidden, and respects `prefers-reduced-motion` (single static frame). Tuning lives at the top of its draw loop — particle size, density (`(W*H)/16000`), brightness decay (0.92), treble low-pass (`env.treble … *0.15`), beat threshold, and parallax strength (`pf = 0.02 + depth*0.10`). NOTE: scroll-/audio-linked motion only runs when the tab is the visible foreground tab (rAF pauses otherwise), so verify this logic with a Node check of the math, not a background browser tab.
 
 ## Notable features (so you don't reinvent them)
 
@@ -159,7 +174,9 @@ In **case study HTML**: uncomment giscus block + fill `data-repo` etc.
 - **A/B loop** — A/B/Z keys, markers in ExpandMode bars-mode waveform.
 - **Audio analyzer overlay** — D key, real-time peakHz / rms / range from AnalyserNode.
 - **Visualizer modes** — V cycles bars / radial / mirror.
-- **Most Played section** — reads `localStorage.jw_plays`, hidden if empty.
+- **Play counts (global)** — each time a track starts, the player calls the Supabase `increment_play(track_id)` RPC (once per track per visit) which bumps `tracks.plays`. Shown as "▶ N×" on tracks, in the **Most Played** section, and "přehrání celkem" in admin Přehled. The old per-browser `localStorage.jw_plays` still updates but the site reads the global DB value (`window.TRACKS_DATA[].plays`).
+- **Most Played section** — reads global `tracks.plays` (via `window.TRACKS_DATA`), hidden if all zero.
+- **Audio-reactive + parallax background** — `BackgroundFX`, see the Background section above.
 
 ## Things deliberately not done
 
@@ -179,6 +196,6 @@ In **case study HTML**: uncomment giscus block + fill `data-repo` etc.
 7. **Deploy = `git push` to `main`** (Vercel auto-deploys). No manual build.
 8. `handoff/` is a frozen old-version backup — ignore it for current work.
 
-> **Planned next phase:** a content **upload interface** (login-protected `/admin`) backed by **Supabase** (database + auth + file storage), so music, apps and images are added via forms with file upload instead of editing `data.js`. Full spec in **`UPLOAD_INTERFACE_PLAN.md`**.
+> **Done (was "next phase"):** the content **upload interface** (login-protected `/admin`) backed by **Supabase** (database + auth + file storage) is **built and live** — music, apps, images and texts are managed via forms with file upload instead of editing `data.js`. Original spec: **`UPLOAD_INTERFACE_PLAN.md`**; backend details: **`SUPABASE_BACKEND.md`**; current state: **`PROJECT_STATUS.md`**.
 
-— Maintained for the Cowork + GitHub/Vercel workflow. Last updated 14 Jun 2026.
+— Maintained for the Cowork + GitHub/Vercel workflow. Last updated 15 Jun 2026.

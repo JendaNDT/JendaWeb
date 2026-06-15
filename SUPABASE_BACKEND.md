@@ -1,6 +1,6 @@
 # Supabase Backend — JendaWeb
 
-*Fáze 1–2 hotové: 15. 06. 2026. Schéma + RLS + storage + seed. (Plán: `UPLOAD_INTERFACE_PLAN.md`.)*
+*Všech 5 fází hotové a NASAZENÉ (15. 06. 2026): schéma + RLS + storage + seed + web čte z DB + `/admin` login + plný CRUD/upload. Pozdější přírůstky: `albums.cover_url`, `site_config.strings`, `tracks.plays` + RPC `increment_play` a `storage_usage`. (Plán: `UPLOAD_INTERFACE_PLAN.md` · stav: `PROJECT_STATUS.md`.)*
 
 ## Projekt
 - **Název:** jendaweb
@@ -18,25 +18,34 @@
 ## Tabulky (schema `public`)
 | Tabulka | Klíč | Řádků | Pozn. |
 |---|---|---|---|
-| `albums` | `id` text | 5 | id, title, genre, year, g1, g2, tracks, cs, en, sort, created_at |
+| `albums` | `id` text | 5 | id, title, genre, year, g1, g2, tracks, cs, en, **cover_url**, sort, created_at |
 | `apps` | `id` bigint | 20 | name, platform (`PWA`/`Android`), color, cs, en, link, icon_url, case_study_url, sort |
-| `tracks` | `id` bigint | 15 | title, album_id→albums, duration, audio_url, download_url, lyrics_cs, lyrics_en, sort (3 mají texty) |
+| `tracks` | `id` bigint | 15 | title, album_id→albums, duration, audio_url, download_url, lyrics_cs, lyrics_en, **plays** (bigint, počty přehrání), sort (3 mají texty) |
 | `socials` | `id` text | 5 | label, url, sort |
-| `site_config` | `key` text | 9 | value jsonb: contact_email, contact_endpoint, newsletter_endpoint, kofi_username, giscus_config, public_stats, build_log, comparison, case_studies |
-| `site_strings` | `key` text | 0 | UI texty zatím napevno v `data.js`; tabulka připravená pro fázi 4 |
+| `site_config` | `key` text | 10 | value jsonb: contact_email, contact_endpoint, newsletter_endpoint, kofi_username, giscus_config, public_stats, build_log, comparison, case_studies, **strings** (editovatelné UI texty CZ/EN jako override) |
+| `site_strings` | `key` text | 0 | **NEPOUŽÍVÁ se** — editovatelné UI texty se nakonec ukládají do `site_config.strings` (override nad defaulty z `data.js`) |
 
 Identity sekvence `apps`/`tracks` nastaveny za seed (apps→20, tracks→15), nové vkládání nekoliduje.
 
 ## Storage buckety
-- **`audio`** (veřejné čtení) — mp3/wav, cesta `tracks/{id}.mp3`
-- **`images`** (veřejné čtení) — ikony/obálky, `apps/{id}.png`, `covers/{id}.jpg`
-- Zápis jen `authenticated`.
+- **`audio`** (veřejné čtení) — mp3/wav. Admin nahrává s cestou `tracks/{timestamp}_{název}` (XHR + progress).
+- **`images`** (veřejné čtení) — ikony aplikací + obálky alb, cesta `apps/{timestamp}_{název}`.
+- Zápis jen `authenticated` (přes admin JWT). Pozn.: staré soubory se při přepsání zatím nemažou (viz TODO v `PROJECT_STATUS.md`).
 
 ## RLS (zabezpečení)
-- Každá tabulka: **veřejné čtení** (anon SELECT) · **zápis (ALL) jen `authenticated`**. Anon nemůže zapisovat.
-- ⚠️ **Advisor: 6× „RLS Policy Always True" (WARN).** Write policy je `authenticated using(true)`, tj. *jakýkoliv přihlášený* může zapisovat všude. Pro single-admin CMS je to **záměr**. Reálná pojistka pro fázi 4:
-  1. **Vypnout veřejnou registraci** (Supabase → Authentication → Providers → Email → zakázat signupy), ať jediný účet je Jendův.
-  2. Volitelně zúžit write policy na konkrétní `auth.uid()` admina.
+- Každá tabulka: **veřejné čtení** (anon SELECT) · **zápis (ALL) zamčen na konkrétní admin `uid`** (policies `*_admin_write`, `auth.uid() = '5a7c34fb-…'`). Anon ani jiný přihlášený nezapíše.
+- ✅ **Advisor čistý** — dřívějších 6× „RLS Policy Always True" zmizelo právě tím zúžením na admin uid (zbývalo `authenticated using(true)`). Zbývá jen volitelná „leaked password protection" (kosmetické).
+- **Výjimka — anonymní zápis přes RPC:** počítadlo přehrání zvyšuje `security definer` funkce `increment_play` (viz níže), takže anon zápis do `tracks.plays` jde jen přes ni (ne přímým UPDATE).
+
+## Funkce / RPC (Postgres)
+- **`public.increment_play(track_id bigint)`** — `security definer`, `set search_path = public`, grant `anon` + `authenticated`. Zvýší `tracks.plays` o 1 pro dané `id`. Web ji volá **anonymně** (`POST /rest/v1/rpc/increment_play`, anon klíč) při spuštění skladby — jednou na skladbu za návštěvu. Bezpečné: jen inkrementuje počítadlo, RLS obchází řízeně přes definer.
+- **`public.storage_usage()`** — `security definer`, grant **jen `authenticated`**. Sečte velikost objektů v bucketech `audio` + `images` (z `storage.objects`) a vrátí řádky `{bucket, bytes, files}`. Admin „Přehled" z toho ukazuje využité úložiště proti ~1 GB free.
+
+## Pozdější přírůstky (po fázi 5, vše nasazené 15. 06. 2026)
+- **Plný CMS:** `albums.cover_url` (upload obálky) + `site_config.strings` (editovatelné hlavní texty CZ/EN, web je merguje do `window.STRINGS`). `CASE_STUDIES` web staví z `apps.case_study_url`.
+- **Dashboard „Přehled":** statistiky obsahu + úložiště přes `storage_usage()`.
+- **Počty přehrání:** `tracks.plays` + `increment_play` (viz výše); web ukazuje „Nejvíce poslouchané" a „▶ N×" z reálných dat, admin má kartu „přehrání celkem".
+- **Mimo Supabase (web-only, detaily v `PROJECT_STATUS.md`):** návštěvnost přes **GoatCounter** (admin záložka Návštěvnost) a celostránkové **audio-reaktivní + paralaxní** částicové pozadí `BackgroundFX`.
 
 ## Co dál
 
@@ -48,6 +57,6 @@ Identity sekvence `apps`/`tracks` nastaveny za seed (apps→20, tracks→15), no
 - Ověřeno: anon RLS čtení, mapování (unit test), transpilace všech JSX.
 - **Nasazení: hotovo** (commit `e8306ee` v `JendaNDT/JendaWeb` na `main` → Vercel deploy). Pozn.: mountovaná kopie neumí git zápis (lock soubory) — pushovalo se z čerstvého klonu repa v sandboxu, do něj zkopírovány změněné soubory.
 
-**Fáze 4 — admin auth: POSTAVENO (15. 06. 2026, čeká na deploy `/admin` + test loginu).** `admin.html` + `admin.jsx` — login přes GoTrue (`POST /auth/v1/token?grant_type=password`, anon key, session v localStorage). Admin user `mcnegr@gmail.com` vytvořen (uid `5a7c34fb-4c84-4786-8c2e-7f5efdb0ccf6`, potvrzený). **RLS zápis zúžen na tento uid** (policies `*_admin_write`) → vyřešilo 6 advisor warningů (zbývá jen volitelná „leaked password protection"). Pozn.: veřejný signup už není kritický (zápis je vázán na uid).
+**Fáze 4 — admin auth: HOTOVO a NASAZENO (15. 06. 2026, login ověřen).** `admin.html` + `admin.jsx` — login přes GoTrue (`POST /auth/v1/token?grant_type=password`, anon key, session v localStorage). Admin user `mcnegr@gmail.com` vytvořen (uid `5a7c34fb-4c84-4786-8c2e-7f5efdb0ccf6`, potvrzený). **RLS zápis zúžen na tento uid** (policies `*_admin_write`) → vyřešilo 6 advisor warningů (zbývá jen volitelná „leaked password protection"). Pozn.: veřejný signup už není kritický (zápis je vázán na uid).
 
 **Fáze 5 — admin CRUD + upload: POSTAVENO (15. 06. 2026).** `admin.jsx` plný CRUD přes REST (admin JWT, `Prefer: return=representation`) + Storage upload (mp3→`audio`, ikony→`images`, XHR s progress barem) + změna hesla (`PUT /auth/v1/user`) + auto-refresh tokenu (`grant_type=refresh_token`). Zápis chrání RLS `*_admin_write` (jen admin uid) — ověřeno serverovým RLS testem (insert/update/delete pod admin JWT). Storage cesty: `tracks/{ts}_{name}`, `apps/{ts}_{name}`. Zatím bez editoru build-logu/comparison.
