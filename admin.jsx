@@ -448,12 +448,9 @@ function SocialForm({ initial, onClose, onSaved, notify }) {
 
 /* ---------------- CONFIG (texty & odkazy) ---------------- */
 function ConfigForm({ config, onClose, onSaved, notify }) {
-  const stats = config.public_stats || {};
   const [f, setF] = useState({
     contact_email: config.contact_email || '', contact_endpoint: config.contact_endpoint || '',
     newsletter_endpoint: config.newsletter_endpoint || '', kofi_username: config.kofi_username || '',
-    commits_month: stats.commits_month || 0, apps_built: stats.apps_built || 0,
-    tracks_released: stats.tracks_released || 0, shipped_this_year: stats.shipped_this_year || 0,
   });
   const [busy, setBusy] = useState(false);
   const set = (k, v) => setF((o) => Object.assign({}, o, { [k]: v }));
@@ -465,10 +462,6 @@ function ConfigForm({ config, onClose, onSaved, notify }) {
         sbUpdate('site_config', 'key', 'contact_endpoint', { value: f.contact_endpoint.trim() || null }),
         sbUpdate('site_config', 'key', 'newsletter_endpoint', { value: f.newsletter_endpoint.trim() || null }),
         sbUpdate('site_config', 'key', 'kofi_username', { value: f.kofi_username.trim() || null }),
-        sbUpdate('site_config', 'key', 'public_stats', { value: {
-          commits_month: Number(f.commits_month) || 0, apps_built: Number(f.apps_built) || 0,
-          tracks_released: Number(f.tracks_released) || 0, shipped_this_year: Number(f.shipped_this_year) || 0,
-        } }),
       ];
       await Promise.all(saves);
       notify('Uloženo', 'ok'); onSaved();
@@ -476,20 +469,11 @@ function ConfigForm({ config, onClose, onSaved, notify }) {
     finally { setBusy(false); }
   };
   return (
-    <Modal title="Kontakt, odkazy & statistiky" onClose={onClose}>
+    <Modal title="Kontakt a odkazy" onClose={onClose}>
       <Field label="Kontaktní e-mail"><input value={f.contact_email} onChange={(e) => set('contact_email', e.target.value)} /></Field>
       <Field label="Kontaktní formulář endpoint (Formspree, nepovinné)"><input value={f.contact_endpoint} onChange={(e) => set('contact_endpoint', e.target.value)} /></Field>
       <Field label="Newsletter endpoint (Buttondown, nepovinné)"><input value={f.newsletter_endpoint} onChange={(e) => set('newsletter_endpoint', e.target.value)} /></Field>
       <Field label="Ko-fi username (nepovinné)"><input value={f.kofi_username} onChange={(e) => set('kofi_username', e.target.value)} /></Field>
-      <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--a2)', textTransform: 'uppercase', letterSpacing: '.06em', margin: '8px 0 12px' }}>Statistiky (Deník buildu)</div>
-      <div style={{ display: 'flex', gap: 12 }}>
-        <Field label="Commitů/měsíc"><input type="number" value={f.commits_month} onChange={(e) => set('commits_month', e.target.value)} /></Field>
-        <Field label="Aplikací"><input type="number" value={f.apps_built} onChange={(e) => set('apps_built', e.target.value)} /></Field>
-      </div>
-      <div style={{ display: 'flex', gap: 12 }}>
-        <Field label="Skladeb"><input type="number" value={f.tracks_released} onChange={(e) => set('tracks_released', e.target.value)} /></Field>
-        <Field label="Projektů/rok"><input type="number" value={f.shipped_this_year} onChange={(e) => set('shipped_this_year', e.target.value)} /></Field>
-      </div>
       <FormActions busy={busy} onCancel={onClose} onSubmit={submit} />
     </Modal>
   );

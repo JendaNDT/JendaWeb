@@ -99,6 +99,11 @@ function StatsSection({ lang }) {
   const s = window.PUBLIC_STATS || {};
   const log = window.BUILD_LOG || [];
 
+  const albumsCount = (window.ALBUMS || []).length;
+  const appsCount = (window.APPS_DATA || []).length;
+  const tracksCount = (window.TRACKS_DATA || []).length;
+  const studiesCount = Object.keys(window.CASE_STUDIES || {}).length;
+
   return (
     <section style={{ padding:'90px 24px', background:'transparent' }}>
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:1100, margin:'0 auto' }}>
@@ -106,10 +111,10 @@ function StatsSection({ lang }) {
 
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', gap:14, marginBottom:42 }}>
           {[
-            { num: s.commits_month,     lbl: tx(lang,'stats_commits') },
-            { num: s.apps_built,        lbl: tx(lang,'stats_apps') },
-            { num: s.tracks_released,   lbl: tx(lang,'stats_tracks') },
-            { num: s.shipped_this_year, lbl: tx(lang,'stats_shipped') },
+            { num: albumsCount,  lbl: tx(lang,'stats_albums') },
+            { num: appsCount,    lbl: tx(lang,'stats_apps') },
+            { num: tracksCount,  lbl: tx(lang,'stats_tracks') },
+            { num: studiesCount, lbl: tx(lang,'stats_studies') },
           ].map((m, i) => {
             const [r, v] = useCountUp(m.num || 0);
             return (
