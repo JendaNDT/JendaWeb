@@ -176,6 +176,7 @@ function App() {
 
   return (
     <div style={{ minHeight:'100vh', paddingBottom: playerTrack ? 130 : 0, position:'relative' }}>
+      <BackgroundFX />
       <Nav lang={lang} setLang={setLang} mode={tw.mode || 'auto'} setMode={(v) => setTweak('mode', v)} />
       <Hero lang={lang} />
       <AppsSection lang={lang} />

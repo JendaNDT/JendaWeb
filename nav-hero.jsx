@@ -2,12 +2,13 @@
 // Depends on shared.jsx (window globals).
 const { useState: __useState_nh, useEffect: __useEffect_nh, useRef: __useRef_nh } = React;
 
-// HeroCanvas — generativní "souhvězdí" částic za nadpisem.
-// Samo jemně plyne; když hraje hudba, reaguje na ni přes sdílený analyser
-// (window.__jwAnalyser z přehrávače): basy nafouknou/rozzáří částice,
-// výšky přidají rychlost a propojení. Respektuje prefers-reduced-motion,
-// pauzuje mimo obrazovku i na skryté kartě, ladí barvy dle motivu webu.
-function HeroCanvas() {
+// BackgroundFX — generativní "souhvězdí" částic přes CELOU stránku (fixní vrstva
+// nad mesh-bg, pod obsahem). Samo jemně plyne; když hraje hudba, reaguje na ni
+// přes sdílený analyser (window.__jwAnalyser z přehrávače): basy nafouknou/rozzáří
+// částice a „nadechnou" celé pole, výšky přidají rychlost a propojení, nárazy
+// vyšlou prstenec. Respektuje prefers-reduced-motion, pauzuje mimo obrazovku
+// i na skryté kartě, ladí barvy dle motivu webu.
+function BackgroundFX() {
   const ref = __useRef_nh(null);
   __useEffect_nh(() => {
     const canvas = ref.current; if (!canvas) return;
@@ -38,8 +39,8 @@ function HeroCanvas() {
       } catch (e) {}
     }
     function mk() {
-      return { x:Math.random()*W, y:Math.random()*H, r:1+Math.random()*2.4,
-        vx:(Math.random()-0.5)*0.18, vy:-(0.06+Math.random()*0.22),
+      return { x:Math.random()*W, y:Math.random()*H, r:0.6+Math.random()*1.5,
+        vx:(Math.random()-0.5)*0.16, vy:-(0.05+Math.random()*0.2),
         ph:Math.random()*Math.PI*2, warm:Math.random(),
         bin: 2 + Math.floor(Math.random()*86),   // „svoje" frekvenční pásmo
         react: 0.7 + Math.random()*0.7,           // jak silně reaguje
@@ -50,8 +51,12 @@ function HeroCanvas() {
       canvas.width = Math.max(1, Math.floor(W*dpr));
       canvas.height = Math.max(1, Math.floor(H*dpr));
       ctx.setTransform(dpr,0,0,dpr,0,0);
-      const target = Math.round(Math.min(86, Math.max(34, W/16)));
-      if (particles.length !== target) { particles = []; for (let i=0;i<target;i++) particles.push(mk()); }
+      // hustota dle plochy viewportu (canvas je fixní = velikost okna)
+      const target = Math.round(Math.min(120, Math.max(45, (W*H)/16000)));
+      if (particles.length !== target) {
+        if (target < particles.length) particles.length = target;
+        else while (particles.length < target) particles.push(mk());
+      }
     }
     function audioLevels() {
       const an = window.__jwAnalyser; if (!an) return null;
@@ -100,10 +105,10 @@ function HeroCanvas() {
       const idle = playing ? 0 : 0.10*(0.5 + 0.5*Math.sin(t*0.6)); // jemné dýchání v klidu
       const drive = Math.max(env.bass, idle);
       const lvl   = Math.max(env.level, idle);
-      const cx = W/2, cy = H*0.42;
-      const bloom = drive*0.14;                       // basy „nadechnou" celé souhvězdí
+      const cx = W/2, cy = H*0.5;
+      const bloom = drive*0.13;                       // basy „nadechnou" celé pole
       const speedM = 1 + env.surge*2.6 + treble*1.1;  // beat zrychlí pohyb
-      const linkDist = (playing ? 132 : 108) + lvl*70;
+      const linkDist = (playing ? 116 : 96) + lvl*64;
 
       ctx.globalCompositeOperation = col.dark ? 'lighter' : 'source-over';
 
@@ -125,9 +130,9 @@ function HeroCanvas() {
         const be = binEnv[p.bin] * p.react;          // 0..~1 dle spektra
         const dx = p.x + (p.x-cx)*bloom, dy = p.y + (p.y-cy)*bloom;
         p._x = dx; p._y = dy;
-        const rr = Math.max(0.4, p.r*(1 + drive*0.7 + be*2.6 + env.flash*0.7) + Math.sin(p.ph)*0.4);
+        const rr = Math.max(0.3, p.r*(1 + drive*0.6 + be*2.1 + env.flash*0.6) + Math.sin(p.ph)*0.3);
         const c = p.warm < 0.5 ? col.a1 : col.a2;
-        const al = Math.min(0.95, (col.dark ? 0.14 : 0.20) + be*0.6 + env.flash*0.22);
+        const al = Math.min(0.9, (col.dark ? 0.13 : 0.18) + be*0.6 + env.flash*0.22);
         ctx.beginPath();
         ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${al})`;
         ctx.arc(dx, dy, rr, 0, Math.PI*2); ctx.fill();
@@ -175,7 +180,7 @@ function HeroCanvas() {
     };
   }, []);
   return <canvas ref={ref} aria-hidden="true" style={{
-    position:'absolute', inset:0, width:'100%', height:'100%', zIndex:0, pointerEvents:'none',
+    position:'fixed', inset:0, width:'100%', height:'100%', zIndex:-1, pointerEvents:'none',
   }} />;
 }
 
@@ -278,7 +283,6 @@ function Hero({ lang }) {
       textAlign:'center', padding:'90px 24px 80px',
       position:'relative', overflow:'hidden',
     }}>
-      <HeroCanvas />
       <div style={{ position:'relative', zIndex:1, maxWidth:820 }}>
         <div style={{
           display:'inline-flex', alignItems:'center', gap:8,
@@ -349,4 +353,4 @@ function Hero({ lang }) {
   );
 }
 
-Object.assign(window, { Nav, Hero });
+Object.assign(window, { Nav, Hero, BackgroundFX });
