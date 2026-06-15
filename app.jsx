@@ -175,10 +175,10 @@ function App() {
   }, []);
 
   return (
-    <div style={{ minHeight:'100vh', paddingBottom: playerTrack ? 130 : 0, position:'relative' }}>
+    <div style={{ minHeight:'100vh', paddingBottom: playerTrack ? 130 : 0, position:'relative', animation:'jwFade 0.25s ease' }}>
       <BackgroundFX />
       <Nav lang={lang} setLang={setLang} mode={tw.mode || 'auto'} setMode={(v) => setTweak('mode', v)} />
-      <Hero lang={lang} />
+      <Hero lang={lang} onPlay={handlePlay} />
       <MusicSection lang={lang} onPlay={handlePlay} currentTrack={playerTrack} playing={playing} />
       <MostPlayedSection lang={lang} onPlay={handlePlay} currentTrack={playerTrack} playing={playing} />
       <AppsSection lang={lang} />
@@ -215,6 +215,9 @@ function App() {
           animation:'overlayPop 0.2s ease',
         }}>{toast}</div>
       )}
+
+      <button className="kbd-hint" aria-label="Klávesové zkratky" title="Klávesové zkratky (?)"
+        style={{ bottom: playerTrack ? 145 : 24 }} onClick={() => setShowShortcuts(true)}>?</button>
 
       {showShortcuts && <ShortcutsOverlay lang={lang} onClose={() => setShowShortcuts(false)} />}
       {showSearch    && <SearchOverlay    lang={lang} onClose={() => setShowSearch(false)} onPlay={handlePlay} />}

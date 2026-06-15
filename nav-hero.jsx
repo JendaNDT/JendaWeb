@@ -281,7 +281,13 @@ function Nav({ lang, setLang, mode, setMode }) {
   );
 }
 
-function Hero({ lang }) {
+function Hero({ lang, onPlay }) {
+  const playFeatured = () => {
+    const tracks = window.TRACKS_DATA || [];
+    if (tracks.length && onPlay) onPlay(tracks[0], tracks);
+    const el = document.getElementById('music');
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 64, behavior: 'smooth' });
+  };
   return (
     <section id="hero" style={{
       minHeight:'100vh', display:'flex', flexDirection:'column',
@@ -323,7 +329,7 @@ function Hero({ lang }) {
         </p>
 
         <div style={{ display:'flex', gap:14, justifyContent:'center', flexWrap:'wrap' }}>
-          <Btn href="#music" primary>{tx(lang, 'cta_music')}</Btn>
+          <Btn primary onClick={playFeatured}>{tx(lang, 'cta_music')}</Btn>
           <Btn href="#apps" outline>{tx(lang, 'cta_apps')}</Btn>
         </div>
 

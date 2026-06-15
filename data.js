@@ -178,7 +178,7 @@ window.STRINGS = {
   cs: {
     nav_apps:'Aplikace', nav_music:'Hudba', nav_contact:'Kontakt',
     hero_tag:'Vibe coder & AI hudebník',
-    hero_desc:'Tvořím mobilní aplikace a experimentální elektronickou hudbu pomocí AI.',
+    hero_desc:'Tvořím experimentální elektronickou hudbu pomocí AI — a k tomu vlastní appky.',
     cta_apps:'Prozkoumat aplikace', cta_music:'Poslechnout hudbu',
     stat_apps:'aplikací', stat_tracks:'skladeb', stat_albums:'alb',
     apps_title:'Aplikace', apps_all:'Vše',
@@ -256,7 +256,7 @@ window.STRINGS = {
   en: {
     nav_apps:'Apps', nav_music:'Music', nav_contact:'Contact',
     hero_tag:'Vibe coder & AI musician',
-    hero_desc:'I build mobile apps and experimental electronic music with AI.',
+    hero_desc:'I make experimental electronic music with AI — and build my own apps too.',
     cta_apps:'Explore Apps', cta_music:'Listen to Music',
     stat_apps:'apps', stat_tracks:'tracks', stat_albums:'albums',
     apps_title:'Apps', apps_all:'All',

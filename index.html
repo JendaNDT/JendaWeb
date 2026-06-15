@@ -279,6 +279,19 @@
     }
 
     /* Drifting Mesh — site-wide ambient background */
+    @keyframes jwFade { from { opacity: 0; } to { opacity: 1; } }
+    .kbd-hint {
+      position: fixed; left: 20px; z-index: 200;
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--bg) 85%, transparent);
+      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+      color: var(--muted); display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 600; line-height: 1;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .kbd-hint:hover { color: var(--text); border-color: var(--a1); }
+    @media (max-width: 768px) { .kbd-hint { display: none !important; } }
     .mesh-bg {
       position: fixed; inset: 0; z-index: -1; pointer-events: none;
       overflow: hidden;

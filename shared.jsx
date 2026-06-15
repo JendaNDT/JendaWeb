@@ -245,8 +245,8 @@ function useCountUp(target, duration = 1400) {
   const elRef = useRef(null);
   useEffect(() => {
     const el = elRef.current; if (!el) return;
-    const obs = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting || startedRef.current) return;
+    const startAnim = () => {
+      if (startedRef.current) return;
       startedRef.current = true;
       const start = performance.now();
       const tick = (now) => {
@@ -256,8 +256,14 @@ function useCountUp(target, duration = 1400) {
         if (t < 1) requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
+    };
+    const r = el.getBoundingClientRect();
+    if (r.top < (window.innerHeight || 0) && r.bottom > 0) { startAnim(); return; }
+    const obs = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      startAnim();
       obs.disconnect();
-    }, { threshold: 0.4 });
+    }, { threshold: 0.15 });
     obs.observe(el);
     return () => obs.disconnect();
   }, [target, duration]);
