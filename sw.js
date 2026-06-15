@@ -1,9 +1,10 @@
 // sw.js — Service worker for offline-first PWA
-const VERSION = 'jw-v29';
+const VERSION = 'jw-v30';
 const SHELL = [
   '/',
   '/index.html',
   '/data.js',
+  '/supabase-data.js',
   '/shared.jsx',
   '/nav-hero.jsx',
   '/apps-music.jsx',

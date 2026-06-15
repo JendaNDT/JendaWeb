@@ -232,4 +232,18 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+// Root wrapper — když supabase-data.js načte čerstvý obsah ze sítě, přerenderuje
+// celý strom (změna `key`), takže komponenty znovu přečtou aktualizované window globály.
+function Root() {
+  const [v, setV] = __useS_app(() => window.__jwContentVersion || 0);
+  __useE_app(() => {
+    const onUpd = () => setV(window.__jwContentVersion || 0);
+    window.addEventListener('jw-data-updated', onUpd);
+    // Pojistka: data mohla dorazit mezi prvním renderem a připojením listeneru.
+    if ((window.__jwContentVersion || 0) !== v) setV(window.__jwContentVersion || 0);
+    return () => window.removeEventListener('jw-data-updated', onUpd);
+  }, []);
+  return <App key={v} />;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Root />);
