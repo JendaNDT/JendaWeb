@@ -336,9 +336,9 @@ function Hero({ lang, onPlay }) {
 
         <div style={{ display:'flex', gap:56, justifyContent:'center', marginTop:80, flexWrap:'wrap' }}>
           {[
-            { num:20,  suffix:'+', lbl: tx(lang,'stat_apps'),   href:'#apps' },
-            { num:200, suffix:'+', lbl: tx(lang,'stat_tracks'), href:'#music' },
-            { num:5,   suffix:'',  lbl: tx(lang,'stat_albums'), href:'#music' },
+            { num:(window.APPS_DATA||[]).length,   suffix:'', lbl: tx(lang,'stat_apps'),   href:'#apps' },
+            { num:(window.TRACKS_DATA||[]).length, suffix:'', lbl: tx(lang,'stat_tracks'), href:'#music' },
+            { num:(window.ALBUMS||[]).length,      suffix:'', lbl: tx(lang,'stat_albums'), href:'#music' },
           ].map(({ num, suffix, lbl, href }) => {
             const [r, v] = useCountUp(num);
             return (
