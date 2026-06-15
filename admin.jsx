@@ -1002,8 +1002,26 @@ function OverviewTab({ data, goTab }) {
   );
 }
 
+/* ---------------- analytics (GoatCounter) ---------------- */
+const GOATCOUNTER = 'https://jendaweb.goatcounter.com';
+function AnalyticsTab() {
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+        <div style={{ fontSize: 13, color: 'var(--muted)' }}>Živá návštěvnost z GoatCounter — soukromí-friendly, bez cookies. Data se sbírají od nasazení měření.</div>
+        <a className="btn btn-ghost btn-sm" href={GOATCOUNTER} target="_blank" rel="noopener">Otevřít plný dashboard ↗</a>
+      </div>
+      <iframe src={GOATCOUNTER + '?hideui=1'} title="Návštěvnost"
+        style={{ width: '100%', height: 1500, border: '1px solid var(--border)', borderRadius: 'var(--r-md)', background: '#fff' }} />
+      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 8 }}>
+        Když je rámeček prázdný / přihlašovací: v GoatCounter → Settings nastav „Dashboard viewable by" na public a do „Sites that can embed GoatCounter" přidej doménu webu.
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- admin shell ---------------- */
-const TABS = [['overview', 'Přehled'], ['tracks', 'Skladby'], ['albums', 'Alba'], ['apps', 'Aplikace'], ['texts', 'Texty & odkazy']];
+const TABS = [['overview', 'Přehled'], ['tracks', 'Skladby'], ['albums', 'Alba'], ['apps', 'Aplikace'], ['texts', 'Texty & odkazy'], ['analytics', 'Návštěvnost']];
 
 function AdminApp({ session, onLogout }) {
   const [tab, setTab] = useState('overview');
@@ -1060,6 +1078,7 @@ function AdminApp({ session, onLogout }) {
       {data && tab === 'albums' && <AlbumsTab data={data} reload={load} notify={notify} />}
       {data && tab === 'apps' && <AppsTab data={data} reload={load} notify={notify} />}
       {data && tab === 'texts' && <TextsTab data={data} reload={load} notify={notify} />}
+      {tab === 'analytics' && <AnalyticsTab />}
 
       {pw && <PasswordModal notify={notify} onClose={() => setPw(false)} />}
       {toast && <div className={'toast ' + toast.type}>{toast.msg}</div>}
