@@ -6,6 +6,15 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
   const audioCtxRef = __useR_pc(null);
   const analyserRef = __useR_pc(null);
   const sourceRef = __useR_pc(null);
+  // Mobil/iOS: přehrávej přímo z <audio> (ne přes Web Audio), ať hudba běží i při
+  // zhasnuté obrazovce. iOS uspí AudioContext při zamčení → jinak by se zvuk zastavil.
+  const isMobile = __useM_pc(() => {
+    try {
+      const ua = navigator.userAgent || '';
+      const iOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      return iOS || /Android/.test(ua) || (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches);
+    } catch { return false; }
+  }, []);
   const [fft, setFft] = __useS_pc(null);
   const [currentTime, setCurrentTime] = __useS_pc(initialPosition || 0);
   const [duration, setDuration] = __useS_pc(0);
@@ -48,7 +57,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
 
   // Web Audio FFT setup (lazy — only on first play; MediaElementSource can only be created once)
   const setupAudioContext = () => {
-    if (audioCtxRef.current || !audioRef.current) return;
+    if (audioCtxRef.current || !audioRef.current || isMobile) return;
     try {
       const Ctor = window.AudioContext || window.webkitAudioContext;
       if (!Ctor) return;
@@ -68,7 +77,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
 
   // FFT animation loop while playing
   __useE_pc(() => {
-    if (!isPlaying) { setFft(null); return; }
+    if (!isPlaying || isMobile) { setFft(null); return; }
     setupAudioContext();
     if (audioCtxRef.current?.state === 'suspended') {
       audioCtxRef.current.resume().catch(() => {});
@@ -112,11 +121,19 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
     const a = audioRef.current; if (!a) return;
     if (isPlaying && track?.audioUrl) a.play().catch(() => setIsPlaying(false));
     else a.pause();
+    if ('mediaSession' in navigator) {
+      try { navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused'; } catch {}
+    }
   }, [isPlaying, track?.audioUrl, setIsPlaying]);
 
   __useE_pc(() => {
     const a = audioRef.current; if (!a) return;
-    const onTime  = () => setCurrentTime(a.currentTime);
+    const onTime  = () => {
+      setCurrentTime(a.currentTime);
+      if ('mediaSession' in navigator && a.duration && isFinite(a.duration)) {
+        try { navigator.mediaSession.setPositionState({ duration: a.duration, position: Math.min(a.currentTime, a.duration), playbackRate: a.playbackRate || 1 }); } catch {}
+      }
+    };
     const onMeta  = () => {
       setDuration(a.duration || 0);
       if (!restoredRef.current && initialPosition && a.duration > initialPosition) {
@@ -219,15 +236,23 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
   __useE_pc(() => {
     if (!('mediaSession' in navigator) || !track) return;
     try {
+      const artUrl = album && album.cover_url ? album.cover_url : '';
       navigator.mediaSession.metadata = new window.MediaMetadata({
         title: track.title,
         artist: 'Jenda',
         album: album?.title || '',
+        artwork: artUrl ? [{ src: artUrl, sizes: '512x512' }] : [],
       });
       navigator.mediaSession.setActionHandler('play',          () => setIsPlaying(true));
       navigator.mediaSession.setActionHandler('pause',         () => setIsPlaying(false));
       navigator.mediaSession.setActionHandler('previoustrack', () => onPrev());
       navigator.mediaSession.setActionHandler('nexttrack',     () => onNext());
+      try {
+        navigator.mediaSession.setActionHandler('seekto', (d) => {
+          const a = audioRef.current; if (!a) return;
+          if (d.seekTime != null) { try { a.currentTime = d.seekTime; } catch {} }
+        });
+      } catch {}
     } catch {}
   }, [track?.id, album?.id, setIsPlaying, onPrev, onNext]);
 
