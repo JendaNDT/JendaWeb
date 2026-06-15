@@ -54,7 +54,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - Vlastní doména + absolutní OG meta tagy (návštěvnost už řeší GoatCounter — hotovo)
 
 ### Backlog (později)
-- Rozhodnout o staré záloze `handoff/` (zastaralá 4souborová verze) — nechat / smazat (vše je už na GitHubu s historií)
+- Stará záloha `handoff/` (zastaralá 4souborová verze) — **ponecháno** (rozhodnutí 15. 06. 2026, Jenda). Není to aktuální dokumentace, jen zmrazený archiv; k práci ignorovat.
 - Pozn.: audio ze Suno CDN → offline nepojede, dokud ho nepřidáme do cache
 - Záměrně neuděláno (vyžaduje reálné audio): crossfade, pre-cache další skladby, přepínač kvality, smart-skip
 
