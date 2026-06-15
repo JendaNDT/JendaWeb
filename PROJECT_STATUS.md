@@ -7,8 +7,11 @@ Osobní portfolio web „Jenda — vibe-coder & AI hudebník". Prezentuje appky 
 Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohlížeči), čisté CSS + inline styly. **Žádný build, žádné npm.** Plně offline-capable (knihovny i fonty hostované lokálně). Instalovatelná PWA, dvojjazyčné CZ/EN, dark/light + 3 barevné motivy.
 
 ## ⏭️ Příští krok
-**Dokončit fázi 4** — `/admin` přihlašovací stránka je hotová a admin účet vytvořený; zbývá **nasadit `/admin`** (push → Vercel) a vyzkoušet login. Pak **fáze 5** (formuláře + upload mp3/obrázků do Storage).
-**Backend (1–2) + čtení na webu (3) NASAZENÉ; admin login (4) postavený** — detaily v **`SUPABASE_BACKEND.md`**, celý plán v `UPLOAD_INTERFACE_PLAN.md`.
+**Fáze 5 hotová — nasazuje se a testuje.** Admin umí CRUD skladeb / alb / aplikací / sociálních sítí + konfig, nahrávání mp3 a ikon do Storage (progress bar) a změnu hesla. Po nasazení vyzkoušet živě (typicky: přidat skladbu s mp3, ověřit že hraje na webu).
+**Fáze 1–5 hotové** — backend, web čte z DB, `/admin` login + správa obsahu. Detaily v **`SUPABASE_BACKEND.md`**, celý plán v `UPLOAD_INTERFACE_PLAN.md`.
+
+**Budoucí vylepšení (nepovinné):** editor build-logu a srovnání aplikací přímo v adminu; mazání starých souborů ze Storage při přepsání; doplnit reálné odkazy/doménu/analytics (z původního TODO).
+**Bezpečnost:** zrušit použitý GitHub token; admin heslo změnit přímo v adminu (tlačítko „Změnit heslo"). Složka `Token/` je už v `.gitignore`.
 
 ## ✅ Hotovo
 - **Nasazeno živě na Vercel** (`jenda-web.vercel.app`) přes GitHub auto-deploy — push do `main` = automatický deploy
@@ -23,7 +26,8 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - **Drobné opravy (14. 06. 2026):** 3 překlepy v CZ textech, gramatika „5 alb", odstraněn brandový vodoznak „J" z levého dolního rohu
 - **Vyladěné pozadí (14. 06. 2026):** mesh přes celou stránku (průhledné sekce), warm-balanced barvy (méně tyrkysové), konstantní opacity (v čase nesvětlá), noise dither proti bandingu, hero bez švu
 - **Supabase backend — fáze 1–2 (15. 06. 2026):** projekt `jendaweb` (ref `semdgbaearwhkhulkyts`), tabulky albums/apps/tracks/socials/site_config/site_strings + RLS (veřejné čtení, zápis jen přihlášený), storage buckety `audio`+`images`, naplněno obsahem z `data.js` (20 aplikací, 5 alb, 15 skladeb vč. 3 textů, 5 sítí, 9 konfig klíčů). Detaily v `SUPABASE_BACKEND.md`.
-- **Admin přihlášení — fáze 4 (15. 06. 2026, postaveno, čeká na deploy):** `admin.html` + `admin.jsx` — login přes Supabase Auth (plain-fetch GoTrue), session v localStorage, dashboard placeholder. Admin účet vytvořen (`mcnegr@gmail.com`). RLS zápis **zamčen na admin uid** → 6 „always true" warningů pryč.
+- **Admin správa obsahu — fáze 5 (15. 06. 2026):** `admin.jsx` rozšířen na plný CRUD (skladby / alba / aplikace / sociální sítě / konfig) přes Supabase REST s admin JWT, **nahrávání mp3** (bucket `audio`) a **ikon** (bucket `images`) do Storage s progress barem, **změna hesla** (GoTrue). Auto-refresh tokenu. Ověřeno: transpilace + serverový RLS test zápisu pod admin JWT (insert/update/delete prošly). SW `jw-v31`, admin online-only. Záměrně zatím bez editoru build-logu/comparison.
+- **Admin přihlášení — fáze 4 (15. 06. 2026, NASAZENO + login ověřen, commit `adffca2`):** `admin.html` + `admin.jsx` — login přes Supabase Auth (plain-fetch GoTrue), session v localStorage, dashboard placeholder. `/admin` přes `vercel.json` rewrite. Admin účet `mcnegr@gmail.com` (uid `5a7c34fb-…`). RLS zápis **zamčen na admin uid** → 6 „always true" warningů pryč. Pozn.: SQL-vytvořený auth user měl token sloupce NULL → GoTrue login 500 „Database error querying schema"; opraveno přepsáním na `''`.
 - **Web čte ze Supabase — fáze 3 (15. 06. 2026, NASAZENO, commit `e8306ee`):** nová vrstva `supabase-data.js` stáhne obsah z DB přes REST a přepíše `window.*` globály (cache-first přes localStorage + revalidace, offline/chyba → fallback na `data.js`). Komponenty beze změny. SW bumpnut na `jw-v30`. Ověřeno: anon RLS čtení, mapování DB→tvar webu (unit test), transpilace všech JSX. Pozn.: obsah v DB se teď rovná placeholderu, takže web vypadá identicky — jde o plumbing pro pozdější admin.
 
 ## 🔄 Rozjeté (nedodělané)
@@ -75,7 +79,8 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - `index.html` – HTML shell, CSS tokeny, pořadí skriptů, mesh pozadí
 - `data.js` – veškerý obsah (appky, alba, skladby, texty, konfig) — teď slouží jako offline/fallback seed
 - `supabase-data.js` – fáze 3: stáhne obsah ze Supabase → přepíše `window.*` globály + localStorage cache
-- `admin.html` · `admin.jsx` – fáze 4: přihlašovací stránka `/admin` (Supabase Auth)
+- `admin.html` · `admin.jsx` – admin: přihlášení + CRUD obsahu + upload mp3/obrázků (fáze 4–5)
+- `vercel.json` – rewrite `/admin` → `/admin.html`
 - `app.jsx` – root App, stav jazyk/mode, hash routing, zkratky
 - `shared.jsx` – motivy, hooky, ikony, base komponenty, artwork
 - `nav-hero.jsx` · `apps-music.jsx` · `player-contact.jsx` · `player-expand.jsx` · `search.jsx` · `queue.jsx` · `extras.jsx` – sekce/komponenty

@@ -3,3 +3,7 @@
 *.log
 node_modules/
 .vercel
+
+# Lokální tajná data — NIKDY do gitu (GitHub token apod.)
+Token/
+/Token/

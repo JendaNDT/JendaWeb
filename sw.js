@@ -1,5 +1,5 @@
 // sw.js — Service worker for offline-first PWA
-const VERSION = 'jw-v30';
+const VERSION = 'jw-v31';
 const SHELL = [
   '/',
   '/index.html',
@@ -56,6 +56,11 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  // Admin je online-only — nikdy neservíruj starou verzi z cache (vždy ze sítě)
+  if (url.origin === location.origin && (url.pathname === '/admin' || url.pathname.startsWith('/admin.'))) {
+    e.respondWith(fetch(req).catch(() => caches.match(req)));
+    return;
+  }
   // network-first for HTML to pick up new content; cache-first for assets
   const isHTML = req.mode === 'navigate' || (req.headers.get('Accept') || '').includes('text/html');
   if (isHTML) {
