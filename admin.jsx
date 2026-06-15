@@ -102,6 +102,84 @@ function uploadFile(bucket, folder, file, onProgress) {
   });
 }
 
+/* ---------------- helpers: audio preview, web links, drag reorder ---------------- */
+const SITE = location.origin;
+function fmtDur(sec) {
+  if (!sec || !isFinite(sec)) return '';
+  const m = Math.floor(sec / 60), s = Math.round(sec % 60);
+  return m + ':' + String(s).padStart(2, '0');
+}
+function readAudioDuration(file) {
+  return new Promise((resolve) => {
+    try {
+      const url = URL.createObjectURL(file);
+      const a = document.createElement('audio');
+      a.preload = 'metadata';
+      a.onloadedmetadata = () => { const d = a.duration; URL.revokeObjectURL(url); resolve(fmtDur(d)); };
+      a.onerror = () => { URL.revokeObjectURL(url); resolve(''); };
+      a.src = url;
+    } catch (e) { resolve(''); }
+  });
+}
+let CURRENT_AUDIO = null;
+function PlayBtn({ url }) {
+  const [playing, setPlaying] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => () => { if (ref.current) { ref.current.pause(); if (CURRENT_AUDIO === ref.current) CURRENT_AUDIO = null; } }, []);
+  const toggle = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!ref.current) {
+      ref.current = new Audio(url);
+      ref.current.onended = () => setPlaying(false);
+      ref.current.onpause = () => setPlaying(false);
+      ref.current.onplay = () => setPlaying(true);
+    }
+    if (!ref.current.paused) { ref.current.pause(); return; }
+    if (CURRENT_AUDIO && CURRENT_AUDIO !== ref.current) { try { CURRENT_AUDIO.pause(); } catch (e) {} }
+    CURRENT_AUDIO = ref.current;
+    ref.current.play().catch(() => {});
+  };
+  return <button className={'iconbtn' + (playing ? ' playing' : '')} onClick={toggle} title="Přehrát / pauza">{playing ? '⏸' : '▶'}</button>;
+}
+function WebLink({ url }) {
+  if (!url) return null;
+  return <a className="iconbtn" href={url} target="_blank" rel="noopener" title="Otevřít na webu" onClick={(e) => e.stopPropagation()}>↗</a>;
+}
+async function persistOrder(table, items, notify) {
+  try {
+    await Promise.all(items.map((it, i) => sbUpdate(table, 'id', it.id, { sort: i })));
+    if (notify) notify('Pořadí uloženo', 'ok');
+  } catch (e) { if (notify) notify(e.message || 'Pořadí se nepodařilo uložit', 'err'); }
+}
+function DragList({ items, getKey, renderRow, onReorder }) {
+  const [order, setOrder] = useState(items);
+  useEffect(() => { setOrder(items); }, [items]);
+  const from = useRef(null);
+  const [over, setOver] = useState(null);
+  const commit = () => {
+    const f = from.current, t = over;
+    from.current = null; setOver(null);
+    if (f == null || t == null || f === t) return;
+    const next = order.slice();
+    const [m] = next.splice(f, 1);
+    next.splice(t, 0, m);
+    setOrder(next);
+    onReorder(next);
+  };
+  return (
+    <div className="list">
+      {order.map((it, i) => renderRow(it, i, {
+        draggable: true,
+        onDragStart: () => { from.current = i; },
+        onDragOver: (e) => { e.preventDefault(); if (over !== i) setOver(i); },
+        onDragEnd: commit,
+        onDrop: (e) => { e.preventDefault(); commit(); },
+        highlight: over === i,
+      }))}
+    </div>
+  );
+}
+
 /* ---------------- shared UI ---------------- */
 const wrap = { width: '100%', maxWidth: 720, margin: '0 auto', padding: '0 18px' };
 
@@ -163,6 +241,7 @@ function TrackForm({ initial, albums, onClose, onSaved, notify }) {
   const [busy, setBusy] = useState(false);
   const [prog, setProg] = useState(-1);
   const set = (k, v) => setF((o) => Object.assign({}, o, { [k]: v }));
+  const onPickAudio = (fl) => { setFile(fl); readAudioDuration(fl).then((d) => { if (d) set('duration', d); }); };
 
   const submit = async () => {
     if (!f.title.trim()) { notify('Zadej název skladby', 'err'); return; }
@@ -198,7 +277,8 @@ function TrackForm({ initial, albums, onClose, onSaved, notify }) {
       </Field>
       <Field label="Délka (např. 4:12)"><input value={f.duration} onChange={(e) => set('duration', e.target.value)} placeholder="4:12" /></Field>
       <Field label={'Audio (mp3)' + (f.audio_url ? ' — nahráno ✓' : '')}>
-        <FileDrop accept="audio/*" file={file} onFile={setFile} label="Přetáhni mp3, nebo klikni" />
+        <FileDrop accept="audio/*" file={file} onFile={onPickAudio} label="Přetáhni mp3, nebo klikni (délka se vyplní sama)" />
+        {f.audio_url && !file && <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}><PlayBtn url={f.audio_url} /><span style={{ fontSize: 12, color: 'var(--muted)' }}>přehrát nahrané audio</span></div>}
       </Field>
       <Field label="Text CZ (nepovinné)"><textarea value={f.lyrics_cs} onChange={(e) => set('lyrics_cs', e.target.value)} /></Field>
       <Field label="Text EN (nepovinné)"><textarea value={f.lyrics_en} onChange={(e) => set('lyrics_en', e.target.value)} /></Field>
@@ -267,6 +347,8 @@ function AppForm({ initial, onClose, onSaved, notify }) {
   const [busy, setBusy] = useState(false);
   const [prog, setProg] = useState(-1);
   const set = (k, v) => setF((o) => Object.assign({}, o, { [k]: v }));
+  const [preview, setPreview] = useState(initial && initial.icon_url ? initial.icon_url : '');
+  const onPickIcon = (fl) => { setFile(fl); try { setPreview(URL.createObjectURL(fl)); } catch (e) {} };
 
   const submit = async () => {
     if (!f.name.trim()) { notify('Zadej název aplikace', 'err'); return; }
@@ -302,7 +384,10 @@ function AppForm({ initial, onClose, onSaved, notify }) {
       <Field label="Odkaz (URL aplikace)"><input value={f.link} onChange={(e) => set('link', e.target.value)} placeholder="https://…" /></Field>
       <Field label="Odkaz na case study (nepovinné)"><input value={f.case_study_url} onChange={(e) => set('case_study_url', e.target.value)} placeholder="case-studies/…html" /></Field>
       <Field label={'Ikona (obrázek)' + (f.icon_url ? ' — nahráno ✓' : '')}>
-        <FileDrop accept="image/*" file={file} onFile={setFile} label="Přetáhni obrázek, nebo klikni" />
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          {preview && <img className="thumb" src={preview} alt="" />}
+          <div style={{ flex: 1 }}><FileDrop accept="image/*" file={file} onFile={onPickIcon} label="Přetáhni obrázek, nebo klikni" /></div>
+        </div>
       </Field>
       <Field label="Pořadí"><input type="number" value={f.sort} onChange={(e) => set('sort', e.target.value)} /></Field>
       <FormActions busy={busy} progress={prog} onCancel={onClose} onSubmit={submit} />
@@ -409,26 +494,34 @@ function PasswordModal({ onClose, notify }) {
 }
 
 /* ---------------- list row ---------------- */
-function ItemRow({ title, sub, swatch, onEdit, onDelete }) {
+function ItemRow({ title, sub, swatch, leading, badge, webUrl, onEdit, onDelete, drag }) {
+  const d = drag || {};
   return (
-    <div className="item">
+    <div className={'item' + (d.highlight ? ' dragover' : '')}
+      draggable={d.draggable || undefined}
+      onDragStart={d.onDragStart} onDragOver={d.onDragOver} onDragEnd={d.onDragEnd} onDrop={d.onDrop}>
+      {drag && <span className="grip" title="Přetáhni pro změnu pořadí">⠿</span>}
+      {leading}
       {swatch && <div className="swatch" style={{ background: swatch }} />}
       <div className="grow">
         <div className="t">{title}</div>
         {sub && <div className="s">{sub}</div>}
       </div>
+      {badge}
+      <WebLink url={webUrl} />
       <button className="btn btn-ghost btn-sm" onClick={onEdit}>Upravit</button>
       <button className="btn btn-danger btn-sm" onClick={onDelete}>Smazat</button>
     </div>
   );
 }
 function AddBtn({ onClick, label }) {
-  return <button className="btn btn-primary" style={{ marginBottom: 14 }} onClick={onClick}>+ {label}</button>;
+  return <button className="btn btn-primary" onClick={onClick}>+ {label}</button>;
 }
 
 /* ---------------- tabs ---------------- */
 function TracksTab({ data, reload, notify }) {
   const [edit, setEdit] = useState(undefined); // undefined=closed, null=new, obj=edit
+  const [onlyNoAudio, setOnlyNoAudio] = useState(false);
   const albums = data.albums;
   const albMap = {}; albums.forEach((a) => { albMap[a.id] = a.title; });
   const del = async (t) => {
@@ -436,17 +529,30 @@ function TracksTab({ data, reload, notify }) {
     try { await sbDelete('tracks', 'id', t.id); notify('Smazáno', 'ok'); reload(); }
     catch (e) { notify(e.message || 'Chyba', 'err'); }
   };
+  const noAudioCount = data.tracks.filter((t) => !t.audio_url).length;
+  const tracks = onlyNoAudio ? data.tracks.filter((t) => !t.audio_url) : data.tracks;
+  const row = (t, i, drag) => (
+    <ItemRow key={t.id} drag={onlyNoAudio ? null : drag}
+      leading={t.audio_url ? <PlayBtn url={t.audio_url} /> : null}
+      title={t.title}
+      sub={(albMap[t.album_id] || '—') + (t.duration ? ' · ' + t.duration : '')}
+      badge={!t.audio_url ? <span className="badge warn">bez audia</span> : null}
+      webUrl={SITE + '/#track=' + t.id}
+      onEdit={() => setEdit(t)} onDelete={() => del(t)} />
+  );
   return (
     <div>
-      <AddBtn onClick={() => setEdit(null)} label="Nová skladba" />
-      <div className="list">
-      {data.tracks.map((t) => (
-        <ItemRow key={t.id} title={t.title}
-          sub={(albMap[t.album_id] || '—') + (t.duration ? ' · ' + t.duration : '') + (t.audio_url ? ' · 🎵' : ' · bez audia')}
-          onEdit={() => setEdit(t)} onDelete={() => del(t)} />
-      ))}
+      <div className="toolbar">
+        <AddBtn onClick={() => setEdit(null)} label="Nová skladba" />
+        <button className={'toggle' + (onlyNoAudio ? ' on' : '')} onClick={() => setOnlyNoAudio((v) => !v)}>
+          Jen bez audia{noAudioCount ? ' (' + noAudioCount + ')' : ''}
+        </button>
       </div>
-      {data.tracks.length === 0 && <div style={{ color: 'var(--muted)', fontSize: 14 }}>Zatím žádné skladby.</div>}
+      {onlyNoAudio
+        ? <div className="list">{tracks.map((t) => row(t))}</div>
+        : <DragList items={tracks} getKey={(t) => t.id} renderRow={row}
+            onReorder={(next) => persistOrder('tracks', next, notify).then(reload)} />}
+      {tracks.length === 0 && <div style={{ color: 'var(--muted)', fontSize: 14, marginTop: 4 }}>{onlyNoAudio ? 'Všechny skladby mají audio 🎉' : 'Zatím žádné skladby.'}</div>}
       {edit !== undefined && <TrackForm initial={edit} albums={albums} notify={notify}
         onClose={() => setEdit(undefined)} onSaved={() => { setEdit(undefined); reload(); }} />}
     </div>
@@ -461,14 +567,16 @@ function AlbumsTab({ data, reload, notify }) {
   };
   return (
     <div>
-      <AddBtn onClick={() => setEdit(null)} label="Nové album" />
-      <div className="list">
-      {data.albums.map((a) => (
-        <ItemRow key={a.id} title={a.title} sub={(a.genre || '') + (a.year ? ' · ' + a.year : '')}
-          swatch={'linear-gradient(135deg,' + (a.g1 || '#888') + ',' + (a.g2 || '#444') + ')'}
-          onEdit={() => setEdit(a)} onDelete={() => del(a)} />
-      ))}
-      </div>
+      <div className="toolbar"><AddBtn onClick={() => setEdit(null)} label="Nové album" /></div>
+      <DragList items={data.albums} getKey={(a) => a.id}
+        onReorder={(next) => persistOrder('albums', next, notify).then(reload)}
+        renderRow={(a, i, drag) => (
+          <ItemRow key={a.id} drag={drag}
+            title={a.title} sub={(a.genre || '') + (a.year ? ' · ' + a.year : '')}
+            swatch={'linear-gradient(135deg,' + (a.g1 || '#888') + ',' + (a.g2 || '#444') + ')'}
+            webUrl={SITE + '/#album=' + a.id}
+            onEdit={() => setEdit(a)} onDelete={() => del(a)} />
+        )} />
       {edit !== undefined && <AlbumForm initial={edit} notify={notify}
         onClose={() => setEdit(undefined)} onSaved={() => { setEdit(undefined); reload(); }} />}
     </div>
@@ -483,13 +591,15 @@ function AppsTab({ data, reload, notify }) {
   };
   return (
     <div>
-      <AddBtn onClick={() => setEdit(null)} label="Nová aplikace" />
-      <div className="list">
-      {data.apps.map((a) => (
-        <ItemRow key={a.id} title={a.name} sub={a.platform + (a.link && a.link !== '#' ? ' · ' + a.link : '')}
-          swatch={a.color} onEdit={() => setEdit(a)} onDelete={() => del(a)} />
-      ))}
-      </div>
+      <div className="toolbar"><AddBtn onClick={() => setEdit(null)} label="Nová aplikace" /></div>
+      <DragList items={data.apps} getKey={(a) => a.id}
+        onReorder={(next) => persistOrder('apps', next, notify).then(reload)}
+        renderRow={(a, i, drag) => (
+          <ItemRow key={a.id} drag={drag}
+            title={a.name} sub={a.platform + (a.link && a.link !== '#' ? ' · ' + a.link : '')}
+            swatch={a.color} webUrl={(a.link && a.link !== '#') ? a.link : SITE}
+            onEdit={() => setEdit(a)} onDelete={() => del(a)} />
+        )} />
       {edit !== undefined && <AppForm initial={edit} notify={notify}
         onClose={() => setEdit(undefined)} onSaved={() => { setEdit(undefined); reload(); }} />}
     </div>
@@ -507,12 +617,14 @@ function TextsTab({ data, reload, notify }) {
     <div>
       <button className="btn btn-ghost" style={{ marginBottom: 16 }} onClick={() => setCfg(true)}>⚙️ Kontakt, odkazy & statistiky</button>
       <div className="syne" style={{ fontWeight: 700, fontSize: 15, margin: '6px 0 10px' }}>Sociální sítě</div>
-      <AddBtn onClick={() => setEdit(null)} label="Nová síť" />
-      <div className="list">
-      {data.socials.map((s) => (
-        <ItemRow key={s.id} title={s.label} sub={s.url} onEdit={() => setEdit(s)} onDelete={() => del(s)} />
-      ))}
-      </div>
+      <div className="toolbar"><AddBtn onClick={() => setEdit(null)} label="Nová síť" /></div>
+      <DragList items={data.socials} getKey={(s) => s.id}
+        onReorder={(next) => persistOrder('socials', next, notify).then(reload)}
+        renderRow={(s, i, drag) => (
+          <ItemRow key={s.id} drag={drag} title={s.label} sub={s.url}
+            webUrl={(s.url && s.url !== '#') ? s.url : null}
+            onEdit={() => setEdit(s)} onDelete={() => del(s)} />
+        )} />
       {edit !== undefined && <SocialForm initial={edit} notify={notify}
         onClose={() => setEdit(undefined)} onSaved={() => { setEdit(undefined); reload(); }} />}
       {cfg && <ConfigForm config={data.config} notify={notify}
