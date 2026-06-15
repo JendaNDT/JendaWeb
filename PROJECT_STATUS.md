@@ -15,6 +15,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 **Vše hotové a NASAZENÉ** — backend (1–2), web čte z DB (3), `/admin` login (4), správa obsahu (5), plnohodnotný CMS, dashboard Přehled, návštěvnost (GoatCounter). Detaily níž a v `SUPABASE_BACKEND.md`.
 
 ## ✅ Hotovo
+- **Kontakt — nadpis přejmenován (16. 06. 2026, NASAZENO, SW `jw-v47`):** `contact_title` „Pojďme si říct" → **„Napiš mi"** (EN „Write to me"), v `data.js` (DB `strings` prázdné, takže code-only). Zvoleno **tykání** („Napiš", ne „Napište") kvůli konzistenci s tykajícím podtitulem („Máš zájem… chceš"). Mění štítek („04 — Napiš mi") i velký nadpis (oba z jednoho `SectionLabel`).
 - **Oprava diakritiky ve fontech (15. 06. 2026, NASAZENO, SW `jw-v46`):** Syne i DM Sans byly self-hostované jen v **latin subsetu** → českým znakům `č ď ě ň ř š ť ů ž` chyběly glyfy a prohlížeč je kreslil náhradním systémovým fontem (velké nadpisy „skákaly" — nejvíc „Pojďme si říct"). Přidány **latin-ext** verze týchž fontů (`@fontsource`, woff2+woff) s `unicode-range`; latin soubory ponechány 1:1 → základní písmena beze změny, latin-ext kreslí jen accentované znaky **stejným písmem**. Doplněno do `vendor/fonts.css` + SW precache (offline). Ověřeno fonttools (latin subset české znaky neměl, latin-ext je pokrývá). Stejné písmo, jen spravená diakritika.
 - **CTA hraje první skladbu s audiem + mp3 ověřeno (15. 06. 2026, NASAZENO, SW `jw-v45`):** „Poslechnout hudbu" teď vybírá **první skladbu, která má `audioUrl`** (ne jen první v pořadí) — odolné, až bude víc skladeb. První nahraná mp3 (CelticSing, Supabase Storage) ověřena živě: dostupná (HTTP 206, `audio/mpeg`, podporuje range), cross-origin fetch prošel → **CORS OK** (`crossOrigin='anonymous'` přehrávače splněné). Pozn.: skutečný zvuk nelze ověřit z automatizovaného prohlížeče (chybí user-gesture + média se v takovém tabu nenačtou) — reálný test = ťuknout play na zařízení.
 - **Kontaktní formulář → Formspree (15. 06. 2026, NASAZENO, SW `jw-v44`):** `site_config.contact_endpoint` = `https://formspree.io/f/xjgdllrd` (v DB → šlo bez deploye). Formulář POSTuje JSON `{name,email,message}`, zpráva chodí Jendovi — **ověřeno reálným testem** (dorazilo do schránky, Formspree potvrzen). Přímý e-mailový odkaz pod formulářem **skryt** — zobrazí se jen když je v configu reálný e-mail (≠ `jenda@example.com`); jinak kontakt jen přes formulář (e-mail skrytý). Toto skrytí je code (proto SW v44).
@@ -92,7 +93,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - **Bez build stepu:** JSX transpiluje Babel v prohlížeči. Nutný http server / hosting (`file://` nefunguje).
 - **Komunikace mezi soubory přes `window` globály** — pořadí skriptů v `index.html` se nesmí měnit.
 - **Web předpokládá nasazení v kořeni domény** — `sw.js`/manifest mají absolutní cesty (`/...`).
-- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v46`).
+- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v47`).
 - **Nepoužívat `scrollIntoView`** — místo toho `window.scrollTo({...})`.
 - **`handoff/` je starší 4souborová záloha**, ne aktuální verze.
 
@@ -109,7 +110,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - `tweaks-panel.jsx` – panel nastavení
 - `vendor/` – lokální React/ReactDOM/Babel + fonty (offline) · `vendor/fonts.css`
 - `icons/` – PNG ikony 180/192/512
-- `sw.js` – service worker (`jw-v46`) · `manifest.webmanifest`
+- `sw.js` – service worker (`jw-v47`) · `manifest.webmanifest`
 - `vendor/fonts.css` + `vendor/fonts/` – Syne + DM Sans, **latin + latin-ext** (latin-ext kvůli české diakritice), offline precache
 - `case-studies/` – 3 case studies + styly
 - `embed.html` · `feed.xml` · `og-image.svg` · `404.html` · `sitemap.xml` · `robots.txt`
