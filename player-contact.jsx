@@ -658,18 +658,20 @@ function ContactSection({ lang }) {
 
         <ContactForm lang={lang} />
 
+        {(window.CONTACT_EMAIL && window.CONTACT_EMAIL !== 'jenda@example.com') && (<React.Fragment>
         <div style={{ display:'flex', alignItems:'center', gap:14, margin:'32px 0 24px', color:'var(--muted)', fontSize:12, letterSpacing:'0.14em', textTransform:'uppercase', opacity:0.6 }}>
           <div style={{ flex:1, height:1, background:'var(--border)' }} />
           {tx(lang,'contact_or')}
           <div style={{ flex:1, height:1, background:'var(--border)' }} />
         </div>
 
-        <a href={`mailto:${window.CONTACT_EMAIL || 'jenda@example.com'}`} style={{
+        <a href={`mailto:${window.CONTACT_EMAIL}`} style={{
           fontFamily:"'Syne',sans-serif", fontWeight:600, fontSize:17,
           color:'var(--a2)', borderBottom:'1px dashed color-mix(in srgb, var(--a2) 50%, transparent)',
         }}>
-          {window.CONTACT_EMAIL || 'jenda@example.com'}
+          {window.CONTACT_EMAIL}
         </a>
+        </React.Fragment>)}
 
         {/* Donation widget */}
         <div style={{ marginTop:28 }}>

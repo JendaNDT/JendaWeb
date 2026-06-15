@@ -15,6 +15,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 **Vše hotové a NASAZENÉ** — backend (1–2), web čte z DB (3), `/admin` login (4), správa obsahu (5), plnohodnotný CMS, dashboard Přehled, návštěvnost (GoatCounter). Detaily níž a v `SUPABASE_BACKEND.md`.
 
 ## ✅ Hotovo
+- **Kontaktní formulář → Formspree (15. 06. 2026, NASAZENO, SW `jw-v44`):** `site_config.contact_endpoint` = `https://formspree.io/f/xjgdllrd` (v DB → šlo bez deploye). Formulář POSTuje JSON `{name,email,message}`, zpráva chodí Jendovi — **ověřeno reálným testem** (dorazilo do schránky, Formspree potvrzen). Přímý e-mailový odkaz pod formulářem **skryt** — zobrazí se jen když je v configu reálný e-mail (≠ `jenda@example.com`); jinak kontakt jen přes formulář (e-mail skrytý). Toto skrytí je code (proto SW v44).
 - **UX várka 1 (15. 06. 2026, NASAZENO, SW `jw-v43`):** (1) hero podtitul přeformulován na hudbu-first (CZ+EN, `data.js`); (2) hlavní CTA „Poslechnout hudbu" teď **spustí první skladbu** + plynule scrolluje na `#music` (Hero dostal `onPlay`, `Btn` bez `href` = `<button>`); (3) **počítadla v heru** naběhnou spolehlivě — `useCountUp` startuje hned, když je prvek ve viewportu (práh 0.4→0.15), ne až při scrollu; (4) **jemný fade** (`jwFade 0.25s`) na App rootu změkčuje překreslení po `jw-data-updated` (Root bumpuje `key`); (5) **objevitelnost zkratek** — plovoucí „?" tlačítko (desktop, skryté ≤768px) otevírá ShortcutsOverlay. Ověřeno transpilací. Pozn.: CTA naostro zahraje až s reálným mp3. Mimo várku (čeká na vstup): kontakt přes Formspree (ID od Jendy), reálné mp3, vlastní doména + absolutní OG.
 - **Pozadí doladěno do OLED (15. 06. 2026, NASAZENO, SW `jw-v42`):** base `--bg` čistá černá `#000`. Po iteraci s Jendou finální hodnoty orbů: cyan `0.07`, indigo `0.105`, fialová `0.11`, teplý akcent (`mesh-3`, `--a2`) `0.17`; navíc `.mesh-orb` dostal `saturate(1.25)` → všechny orby o něco sytější. Noise `0.04`. Výsledek: čistá čerň jako základ, barevné orby čitelné a živé (pryč dřívější šedavý závoj). Cesta: nejdřív ztlumeno skoro na A, pak na přání zpět zesíleno + zsyceno.
 - **Hudba jako primární sekce (15. 06. 2026, NASAZENO, SW `jw-v40`):** pořadí sekcí přehozeno — **Hudba → Nejvíce poslouchané → Aplikace → Srovnání** (`app.jsx`), v navigaci **Hudba před Aplikacemi** a hlavní hero tlačítko je teď **přehrávání (primary)**, Aplikace jako vedlejší (outline); scroll-šipka v heru míří na Hudbu (`#music`). Nadpis/identita hera beze změny (dle dohody). Ověřeno transpilací + kotvy `#music`/`#apps` sedí.
@@ -89,7 +90,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - **Bez build stepu:** JSX transpiluje Babel v prohlížeči. Nutný http server / hosting (`file://` nefunguje).
 - **Komunikace mezi soubory přes `window` globály** — pořadí skriptů v `index.html` se nesmí měnit.
 - **Web předpokládá nasazení v kořeni domény** — `sw.js`/manifest mají absolutní cesty (`/...`).
-- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v43`).
+- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v44`).
 - **Nepoužívat `scrollIntoView`** — místo toho `window.scrollTo({...})`.
 - **`handoff/` je starší 4souborová záloha**, ne aktuální verze.
 
@@ -106,7 +107,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - `tweaks-panel.jsx` – panel nastavení
 - `vendor/` – lokální React/ReactDOM/Babel + fonty (offline) · `vendor/fonts.css`
 - `icons/` – PNG ikony 180/192/512
-- `sw.js` – service worker (`jw-v43`) · `manifest.webmanifest`
+- `sw.js` – service worker (`jw-v44`) · `manifest.webmanifest`
 - `case-studies/` – 3 case studies + styly
 - `embed.html` · `feed.xml` · `og-image.svg` · `404.html` · `sitemap.xml` · `robots.txt`
 - `HANDOFF.md` – technický handoff
