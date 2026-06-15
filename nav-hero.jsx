@@ -237,8 +237,8 @@ function Nav({ lang, setLang, mode, setMode }) {
   };
 
   const links = [
-    { href:'#apps',    lbl: tx(lang, 'nav_apps') },
     { href:'#music',   lbl: tx(lang, 'nav_music') },
+    { href:'#apps',    lbl: tx(lang, 'nav_apps') },
     { href:'#contact', lbl: tx(lang, 'nav_contact') },
   ];
 
@@ -323,8 +323,8 @@ function Hero({ lang }) {
         </p>
 
         <div style={{ display:'flex', gap:14, justifyContent:'center', flexWrap:'wrap' }}>
-          <Btn href="#apps" primary>{tx(lang, 'cta_apps')}</Btn>
-          <Btn href="#music" outline>{tx(lang, 'cta_music')}</Btn>
+          <Btn href="#music" primary>{tx(lang, 'cta_music')}</Btn>
+          <Btn href="#apps" outline>{tx(lang, 'cta_apps')}</Btn>
         </div>
 
         <div style={{ display:'flex', gap:56, justifyContent:'center', marginTop:80, flexWrap:'wrap' }}>
@@ -348,7 +348,7 @@ function Hero({ lang }) {
         </div>
       </div>
 
-      <a href="#apps" className="scroll-cue" aria-label="Scroll" style={{
+      <a href="#music" className="scroll-cue" aria-label="Scroll" style={{
         position:'absolute', bottom:30, left:'50%', transform:'translateX(-50%)',
         zIndex:1, color:'var(--muted)', display:'flex',
         animation:'scrollBob 2.2s ease-in-out infinite',

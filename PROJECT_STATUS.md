@@ -15,6 +15,8 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 **Vše hotové a NASAZENÉ** — backend (1–2), web čte z DB (3), `/admin` login (4), správa obsahu (5), plnohodnotný CMS, dashboard Přehled, návštěvnost (GoatCounter). Detaily níž a v `SUPABASE_BACKEND.md`.
 
 ## ✅ Hotovo
+- **Hudba jako primární sekce (15. 06. 2026, NASAZENO, SW `jw-v40`):** pořadí sekcí přehozeno — **Hudba → Nejvíce poslouchané → Aplikace → Srovnání** (`app.jsx`), v navigaci **Hudba před Aplikacemi** a hlavní hero tlačítko je teď **přehrávání (primary)**, Aplikace jako vedlejší (outline); scroll-šipka v heru míří na Hudbu (`#music`). Nadpis/identita hera beze změny (dle dohody). Ověřeno transpilací + kotvy `#music`/`#apps` sedí.
+- **Mobil — přehrávání i při zhasnuté obrazovce (15. 06. 2026, NASAZENO, commit `7123c33`, SW `jw-v39`):** na mobilu (iOS/Android) se zvuk pouští **přímo z `<audio>`** elementu, ne přes Web Audio — iOS jinak při zamknutí obrazovky uspí `AudioContext` a hudba by se zastavila. Vylepšená **Media Session** pro zámkovou obrazovku: artwork z obálky alba, `playbackState` (playing/paused), `setPositionState` (posuvník) a `seekto`. Desktop má dál reálný FFT vizualizér; na mobilu fallback (seededBars + jemně plující pozadí, `__jwAnalyser` se nenastaví). Ověřeno: Babel transpilace všech JSX + Node test detekce zařízení (iPhone/iPadOS/Android → přímé, Win/Mac desktop → Web Audio) + Vercel deploy READY. Pozn.: naostro slyšitelné, až budou v adminu reálné mp3.
 - **Bezpečnostní pas (15. 06. 2026):** audit repa i celé git historie — **žádný GitHub token ani Supabase `service_role` klíč** ve verzování (na webu jen veřejný `anon`, OK). Admin **heslo změněno**. V Supabase **vypnutá veřejná registrace** („Allow new users to sign up" OFF, ověřeno po reloadu) → projekt zamčen jen na Jendův účet. Classic PAT ponechán (viz rozhodnutí).
 - **Vizuál — jemná hloubková paralaxa (15. 06. 2026, NASAZENO, commit `b695be8`, SW `jw-v38`):** každá částice má `depth` (daleko↔blízko); při scrollu se posouvá podle hloubky (bližší výrazně víc — ~3,7× než vzdálené), bližší jsou i o něco větší a jasnější → decentní 3D dojem přes celou stránku. `scrollY` se čte přímo ve vykreslovací smyčce (žádný scroll listener = nic navíc na výkon), posun je zabalený do výšky okna (pole zůstává plné). Respektuje `prefers-reduced-motion`. Ověřeno Node testem (různé hloubky = různý posun, vše v mezích) + nasazení.
 - **Vizuál — zklidnění reaktivity (15. 06. 2026, NASAZENO, commit `29e5403`, SW `jw-v37`):** při hudbě se pozadí „třáslo" moc rychle (rychlé výšky/hi-haty). Zklidněno: výšky jdou přes **dolnopropust** (`env.treble`, plynulé), **doznívání jasu** zpomaleno (0.86→0.92), nárazové **zrychlení** uhlazeno (surge 0.86→0.90) a menší koeficienty rychlosti/třpytu. Bass „nádech", záblesk na beat, prstence i pulzování velikosti podle spektra **zůstaly** → pořád viditelně reaktivní, jen ne roztřesené. Ověřeno Node testem (vyhlazený signál kolísá ~0.065 místo 0.80; velikost dál pulzuje ~3× a plynule doznívá) + potvrzeno nasazení.
@@ -85,7 +87,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - **Bez build stepu:** JSX transpiluje Babel v prohlížeči. Nutný http server / hosting (`file://` nefunguje).
 - **Komunikace mezi soubory přes `window` globály** — pořadí skriptů v `index.html` se nesmí měnit.
 - **Web předpokládá nasazení v kořeni domény** — `sw.js`/manifest mají absolutní cesty (`/...`).
-- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v38`).
+- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v40`).
 - **Nepoužívat `scrollIntoView`** — místo toho `window.scrollTo({...})`.
 - **`handoff/` je starší 4souborová záloha**, ne aktuální verze.
 
@@ -102,7 +104,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - `tweaks-panel.jsx` – panel nastavení
 - `vendor/` – lokální React/ReactDOM/Babel + fonty (offline) · `vendor/fonts.css`
 - `icons/` – PNG ikony 180/192/512
-- `sw.js` – service worker (`jw-v38`) · `manifest.webmanifest`
+- `sw.js` – service worker (`jw-v40`) · `manifest.webmanifest`
 - `case-studies/` – 3 case studies + styly
 - `embed.html` · `feed.xml` · `og-image.svg` · `404.html` · `sitemap.xml` · `robots.txt`
 - `HANDOFF.md` – technický handoff

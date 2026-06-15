@@ -179,10 +179,10 @@ function App() {
       <BackgroundFX />
       <Nav lang={lang} setLang={setLang} mode={tw.mode || 'auto'} setMode={(v) => setTweak('mode', v)} />
       <Hero lang={lang} />
-      <AppsSection lang={lang} />
-      <ComparisonSection lang={lang} />
       <MusicSection lang={lang} onPlay={handlePlay} currentTrack={playerTrack} playing={playing} />
       <MostPlayedSection lang={lang} onPlay={handlePlay} currentTrack={playerTrack} playing={playing} />
+      <AppsSection lang={lang} />
+      <ComparisonSection lang={lang} />
       <StatsSection lang={lang} />
       <NewsletterSection lang={lang} />
       <ContactSection lang={lang} />
