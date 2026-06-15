@@ -7,12 +7,13 @@ Osobní portfolio web „Jenda — vibe-coder & AI hudebník". Prezentuje appky 
 Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohlížeči), čisté CSS + inline styly. **Žádný build, žádné npm.** Plně offline-capable (knihovny i fonty hostované lokálně). Instalovatelná PWA, dvojjazyčné CZ/EN, dark/light + 3 barevné motivy.
 
 ## ⏭️ Příští krok
-**Doplnit reálná audio URL skladeb ze Suno.**
-V `data.js` má všech 15 skladeb `audioUrl: null`, takže přehrávač zatím nehraje. Nahraď `audioUrl` / `downloadUrl` v poli `TRACKS_DATA` (data.js) reálnými odkazy ze Suno.
+**Postavit nahrávací rozhraní (admin) přes Supabase** — aby Jenda mohl přidávat hudbu, aplikace a obrázky přímo přes formuláře s nahráváním souborů (mp3, obrázky), místo editace `data.js`.
+Kompletní implementační plán je v **`UPLOAD_INTERFACE_PLAN.md`**. Pustíme se do toho v **novém vlákně chatu** (rozhodnuto 14. 06. 2026).
+(Doplnění reálných audio URL skladeb se vyřeší právě přes tohle rozhraní.)
 
 ## ✅ Hotovo
 - **Nasazeno živě na Vercel** (`jenda-web.vercel.app`) přes GitHub auto-deploy — push do `main` = automatický deploy
-- **Offline soběstačnost:** React/ReactDOM/Babel + fonty Syne/DM Sans hostované lokálně (`vendor/`), service worker precachuje celý boot (`jw-v26`). Web nepotřebuje žádné CDN.
+- **Offline soběstačnost:** React/ReactDOM/Babel + fonty Syne/DM Sans hostované lokálně (`vendor/`), service worker precachuje celý boot (`jw-v29`). Web nepotřebuje žádné CDN.
 - **PNG ikony pro iOS** (`icons/` 180/192/512, „J" v Syne, full-bleed = maskable i apple-touch)
 - **Hudební přehrávač s plnou výbavou:** mini, fullscreen expand (E), fronta (Q), vizualizér (V), audio analyzér (D), A/B loop, rychlost, shuffle, repeat
 - **Cmd+K vyhledávání** + bohaté klávesové zkratky (`?`)
@@ -72,7 +73,7 @@ V `data.js` má všech 15 skladeb `audioUrl: null`, takže přehrávač zatím n
 - `tweaks-panel.jsx` – panel nastavení
 - `vendor/` – lokální React/ReactDOM/Babel + fonty (offline) · `vendor/fonts.css`
 - `icons/` – PNG ikony 180/192/512
-- `sw.js` – service worker (`jw-v26`) · `manifest.webmanifest`
+- `sw.js` – service worker (`jw-v29`) · `manifest.webmanifest`
 - `case-studies/` – 3 case studies + styly
 - `embed.html` · `feed.xml` · `og-image.svg` · `404.html` · `sitemap.xml` · `robots.txt`
 - `HANDOFF.md` – technický handoff

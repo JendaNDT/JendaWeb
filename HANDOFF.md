@@ -22,7 +22,7 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 - **GitHub:** `JendaNDT/JendaWeb`, branch `main`.
 - **Vercel:** connected to the repo. **Push to `main` auto-deploys.** Framework preset "Other" (pure static, no build).
 - The site assumes deployment at the **domain root** — `sw.js` and the manifest use absolute paths (`/...`). A subpath deploy would need path tweaks.
-- After changing any cached asset, **bump `VERSION` in `sw.js`** (currently `jw-v26`) so clients pick up new content.
+- After changing any cached asset, **bump `VERSION` in `sw.js`** (currently `jw-v29`) so clients pick up new content.
 
 ## File map
 
@@ -139,11 +139,12 @@ In **case study HTML**: uncomment giscus block + fill `data-repo` etc.
 
 - **Themes** (accents): `ember` (default), `velvet`, `desert` — `THEMES` in `shared.jsx`.
 - **Mode**: `auto` / `light` / `dark`. CSS tokens in `index.html` `:root` and `html[data-mode="light"]`.
-- `--ambient1` / `--ambient2` set dynamically from the currently-playing album colors.
+- **(Removed)** The page no longer tints to the playing album's colors. The old per-album "ambient wash" overlay (`app.jsx`, `mix-blend-mode: screen`) was deleted — it lightened + tinted the page while music played and fought the dark look. Background is now consistent regardless of the player. `--ambient1`/`--ambient2` are no longer used.
 
 ## Background (mesh) — how it works + rules
 
 - **One fixed ambient layer:** `.mesh-bg` (`position:fixed; inset:0; z-index:-1`) holds 4 blurred radial orbs (mesh-1 teal, mesh-2 indigo, mesh-3 amber, mesh-4 purple) + a fine noise overlay `.mesh-noise`.
+- **OLED base:** `--bg` is pure black `#000000`; the orbs + warm glow are color accents against it. Keep blacks deep — the noise overlay opacity is kept very low so it doesn't lift the black (matters on OLED). Teal is toned down, amber leads (warm brand).
 - **Spans the whole page:** all page sections use `background:transparent`, so the fixed mesh shows continuously top-to-bottom. Don't give a section an opaque background unless you intend to hide the mesh there.
 - **RULE — orbs must NOT animate `opacity` (only `transform`).** Animating opacity + big `scale` makes the background progressively brighten / wash out over time (4 orbs with different periods drift into phase). Keep opacity constant on each orb, scale ≤ ~1.06, gentle drift. `prefers-reduced-motion` disables animation.
 - **Warm-balanced:** amber (mesh-3) is the larger/central warm orb; teal (mesh-1) is toned down — matches the warm brand and keeps orange present.
@@ -177,5 +178,7 @@ In **case study HTML**: uncomment giscus block + fill `data-repo` etc.
 6. Avoid `scrollIntoView` (project convention) — use `window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 80 })`.
 7. **Deploy = `git push` to `main`** (Vercel auto-deploys). No manual build.
 8. `handoff/` is a frozen old-version backup — ignore it for current work.
+
+> **Planned next phase:** a content **upload interface** (login-protected `/admin`) backed by **Supabase** (database + auth + file storage), so music, apps and images are added via forms with file upload instead of editing `data.js`. Full spec in **`UPLOAD_INTERFACE_PLAN.md`**.
 
 — Maintained for the Cowork + GitHub/Vercel workflow. Last updated 14 Jun 2026.
