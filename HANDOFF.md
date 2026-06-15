@@ -8,6 +8,17 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
 - **Repo:** https://github.com/JendaNDT/JendaWeb — push to `main` → Vercel auto-deploys.
 - **Backend:** Supabase project `jendaweb` (ref `semdgbaearwhkhulkyts`, eu-central-1, free). Frontend uses the public anon/publishable key; writes are protected by RLS (locked to the admin uid). See `SUPABASE_BACKEND.md`.
 
+## Recent updates (15 Jun 2026, evening)
+
+- **Music is the primary section now.** Page + nav order is Music → Apps. The hero's main CTA "Poslechnout hudbu" (primary button) starts playback of the first track that has audio and smooth-scrolls to `#music`; the scroll cue also points to `#music`. Hero headline/identity unchanged.
+- **Mobile background playback.** On mobile (iOS/Android) the player plays the raw `<audio>` element directly and does **not** route through Web Audio — `setupAudioContext()` early-returns when `isMobile`. iOS suspends `AudioContext` on screen lock, which would stop audio; bypassing it keeps music playing with the screen off. Desktop still gets the real FFT visualizer; mobile falls back to `seededBars` + idle `BackgroundFX`.
+- **Media Session** (lock-screen controls): metadata + artwork (album cover), `playbackState`, `setPositionState` (scrubber), and play/pause/prev/next/seek handlers — see the `mediaSession` effect in `player-contact.jsx`.
+- **Contact → Formspree.** `site_config.contact_endpoint` is set (`/f/xjgdllrd`); the form POSTs JSON and emails Jenda (verified end-to-end). Direct-email link is hidden unless a real `contact_email` is configured.
+- **Background tuned for OLED.** Pure-black base; cold orbs dimmed then brought back slightly, plus `.mesh-orb` now has `saturate(1.25)`; warm accent leads. Final orb opacities: teal `0.07`, indigo `0.105`, amber `0.17`, purple `0.11`; noise `0.04`.
+- **Other UX:** hero counters animate reliably (`useCountUp` starts when in viewport, threshold `0.15`), gentle `jwFade` on content (re)render, hero subtitle reworded music-first (`data.js`), floating "?" shortcut hint (desktop, hidden ≤768px).
+- **Security:** public sign-ups disabled in Supabase Auth; admin password changed; GitHub token kept (local only, gitignored — see `PROJECT_STATUS.md` decisions).
+- SW is now `jw-v45`. Full chronological detail lives in `PROJECT_STATUS.md`.
+
 ## Tech stack
 
 - **React 18 + ReactDOM** — vendored locally in `vendor/` (production UMD builds), **not from CDN**.
@@ -25,7 +36,7 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 - **GitHub:** `JendaNDT/JendaWeb`, branch `main`.
 - **Vercel:** connected to the repo. **Push to `main` auto-deploys.** Framework preset "Other" (pure static, no build).
 - The site assumes deployment at the **domain root** — `sw.js` and the manifest use absolute paths (`/...`). A subpath deploy would need path tweaks.
-- After changing any cached asset, **bump `VERSION` in `sw.js`** (currently `jw-v38`) so clients pick up new content.
+- After changing any cached asset, **bump `VERSION` in `sw.js`** (currently `jw-v45`) so clients pick up new content.
 - `/admin` is routed via `vercel.json` (rewrite `/admin` → `/admin.html`) and served **online-only** (SW bypasses cache for it) with `Cache-Control: no-store` headers so it's never stale.
 - **Pushing from the sandbox:** the mounted working copy's `.git` can't take git writes (lock files), so deploys go via a fresh `git clone` in `/tmp`, copy the changed files in, commit, and `git push https://<token>@github.com/JendaNDT/JendaWeb.git HEAD:main`. Token is provided per-session (in `Token/`, gitignored), never stored. Verify the deploy actually landed (Vercel occasionally misses the webhook) and that no caches serve stale files.
 
@@ -55,7 +66,7 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 │   ├── fonts.css           # @font-face for self-hosted fonts
 │   └── fonts/              # Syne + DM Sans (woff2/woff, latin subset)
 ├── icons/                  # PNG app icons 180/192/512 (iOS apple-touch + maskable)
-├── sw.js                   # Service worker (jw-v38; precache shell, network-first HTML, /admin online-only)
+├── sw.js                   # Service worker (jw-v45; precache shell, network-first HTML, /admin online-only)
 ├── manifest.webmanifest    # PWA manifest (icons point to icons/*.png)
 ├── og-image.svg            # 1200×630 social card
 ├── robots.txt · sitemap.xml · feed.xml · 404.html · embed.html
@@ -134,11 +145,11 @@ To avoid Babel scope collisions each file destructures with unique names: `const
 
 | Constant | What to set it to |
 |----------|-------------------|
-| `window.TRACKS_DATA` | Replace `audioUrl: null` with real Suno URLs + `downloadUrl` **(biggest remaining gap — player is silent until done)** |
+| `window.TRACKS_DATA` | Real mp3 URLs (upload in `/admin` → Supabase Storage). **First track is live (CelticSing); add the rest.** Tracks without audio are skipped by the hero CTA (it plays the first track that has `audioUrl`) |
 | `window.APPS_DATA` | Replace placeholder `link:'#'` with real app URLs |
 | `window.SOCIALS` | Replace `url:'#'` with real social profiles |
-| `window.CONTACT_ENDPOINT` | Formspree URL; falls back to `mailto:` if null |
-| `window.CONTACT_EMAIL` | Real email (currently `jenda@example.com`) |
+| `window.CONTACT_ENDPOINT` | ✅ Set to Formspree (`/f/xjgdllrd`) in `site_config` — form POSTs JSON and emails Jenda (verified). Falls back to `mailto:` only if unset |
+| `window.CONTACT_EMAIL` | Still placeholder (`jenda@example.com`) → the direct-email link under the form is **hidden** unless a real email is set (form-only by design) |
 | `window.NEWSLETTER_ENDPOINT` | Buttondown embed URL; degrades to a "thanks" message if null |
 | `window.KOFI_USERNAME` | Ko-fi username — activates donation button |
 | `window.GISCUS_CONFIG` | `{ repo, repoId, category, categoryId }` from giscus.app |

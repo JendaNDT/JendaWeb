@@ -34,7 +34,8 @@ Identity sekvence `apps`/`tracks` nastaveny za seed (apps→20, tracks→15), no
 
 ## RLS (zabezpečení)
 - Každá tabulka: **veřejné čtení** (anon SELECT) · **zápis (ALL) zamčen na konkrétní admin `uid`** (policies `*_admin_write`, `auth.uid() = '5a7c34fb-…'`). Anon ani jiný přihlášený nezapíše.
-- ✅ **Advisor čistý** — dřívějších 6× „RLS Policy Always True" zmizelo právě tím zúžením na admin uid (zbývalo `authenticated using(true)`). Zbývá jen volitelná „leaked password protection" (kosmetické).
+- ✅ **Advisor čistý** — dřívějších 6× „RLS Policy Always True" zmizelo zúžením na admin uid (zbývalo `authenticated using(true)`). „Leaked password protection" (HIBP) je u Supabase **jen na Pro tarifu**, takže na Free se nezapíná (kosmetické).
+- 🔒 **Veřejná registrace vypnuta** (15. 06. 2026, Authentication → Sign In / Providers → „Allow new users to sign up" OFF) → jediný účet je Jendův. Přihlášení stávajícího účtu tím není dotčeno.
 - **Výjimka — anonymní zápis přes RPC:** počítadlo přehrání zvyšuje `security definer` funkce `increment_play` (viz níže), takže anon zápis do `tracks.plays` jde jen přes ni (ne přímým UPDATE).
 
 ## Funkce / RPC (Postgres)
@@ -47,6 +48,10 @@ Identity sekvence `apps`/`tracks` nastaveny za seed (apps→20, tracks→15), no
 - **Počty přehrání:** `tracks.plays` + `increment_play` (viz výše); web ukazuje „Nejvíce poslouchané" a „▶ N×" z reálných dat, admin má kartu „přehrání celkem".
 - **Mimo Supabase (web-only, detaily v `PROJECT_STATUS.md`):** návštěvnost přes **GoatCounter** (admin záložka Návštěvnost) a celostránkové **audio-reaktivní + paralaxní** částicové pozadí `BackgroundFX`.
 
+## Aktualizace (15. 06. 2026, večer)
+- **Kontaktní formulář → Formspree:** `site_config.contact_endpoint = https://formspree.io/f/xjgdllrd` (dřív `null`). Web POSTuje JSON `{name,email,message}` → zpráva chodí Jendovi (ověřeno reálným testem). `contact_email` zůstává placeholder, takže přímý e-mailový odkaz na webu je skrytý (kontakt jen přes formulář).
+- **První reálná mp3 ve Storage:** `tracks` id 16 „CelticSing" má `audio_url` v bucketu `audio` (`audio/mpeg`, podporuje range, CORS OK — ověřeno živě). Ostatní skladby Jenda nahraje postupně přes `/admin`.
+
 ## Co dál
 
 **Fáze 3 — web čte ze Supabase: HOTOVO a NASAZENO (15. 06. 2026, commit `e8306ee`, live na jenda-web.vercel.app).**
@@ -57,6 +62,6 @@ Identity sekvence `apps`/`tracks` nastaveny za seed (apps→20, tracks→15), no
 - Ověřeno: anon RLS čtení, mapování (unit test), transpilace všech JSX.
 - **Nasazení: hotovo** (commit `e8306ee` v `JendaNDT/JendaWeb` na `main` → Vercel deploy). Pozn.: mountovaná kopie neumí git zápis (lock soubory) — pushovalo se z čerstvého klonu repa v sandboxu, do něj zkopírovány změněné soubory.
 
-**Fáze 4 — admin auth: HOTOVO a NASAZENO (15. 06. 2026, login ověřen).** `admin.html` + `admin.jsx` — login přes GoTrue (`POST /auth/v1/token?grant_type=password`, anon key, session v localStorage). Admin user `mcnegr@gmail.com` vytvořen (uid `5a7c34fb-4c84-4786-8c2e-7f5efdb0ccf6`, potvrzený). **RLS zápis zúžen na tento uid** (policies `*_admin_write`) → vyřešilo 6 advisor warningů (zbývá jen volitelná „leaked password protection"). Pozn.: veřejný signup už není kritický (zápis je vázán na uid).
+**Fáze 4 — admin auth: HOTOVO a NASAZENO (15. 06. 2026, login ověřen).** `admin.html` + `admin.jsx` — login přes GoTrue (`POST /auth/v1/token?grant_type=password`, anon key, session v localStorage). Admin user `mcnegr@gmail.com` vytvořen (uid `5a7c34fb-4c84-4786-8c2e-7f5efdb0ccf6`, potvrzený). **RLS zápis zúžen na tento uid** (policies `*_admin_write`) → vyřešilo 6 advisor warningů. **Heslo Jenda změnil** z dočasného (15. 06. 2026). **Veřejná registrace vypnuta** (viz RLS sekce) → jediný účet je Jendův.
 
 **Fáze 5 — admin CRUD + upload: POSTAVENO (15. 06. 2026).** `admin.jsx` plný CRUD přes REST (admin JWT, `Prefer: return=representation`) + Storage upload (mp3→`audio`, ikony→`images`, XHR s progress barem) + změna hesla (`PUT /auth/v1/user`) + auto-refresh tokenu (`grant_type=refresh_token`). Zápis chrání RLS `*_admin_write` (jen admin uid) — ověřeno serverovým RLS testem (insert/update/delete pod admin JWT). Storage cesty: `tracks/{ts}_{name}`, `apps/{ts}_{name}`. Zatím bez editoru build-logu/comparison.
