@@ -151,6 +151,16 @@ async function persistOrder(table, items, notify) {
     if (notify) notify('Pořadí uloženo', 'ok');
   } catch (e) { if (notify) notify(e.message || 'Pořadí se nepodařilo uložit', 'err'); }
 }
+function downloadBackup(data) {
+  try {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'jendaweb-obsah-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  } catch (e) {}
+}
 function DragList({ items, getKey, renderRow, onReorder }) {
   const [order, setOrder] = useState(items);
   useEffect(() => { setOrder(items); }, [items]);
@@ -493,6 +503,53 @@ function PasswordModal({ onClose, notify }) {
   );
 }
 
+/* ---------------- bulk mp3 upload ---------------- */
+function BulkUpload({ albums, notify, onClose, onDone }) {
+  const [albumId, setAlbumId] = useState((albums[0] && albums[0].id) || '');
+  const [files, setFiles] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(0);
+  const inp = useRef(null);
+  const isAudio = (x) => (x.type && x.type.indexOf('audio') === 0) || /\.(mp3|wav|m4a|ogg|flac)$/i.test(x.name);
+  const add = (list) => setFiles((f) => f.concat([].slice.call(list).filter(isAudio)));
+  const submit = async () => {
+    if (!files.length) { notify('Vyber aspoň jeden soubor', 'err'); return; }
+    setBusy(true); setDone(0);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const title = file.name.replace(/\.[^.]+$/, '');
+        const duration = await readAudioDuration(file);
+        const url = await uploadFile('audio', 'tracks', file);
+        await sbInsert('tracks', { title: title, album_id: albumId || null, duration: duration || null, audio_url: url, download_url: url, sort: 1000 + i });
+        setDone(i + 1);
+      }
+      notify('Nahráno ' + files.length + ' skladeb', 'ok');
+      onDone();
+    } catch (e) { notify(e.message || 'Chyba při nahrávání', 'err'); }
+    finally { setBusy(false); }
+  };
+  return (
+    <Modal title="Hromadné nahrání mp3" onClose={busy ? () => {} : onClose}>
+      <Field label="Přidat do alba">
+        <select value={albumId} onChange={(e) => setAlbumId(e.target.value)}>
+          {albums.map((a) => <option key={a.id} value={a.id}>{a.title}</option>)}
+        </select>
+      </Field>
+      <div className="drop" onClick={() => inp.current && inp.current.click()}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => { e.preventDefault(); add(e.dataTransfer.files); }}>
+        <input ref={inp} type="file" accept="audio/*" multiple style={{ display: 'none' }} onChange={(e) => add(e.target.files)} />
+        Přetáhni sem víc mp3, nebo klikni (název skladby = název souboru)
+      </div>
+      {files.length > 0 && <div className="filelist">{files.map((f, i) => <div key={i}>{f.name}</div>)}</div>}
+      {busy && files.length > 0 && <div className="prog" style={{ marginTop: 12 }}><i style={{ width: Math.round(done / files.length * 100) + '%' }} /></div>}
+      {busy && <div style={{ fontSize: 13, marginTop: 6, color: 'var(--muted)' }}>Nahrávám {done}/{files.length}…</div>}
+      <FormActions busy={busy} onCancel={onClose} onSubmit={submit} submitLabel={'Nahrát' + (files.length ? ' (' + files.length + ')' : '')} />
+    </Modal>
+  );
+}
+
 /* ---------------- list row ---------------- */
 function ItemRow({ title, sub, swatch, leading, badge, webUrl, onEdit, onDelete, drag }) {
   const d = drag || {};
@@ -529,10 +586,16 @@ function TracksTab({ data, reload, notify }) {
     try { await sbDelete('tracks', 'id', t.id); notify('Smazáno', 'ok'); reload(); }
     catch (e) { notify(e.message || 'Chyba', 'err'); }
   };
+  const [bulk, setBulk] = useState(false);
+  const [q, setQ] = useState('');
   const noAudioCount = data.tracks.filter((t) => !t.audio_url).length;
-  const tracks = onlyNoAudio ? data.tracks.filter((t) => !t.audio_url) : data.tracks;
+  const qq = q.trim().toLowerCase();
+  let tracks = data.tracks;
+  if (onlyNoAudio) tracks = tracks.filter((t) => !t.audio_url);
+  if (qq) tracks = tracks.filter((t) => (t.title || '').toLowerCase().indexOf(qq) >= 0 || (albMap[t.album_id] || '').toLowerCase().indexOf(qq) >= 0);
+  const filtered = onlyNoAudio || !!qq;
   const row = (t, i, drag) => (
-    <ItemRow key={t.id} drag={onlyNoAudio ? null : drag}
+    <ItemRow key={t.id} drag={filtered ? null : drag}
       leading={t.audio_url ? <PlayBtn url={t.audio_url} /> : null}
       title={t.title}
       sub={(albMap[t.album_id] || '—') + (t.duration ? ' · ' + t.duration : '')}
@@ -544,39 +607,51 @@ function TracksTab({ data, reload, notify }) {
     <div>
       <div className="toolbar">
         <AddBtn onClick={() => setEdit(null)} label="Nová skladba" />
+        <button className="btn btn-ghost" onClick={() => setBulk(true)}>⇪ Hromadně mp3</button>
         <button className={'toggle' + (onlyNoAudio ? ' on' : '')} onClick={() => setOnlyNoAudio((v) => !v)}>
           Jen bez audia{noAudioCount ? ' (' + noAudioCount + ')' : ''}
         </button>
+        <input className="search" placeholder="Hledat skladbu…" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
-      {onlyNoAudio
+      {filtered
         ? <div className="list">{tracks.map((t) => row(t))}</div>
         : <DragList items={tracks} getKey={(t) => t.id} renderRow={row}
             onReorder={(next) => persistOrder('tracks', next, notify).then(reload)} />}
-      {tracks.length === 0 && <div style={{ color: 'var(--muted)', fontSize: 14, marginTop: 4 }}>{onlyNoAudio ? 'Všechny skladby mají audio 🎉' : 'Zatím žádné skladby.'}</div>}
+      {tracks.length === 0 && <div style={{ color: 'var(--muted)', fontSize: 14, marginTop: 4 }}>{onlyNoAudio ? 'Všechny skladby mají audio 🎉' : 'Nic nenalezeno.'}</div>}
       {edit !== undefined && <TrackForm initial={edit} albums={albums} notify={notify}
         onClose={() => setEdit(undefined)} onSaved={() => { setEdit(undefined); reload(); }} />}
+      {bulk && <BulkUpload albums={albums} notify={notify}
+        onClose={() => setBulk(false)} onDone={() => { setBulk(false); reload(); }} />}
     </div>
   );
 }
 function AlbumsTab({ data, reload, notify }) {
   const [edit, setEdit] = useState(undefined);
+  const [q, setQ] = useState('');
   const del = async (a) => {
     if (!window.confirm('Smazat album „' + a.title + '"? Skladby zůstanou, jen ztratí album.')) return;
     try { await sbDelete('albums', 'id', a.id); notify('Smazáno', 'ok'); reload(); }
     catch (e) { notify(e.message || 'Chyba', 'err'); }
   };
+  const qq = q.trim().toLowerCase();
+  const albums = qq ? data.albums.filter((a) => (a.title || '').toLowerCase().indexOf(qq) >= 0 || (a.genre || '').toLowerCase().indexOf(qq) >= 0) : data.albums;
+  const row = (a, i, drag) => (
+    <ItemRow key={a.id} drag={qq ? null : drag}
+      title={a.title} sub={(a.genre || '') + (a.year ? ' · ' + a.year : '')}
+      swatch={'linear-gradient(135deg,' + (a.g1 || '#888') + ',' + (a.g2 || '#444') + ')'}
+      webUrl={SITE + '/#album=' + a.id}
+      onEdit={() => setEdit(a)} onDelete={() => del(a)} />
+  );
   return (
     <div>
-      <div className="toolbar"><AddBtn onClick={() => setEdit(null)} label="Nové album" /></div>
-      <DragList items={data.albums} getKey={(a) => a.id}
-        onReorder={(next) => persistOrder('albums', next, notify).then(reload)}
-        renderRow={(a, i, drag) => (
-          <ItemRow key={a.id} drag={drag}
-            title={a.title} sub={(a.genre || '') + (a.year ? ' · ' + a.year : '')}
-            swatch={'linear-gradient(135deg,' + (a.g1 || '#888') + ',' + (a.g2 || '#444') + ')'}
-            webUrl={SITE + '/#album=' + a.id}
-            onEdit={() => setEdit(a)} onDelete={() => del(a)} />
-        )} />
+      <div className="toolbar">
+        <AddBtn onClick={() => setEdit(null)} label="Nové album" />
+        <input className="search" placeholder="Hledat album…" value={q} onChange={(e) => setQ(e.target.value)} />
+      </div>
+      {qq
+        ? <div className="list">{albums.map((a) => row(a))}</div>
+        : <DragList items={albums} getKey={(a) => a.id} renderRow={row}
+            onReorder={(next) => persistOrder('albums', next, notify).then(reload)} />}
       {edit !== undefined && <AlbumForm initial={edit} notify={notify}
         onClose={() => setEdit(undefined)} onSaved={() => { setEdit(undefined); reload(); }} />}
     </div>
@@ -584,22 +659,41 @@ function AlbumsTab({ data, reload, notify }) {
 }
 function AppsTab({ data, reload, notify }) {
   const [edit, setEdit] = useState(undefined);
+  const [onlyNoLink, setOnlyNoLink] = useState(false);
+  const [q, setQ] = useState('');
   const del = async (a) => {
     if (!window.confirm('Smazat aplikaci „' + a.name + '"?')) return;
     try { await sbDelete('apps', 'id', a.id); notify('Smazáno', 'ok'); reload(); }
     catch (e) { notify(e.message || 'Chyba', 'err'); }
   };
+  const noLink = (a) => !a.link || a.link === '#';
+  const noLinkCount = data.apps.filter(noLink).length;
+  const qq = q.trim().toLowerCase();
+  let apps = data.apps;
+  if (onlyNoLink) apps = apps.filter(noLink);
+  if (qq) apps = apps.filter((a) => (a.name || '').toLowerCase().indexOf(qq) >= 0);
+  const filtered = onlyNoLink || !!qq;
+  const row = (a, i, drag) => (
+    <ItemRow key={a.id} drag={filtered ? null : drag}
+      title={a.name} sub={a.platform + (a.link && a.link !== '#' ? ' · ' + a.link : '')}
+      swatch={a.color}
+      badge={noLink(a) ? <span className="badge warn">chybí odkaz</span> : null}
+      webUrl={(a.link && a.link !== '#') ? a.link : SITE}
+      onEdit={() => setEdit(a)} onDelete={() => del(a)} />
+  );
   return (
     <div>
-      <div className="toolbar"><AddBtn onClick={() => setEdit(null)} label="Nová aplikace" /></div>
-      <DragList items={data.apps} getKey={(a) => a.id}
-        onReorder={(next) => persistOrder('apps', next, notify).then(reload)}
-        renderRow={(a, i, drag) => (
-          <ItemRow key={a.id} drag={drag}
-            title={a.name} sub={a.platform + (a.link && a.link !== '#' ? ' · ' + a.link : '')}
-            swatch={a.color} webUrl={(a.link && a.link !== '#') ? a.link : SITE}
-            onEdit={() => setEdit(a)} onDelete={() => del(a)} />
-        )} />
+      <div className="toolbar">
+        <AddBtn onClick={() => setEdit(null)} label="Nová aplikace" />
+        <button className={'toggle' + (onlyNoLink ? ' on' : '')} onClick={() => setOnlyNoLink((v) => !v)}>
+          Jen bez odkazu{noLinkCount ? ' (' + noLinkCount + ')' : ''}
+        </button>
+        <input className="search" placeholder="Hledat aplikaci…" value={q} onChange={(e) => setQ(e.target.value)} />
+      </div>
+      {filtered
+        ? <div className="list">{apps.map((a) => row(a))}</div>
+        : <DragList items={apps} getKey={(a) => a.id} renderRow={row}
+            onReorder={(next) => persistOrder('apps', next, notify).then(reload)} />}
       {edit !== undefined && <AppForm initial={edit} notify={notify}
         onClose={() => setEdit(undefined)} onSaved={() => { setEdit(undefined); reload(); }} />}
     </div>
@@ -608,23 +702,33 @@ function AppsTab({ data, reload, notify }) {
 function TextsTab({ data, reload, notify }) {
   const [edit, setEdit] = useState(undefined); // social edit
   const [cfg, setCfg] = useState(false);
+  const [q, setQ] = useState('');
   const del = async (s) => {
     if (!window.confirm('Smazat síť „' + s.label + '"?')) return;
     try { await sbDelete('socials', 'id', s.id); notify('Smazáno', 'ok'); reload(); }
     catch (e) { notify(e.message || 'Chyba', 'err'); }
   };
+  const noLink = (s) => !s.url || s.url === '#';
+  const qq = q.trim().toLowerCase();
+  const socials = qq ? data.socials.filter((s) => (s.label || '').toLowerCase().indexOf(qq) >= 0) : data.socials;
+  const row = (s, i, drag) => (
+    <ItemRow key={s.id} drag={qq ? null : drag} title={s.label} sub={s.url}
+      badge={noLink(s) ? <span className="badge warn">chybí odkaz</span> : null}
+      webUrl={(s.url && s.url !== '#') ? s.url : null}
+      onEdit={() => setEdit(s)} onDelete={() => del(s)} />
+  );
   return (
     <div>
       <button className="btn btn-ghost" style={{ marginBottom: 16 }} onClick={() => setCfg(true)}>⚙️ Kontakt, odkazy & statistiky</button>
       <div className="syne" style={{ fontWeight: 700, fontSize: 15, margin: '6px 0 10px' }}>Sociální sítě</div>
-      <div className="toolbar"><AddBtn onClick={() => setEdit(null)} label="Nová síť" /></div>
-      <DragList items={data.socials} getKey={(s) => s.id}
-        onReorder={(next) => persistOrder('socials', next, notify).then(reload)}
-        renderRow={(s, i, drag) => (
-          <ItemRow key={s.id} drag={drag} title={s.label} sub={s.url}
-            webUrl={(s.url && s.url !== '#') ? s.url : null}
-            onEdit={() => setEdit(s)} onDelete={() => del(s)} />
-        )} />
+      <div className="toolbar">
+        <AddBtn onClick={() => setEdit(null)} label="Nová síť" />
+        <input className="search" placeholder="Hledat síť…" value={q} onChange={(e) => setQ(e.target.value)} />
+      </div>
+      {qq
+        ? <div className="list">{socials.map((s) => row(s))}</div>
+        : <DragList items={socials} getKey={(s) => s.id} renderRow={row}
+            onReorder={(next) => persistOrder('socials', next, notify).then(reload)} />}
       {edit !== undefined && <SocialForm initial={edit} notify={notify}
         onClose={() => setEdit(undefined)} onSaved={() => { setEdit(undefined); reload(); }} />}
       {cfg && <ConfigForm config={data.config} notify={notify}
@@ -669,16 +773,18 @@ function AdminApp({ session, onLogout }) {
           <div className="syne" style={{ fontSize: 22, fontWeight: 800 }}>Administrace</div>
           <div style={{ color: 'var(--muted)', fontSize: 13 }}>{email}</div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button className="btn btn-ghost btn-sm" onClick={() => downloadBackup(data)} disabled={!data} title="Stáhnout zálohu obsahu (JSON)">⬇ Záloha</button>
           <button className="btn btn-ghost btn-sm" onClick={() => setPw(true)}>Změnit heslo</button>
           <button className="btn btn-ghost btn-sm" onClick={onLogout}>Odhlásit</button>
         </div>
       </div>
 
       <div className="tabs">
-        {TABS.map(([k, label]) => (
-          <button key={k} className={'tab' + (tab === k ? ' active' : '')} onClick={() => setTab(k)}>{label}</button>
-        ))}
+        {TABS.map(([k, label]) => {
+          const n = data ? { tracks: data.tracks.length, albums: data.albums.length, apps: data.apps.length, texts: data.socials.length }[k] : null;
+          return <button key={k} className={'tab' + (tab === k ? ' active' : '')} onClick={() => setTab(k)}>{label}{n != null ? <span className="tabcount"> {n}</span> : ''}</button>;
+        })}
       </div>
 
       {err && <div className="toast err" style={{ position: 'static', transform: 'none', marginBottom: 14 }}>{err} <button className="btn btn-ghost btn-sm" onClick={load} style={{ marginLeft: 8 }}>Zkusit znovu</button></div>}
