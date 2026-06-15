@@ -44,6 +44,7 @@ function BackgroundFX() {
         ph:Math.random()*Math.PI*2, warm:Math.random(),
         bin: 2 + Math.floor(Math.random()*86),   // „svoje" frekvenční pásmo
         react: 0.7 + Math.random()*0.7,           // jak silně reaguje
+        depth: Math.random(),                     // hloubka 0=daleko … 1=blízko (paralaxa)
         _x:0, _y:0 };
     }
     function resize() {
@@ -107,6 +108,7 @@ function BackgroundFX() {
       const drive = Math.max(env.bass, idle);
       const lvl   = Math.max(env.level, idle);
       const cx = W/2, cy = H*0.5;
+      const scroll = window.scrollY || window.pageYOffset || 0; // paralaxa: posun pozadí dle scrollu
       const bloom = drive*0.13;                       // basy „nadechnou" celé pole
       const speedM = 1 + env.surge*1.8 + env.treble*0.5;  // beat mírně zrychlí pohyb
       const linkDist = (playing ? 116 : 96) + lvl*64;
@@ -129,11 +131,14 @@ function BackgroundFX() {
         if (p.y < -12) { p.y = H+12; p.x = Math.random()*W; }
         if (p.x < -12) p.x = W+12; else if (p.x > W+12) p.x = -12;
         const be = binEnv[p.bin] * p.react;          // 0..~1 dle spektra
-        const dx = p.x + (p.x-cx)*bloom, dy = p.y + (p.y-cy)*bloom;
+        const pf = 0.02 + p.depth*0.10;              // hloubka → rychlost paralaxy
+        const py = ((p.y - scroll*pf) % H + H) % H;  // posun dle scrollu, zabalený do výšky
+        const dx = p.x + (p.x-cx)*bloom, dy = py + (py-cy)*bloom;
         p._x = dx; p._y = dy;
-        const rr = Math.max(0.3, p.r*(1 + drive*0.6 + be*2.1 + env.flash*0.6) + Math.sin(p.ph)*0.3);
+        const sizeD = 0.6 + p.depth*0.55, alphaD = 0.62 + p.depth*0.38; // blízké větší/jasnější
+        const rr = Math.max(0.3, p.r*sizeD*(1 + drive*0.6 + be*2.1 + env.flash*0.6) + Math.sin(p.ph)*0.3);
         const c = p.warm < 0.5 ? col.a1 : col.a2;
-        const al = Math.min(0.9, (col.dark ? 0.13 : 0.18) + be*0.6 + env.flash*0.22);
+        const al = Math.min(0.9, ((col.dark ? 0.13 : 0.18) + be*0.6 + env.flash*0.22) * alphaD);
         ctx.beginPath();
         ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${al})`;
         ctx.arc(dx, dy, rr, 0, Math.PI*2); ctx.fill();
