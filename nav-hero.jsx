@@ -18,7 +18,7 @@ function BackgroundFX() {
     let W = 0, H = 0, particles = [], raf = null, running = false, t = 0, frame = 0;
     const col = { a1:[249,115,22], a2:[251,191,36], dark:true };
     // reaktivní stav: obálky (rychlý náběh / pomalé doznívání), spektrum, beat, prstence
-    const env = { bass:0, level:0, surge:0, flash:0 };
+    const env = { bass:0, level:0, surge:0, flash:0, treble:0 };
     let binEnv = new Float32Array(128), bassHist = [], beatCool = 0, rings = [];
 
     function parseColor(str, fb) {
@@ -84,7 +84,7 @@ function BackgroundFX() {
         const bins = a.bins;
         for (let i=0;i<binEnv.length;i++) {
           const v = i < bins.length ? bins[i]/255 : 0;
-          binEnv[i] = v > binEnv[i] ? v : binEnv[i]*0.86;
+          binEnv[i] = v > binEnv[i] ? v : binEnv[i]*0.92;
         }
         env.bass  = a.bass  > env.bass  ? a.bass  : env.bass*0.90;
         env.level = a.level > env.level ? a.level : env.level*0.92;
@@ -100,14 +100,15 @@ function BackgroundFX() {
         for (let i=0;i<binEnv.length;i++) binEnv[i] *= 0.90;
         env.bass *= 0.90; env.level *= 0.90;
       }
-      env.flash *= 0.90; env.surge *= 0.86;
+      env.flash *= 0.90; env.surge *= 0.90;
+      env.treble += (treble - env.treble) * 0.15;  // dolnopropust na výšky → klidnější, ne tak roztřesené
 
       const idle = playing ? 0 : 0.10*(0.5 + 0.5*Math.sin(t*0.6)); // jemné dýchání v klidu
       const drive = Math.max(env.bass, idle);
       const lvl   = Math.max(env.level, idle);
       const cx = W/2, cy = H*0.5;
       const bloom = drive*0.13;                       // basy „nadechnou" celé pole
-      const speedM = 1 + env.surge*2.6 + treble*1.1;  // beat zrychlí pohyb
+      const speedM = 1 + env.surge*1.8 + env.treble*0.5;  // beat mírně zrychlí pohyb
       const linkDist = (playing ? 116 : 96) + lvl*64;
 
       ctx.globalCompositeOperation = col.dark ? 'lighter' : 'source-over';
@@ -124,7 +125,7 @@ function BackgroundFX() {
 
       // částice — každá svítí/roste podle „své" frekvence
       for (const p of particles) {
-        p.x += p.vx*speedM; p.y += p.vy*speedM; p.ph += 0.02 + treble*0.12;
+        p.x += p.vx*speedM; p.y += p.vy*speedM; p.ph += 0.018 + env.treble*0.05;
         if (p.y < -12) { p.y = H+12; p.x = Math.random()*W; }
         if (p.x < -12) p.x = W+12; else if (p.x > W+12) p.x = -12;
         const be = binEnv[p.bin] * p.react;          // 0..~1 dle spektra
