@@ -15,6 +15,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 **Vše hotové a NASAZENÉ** — backend (1–2), web čte z DB (3), `/admin` login (4), správa obsahu (5), plnohodnotný CMS, dashboard Přehled, návštěvnost (GoatCounter). Detaily níž a v `SUPABASE_BACKEND.md`.
 
 ## ✅ Hotovo
+- **Pozadí víc do OLED (15. 06. 2026, NASAZENO, SW `jw-v41`):** studené orby ztlumeny ~na polovinu (cyan `0.06→0.03`, indigo `0.095→0.045`, fialová `0.10→0.045`), teplý brand akcent (`mesh-3`, `--a2`) **ponechán** jako jediný svítící bod → hlubší čerň s jedním akcentem (varianta „mezi A a B"). Noise `0.04→0.03`. Base `--bg` zůstává `#000`.
 - **Hudba jako primární sekce (15. 06. 2026, NASAZENO, SW `jw-v40`):** pořadí sekcí přehozeno — **Hudba → Nejvíce poslouchané → Aplikace → Srovnání** (`app.jsx`), v navigaci **Hudba před Aplikacemi** a hlavní hero tlačítko je teď **přehrávání (primary)**, Aplikace jako vedlejší (outline); scroll-šipka v heru míří na Hudbu (`#music`). Nadpis/identita hera beze změny (dle dohody). Ověřeno transpilací + kotvy `#music`/`#apps` sedí.
 - **Mobil — přehrávání i při zhasnuté obrazovce (15. 06. 2026, NASAZENO, commit `7123c33`, SW `jw-v39`):** na mobilu (iOS/Android) se zvuk pouští **přímo z `<audio>`** elementu, ne přes Web Audio — iOS jinak při zamknutí obrazovky uspí `AudioContext` a hudba by se zastavila. Vylepšená **Media Session** pro zámkovou obrazovku: artwork z obálky alba, `playbackState` (playing/paused), `setPositionState` (posuvník) a `seekto`. Desktop má dál reálný FFT vizualizér; na mobilu fallback (seededBars + jemně plující pozadí, `__jwAnalyser` se nenastaví). Ověřeno: Babel transpilace všech JSX + Node test detekce zařízení (iPhone/iPadOS/Android → přímé, Win/Mac desktop → Web Audio) + Vercel deploy READY. Pozn.: naostro slyšitelné, až budou v adminu reálné mp3.
 - **Bezpečnostní pas (15. 06. 2026):** audit repa i celé git historie — **žádný GitHub token ani Supabase `service_role` klíč** ve verzování (na webu jen veřejný `anon`, OK). Admin **heslo změněno**. V Supabase **vypnutá veřejná registrace** („Allow new users to sign up" OFF, ověřeno po reloadu) → projekt zamčen jen na Jendův účet. Classic PAT ponechán (viz rozhodnutí).
@@ -87,7 +88,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - **Bez build stepu:** JSX transpiluje Babel v prohlížeči. Nutný http server / hosting (`file://` nefunguje).
 - **Komunikace mezi soubory přes `window` globály** — pořadí skriptů v `index.html` se nesmí měnit.
 - **Web předpokládá nasazení v kořeni domény** — `sw.js`/manifest mají absolutní cesty (`/...`).
-- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v40`).
+- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v41`).
 - **Nepoužívat `scrollIntoView`** — místo toho `window.scrollTo({...})`.
 - **`handoff/` je starší 4souborová záloha**, ne aktuální verze.
 
@@ -104,7 +105,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - `tweaks-panel.jsx` – panel nastavení
 - `vendor/` – lokální React/ReactDOM/Babel + fonty (offline) · `vendor/fonts.css`
 - `icons/` – PNG ikony 180/192/512
-- `sw.js` – service worker (`jw-v40`) · `manifest.webmanifest`
+- `sw.js` – service worker (`jw-v41`) · `manifest.webmanifest`
 - `case-studies/` – 3 case studies + styly
 - `embed.html` · `feed.xml` · `og-image.svg` · `404.html` · `sitemap.xml` · `robots.txt`
 - `HANDOFF.md` – technický handoff
