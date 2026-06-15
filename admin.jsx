@@ -304,10 +304,14 @@ function AlbumForm({ initial, onClose, onSaved, notify }) {
   const [f, setF] = useState(() => initial ? {
     id: initial.id, title: initial.title || '', genre: initial.genre || '', year: initial.year || '',
     g1: initial.g1 || '#f59e0b', g2: initial.g2 || '#b45309', tracks: initial.tracks != null ? initial.tracks : '',
-    cs: initial.cs || '', en: initial.en || '', sort: initial.sort != null ? initial.sort : 0,
-  } : { id: '', title: '', genre: '', year: new Date().getFullYear(), g1: '#f59e0b', g2: '#b45309', tracks: '', cs: '', en: '', sort: 0 });
+    cs: initial.cs || '', en: initial.en || '', sort: initial.sort != null ? initial.sort : 0, cover_url: initial.cover_url || '',
+  } : { id: '', title: '', genre: '', year: new Date().getFullYear(), g1: '#f59e0b', g2: '#b45309', tracks: '', cs: '', en: '', sort: 0, cover_url: '' });
   const [busy, setBusy] = useState(false);
+  const [prog, setProg] = useState(-1);
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(initial && initial.cover_url ? initial.cover_url : '');
   const set = (k, v) => setF((o) => Object.assign({}, o, { [k]: v }));
+  const onPickCover = (fl) => { setFile(fl); try { setPreview(URL.createObjectURL(fl)); } catch (e) {} };
 
   const submit = async () => {
     const id = initial ? initial.id : (f.id.trim() || slugify(f.title));
@@ -315,16 +319,18 @@ function AlbumForm({ initial, onClose, onSaved, notify }) {
     if (!f.title.trim()) { notify('Zadej název alba', 'err'); return; }
     setBusy(true);
     try {
+      let cover_url = f.cover_url;
+      if (file) { setProg(0); cover_url = await uploadFile('images', 'covers', file, setProg); setProg(-1); }
       const row = {
         title: f.title.trim(), genre: f.genre.trim() || null, year: Number(f.year) || null,
         g1: f.g1, g2: f.g2, tracks: f.tracks === '' ? null : Number(f.tracks),
-        cs: f.cs.trim() || null, en: f.en.trim() || null, sort: Number(f.sort) || 0,
+        cs: f.cs.trim() || null, en: f.en.trim() || null, sort: Number(f.sort) || 0, cover_url: cover_url || null,
       };
       if (initial) await sbUpdate('albums', 'id', initial.id, row);
       else await sbInsert('albums', Object.assign({ id: id }, row));
       notify('Album uloženo', 'ok'); onSaved();
     } catch (e) { notify(e.message || 'Chyba při ukládání', 'err'); }
-    finally { setBusy(false); }
+    finally { setBusy(false); setProg(-1); }
   };
 
   return (
@@ -334,6 +340,12 @@ function AlbumForm({ initial, onClose, onSaved, notify }) {
       <Field label="Žánr"><input value={f.genre} onChange={(e) => set('genre', e.target.value)} /></Field>
       <Field label="Rok"><input type="number" value={f.year} onChange={(e) => set('year', e.target.value)} /></Field>
       <Field label="Počet skladeb (zobrazené číslo)"><input type="number" value={f.tracks} onChange={(e) => set('tracks', e.target.value)} /></Field>
+      <Field label={'Obálka alba' + (f.cover_url ? ' — nahráno ✓' : ' (jinak se použijí barvy)')}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          {preview && <img className="thumb" src={preview} alt="" />}
+          <div style={{ flex: 1 }}><FileDrop accept="image/*" file={file} onFile={onPickCover} label="Přetáhni obálku, nebo klikni" /></div>
+        </div>
+      </Field>
       <div style={{ display: 'flex', gap: 12 }}>
         <Field label="Barva 1"><input type="color" value={f.g1} onChange={(e) => set('g1', e.target.value)} style={{ height: 44, padding: 4 }} /></Field>
         <Field label="Barva 2"><input type="color" value={f.g2} onChange={(e) => set('g2', e.target.value)} style={{ height: 44, padding: 4 }} /></Field>
@@ -341,7 +353,7 @@ function AlbumForm({ initial, onClose, onSaved, notify }) {
       <Field label="Popis CZ"><textarea value={f.cs} onChange={(e) => set('cs', e.target.value)} /></Field>
       <Field label="Popis EN"><textarea value={f.en} onChange={(e) => set('en', e.target.value)} /></Field>
       <Field label="Pořadí"><input type="number" value={f.sort} onChange={(e) => set('sort', e.target.value)} /></Field>
-      <FormActions busy={busy} onCancel={onClose} onSubmit={submit} />
+      <FormActions busy={busy} progress={prog} onCancel={onClose} onSubmit={submit} />
     </Modal>
   );
 }
@@ -478,6 +490,169 @@ function ConfigForm({ config, onClose, onSaved, notify }) {
         <Field label="Skladeb"><input type="number" value={f.tracks_released} onChange={(e) => set('tracks_released', e.target.value)} /></Field>
         <Field label="Projektů/rok"><input type="number" value={f.shipped_this_year} onChange={(e) => set('shipped_this_year', e.target.value)} /></Field>
       </div>
+      <FormActions busy={busy} onCancel={onClose} onSubmit={submit} />
+    </Modal>
+  );
+}
+
+/* ---------------- site texts (STRINGS overrides) ---------------- */
+const STRING_KEYS = [
+  ['hero_tag', 'Hero – podtitul (pod jménem)'],
+  ['hero_desc', 'Hero – popis'],
+  ['cta_apps', 'Tlačítko: aplikace'],
+  ['cta_music', 'Tlačítko: hudba'],
+  ['music_sub', 'Hudba – podtitul'],
+  ['contact_title', 'Kontakt – nadpis'],
+  ['contact_desc', 'Kontakt – popis'],
+  ['newsletter_title', 'Newsletter – nadpis'],
+  ['newsletter_desc', 'Newsletter – popis'],
+  ['compare_title', 'Srovnání – nadpis'],
+  ['compare_desc', 'Srovnání – popis'],
+  ['donate_desc', 'Ko-fi – popis'],
+  ['footer', 'Patička'],
+];
+function StringsEditor({ config, onClose, onSaved, notify }) {
+  const defs = window.STRINGS || { cs: {}, en: {} };
+  const ov = config.strings || { cs: {}, en: {} };
+  const eff = (l, k) => (ov[l] && ov[l][k] != null ? ov[l][k] : ((defs[l] && defs[l][k]) || ''));
+  const [vals, setVals] = useState(() => {
+    const o = { cs: {}, en: {} };
+    STRING_KEYS.forEach(function (p) { o.cs[p[0]] = eff('cs', p[0]); o.en[p[0]] = eff('en', p[0]); });
+    return o;
+  });
+  const [busy, setBusy] = useState(false);
+  const set = (l, k, v) => setVals((o) => { var n = { cs: Object.assign({}, o.cs), en: Object.assign({}, o.en) }; n[l][k] = v; return n; });
+  const submit = async () => {
+    setBusy(true);
+    try {
+      const out = { cs: {}, en: {} };
+      STRING_KEYS.forEach(function (p) {
+        ['cs', 'en'].forEach(function (l) {
+          const v = (vals[l][p[0]] || '').trim();
+          const def = (defs[l] && defs[l][p[0]]) || '';
+          if (v && v !== def) out[l][p[0]] = v;
+        });
+      });
+      await sbUpdate('site_config', 'key', 'strings', { value: out });
+      notify('Texty uloženy', 'ok'); onSaved();
+    } catch (e) { notify(e.message || 'Chyba', 'err'); }
+    finally { setBusy(false); }
+  };
+  return (
+    <Modal title="Hlavní texty webu" onClose={onClose}>
+      <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 14 }}>Prázdné pole = použije se výchozí text z webu.</div>
+      {STRING_KEYS.map(function (p) {
+        return (
+          <div key={p[0]} style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--a2)', marginBottom: 6 }}>{p[1]}</div>
+            <input value={vals.cs[p[0]]} onChange={(e) => set('cs', p[0], e.target.value)} placeholder="Česky" style={{ marginBottom: 6 }} />
+            <input value={vals.en[p[0]]} onChange={(e) => set('en', p[0], e.target.value)} placeholder="English" />
+          </div>
+        );
+      })}
+      <FormActions busy={busy} onCancel={onClose} onSubmit={submit} />
+    </Modal>
+  );
+}
+
+/* ---------------- build log ---------------- */
+function BuildLogEditor({ config, onClose, onSaved, notify }) {
+  const [rows, setRows] = useState(() => (config.build_log || []).map((r) => Object.assign({}, r)));
+  const [busy, setBusy] = useState(false);
+  const upd = (i, k, v) => setRows((rs) => rs.map((r, j) => j === i ? Object.assign({}, r, { [k]: v }) : r));
+  const add = () => setRows((rs) => [{ date: '', cs: '', en: '' }].concat(rs));
+  const remove = (i) => setRows((rs) => rs.filter((_, j) => j !== i));
+  const submit = async () => {
+    setBusy(true);
+    try {
+      const clean = rows.filter((r) => (r.date || r.cs || r.en)).map((r) => ({ date: (r.date || '').trim(), cs: (r.cs || '').trim(), en: (r.en || '').trim() }));
+      await sbUpdate('site_config', 'key', 'build_log', { value: clean });
+      notify('Deník buildu uložen', 'ok'); onSaved();
+    } catch (e) { notify(e.message || 'Chyba', 'err'); }
+    finally { setBusy(false); }
+  };
+  return (
+    <Modal title="Deník buildu" onClose={onClose}>
+      <button className="btn btn-ghost btn-sm" style={{ marginBottom: 12 }} onClick={add}>+ Přidat záznam</button>
+      {rows.map((r, i) => (
+        <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', padding: 12, marginBottom: 10 }}>
+          <input value={r.date} onChange={(e) => upd(i, 'date', e.target.value)} placeholder="2026-06" style={{ marginBottom: 6 }} />
+          <input value={r.cs} onChange={(e) => upd(i, 'cs', e.target.value)} placeholder="Text CZ" style={{ marginBottom: 6 }} />
+          <input value={r.en} onChange={(e) => upd(i, 'en', e.target.value)} placeholder="Text EN" style={{ marginBottom: 8 }} />
+          <button className="btn btn-danger btn-sm" onClick={() => remove(i)}>Odebrat</button>
+        </div>
+      ))}
+      {rows.length === 0 && <div style={{ color: 'var(--muted)', fontSize: 13 }}>Žádné záznamy. Přidej první.</div>}
+      <FormActions busy={busy} onCancel={onClose} onSubmit={submit} />
+    </Modal>
+  );
+}
+
+/* ---------------- comparison ---------------- */
+const DEFAULT_COMPARE_ROWS = [
+  { key: 'platform', cs: 'Platforma', en: 'Platform' },
+  { key: 'price', cs: 'Cena', en: 'Price' },
+  { key: 'offline', cs: 'Offline režim', en: 'Offline mode' },
+  { key: 'account', cs: 'Vyžaduje účet', en: 'Requires account' },
+  { key: 'open_src', cs: 'Open source', en: 'Open source' },
+  { key: 'best_for', cs: 'Nejlépe pro…', en: 'Best for…' },
+];
+function ComparisonEditor({ config, apps, onClose, onSaved, notify }) {
+  const cmp = config.comparison || { apps: [], rows: [], data: {} };
+  const appById = {}; apps.forEach((a) => { appById[a.id] = a; });
+  const init = (id) => {
+    const d = (cmp.data && cmp.data[id]) || {};
+    return { price: d.price || 'Free', offline: !!d.offline, account: !!d.account, open_src: !!d.open_src,
+             best_for_cs: (d.best_for && d.best_for.cs) || '', best_for_en: (d.best_for && d.best_for.en) || '' };
+  };
+  const [ids, setIds] = useState(() => {
+    const base = (cmp.apps || []).slice(0, 3).map(Number);
+    let n = 0;
+    while (base.length < 3) { base.push(apps[n] ? apps[n].id : ''); n++; }
+    return base;
+  });
+  const [vals, setVals] = useState(() => { const o = {}; ids.forEach((id) => { o[id] = init(id); }); return o; });
+  const [busy, setBusy] = useState(false);
+  const setId = (slot, id) => { const n = Number(id); setIds((a) => a.map((x, i) => i === slot ? n : x)); setVals((o) => o[n] ? o : Object.assign({}, o, { [n]: init(n) })); };
+  const setV = (id, k, v) => setVals((o) => Object.assign({}, o, { [id]: Object.assign({}, o[id] || init(id), { [k]: v }) }));
+  const submit = async () => {
+    setBusy(true);
+    try {
+      const data = {};
+      ids.forEach((id) => {
+        const v = vals[id] || init(id);
+        const app = appById[id];
+        data[id] = { platform: app ? app.platform : '', price: v.price, offline: !!v.offline, account: !!v.account,
+                     open_src: !!v.open_src, best_for: { cs: v.best_for_cs, en: v.best_for_en } };
+      });
+      const out = { apps: ids.map(Number), rows: (cmp.rows && cmp.rows.length) ? cmp.rows : DEFAULT_COMPARE_ROWS, data: data };
+      await sbUpdate('site_config', 'key', 'comparison', { value: out });
+      notify('Srovnání uloženo', 'ok'); onSaved();
+    } catch (e) { notify(e.message || 'Chyba', 'err'); }
+    finally { setBusy(false); }
+  };
+  return (
+    <Modal title="Srovnání aplikací (3)" onClose={onClose}>
+      {ids.map((id, slot) => {
+        const v = vals[id] || init(id);
+        return (
+          <div key={slot} style={{ border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', padding: 12, marginBottom: 10 }}>
+            <Field label={'Aplikace ' + (slot + 1)}>
+              <select value={id} onChange={(e) => setId(slot, e.target.value)}>
+                {apps.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+              </select>
+            </Field>
+            <Field label="Cena"><input value={v.price} onChange={(e) => setV(id, 'price', e.target.value)} /></Field>
+            <div style={{ display: 'flex', gap: 16, margin: '4px 0 12px', flexWrap: 'wrap' }}>
+              <label style={{ fontSize: 13 }}><input type="checkbox" checked={v.offline} onChange={(e) => setV(id, 'offline', e.target.checked)} />Offline</label>
+              <label style={{ fontSize: 13 }}><input type="checkbox" checked={v.account} onChange={(e) => setV(id, 'account', e.target.checked)} />Vyžaduje účet</label>
+              <label style={{ fontSize: 13 }}><input type="checkbox" checked={v.open_src} onChange={(e) => setV(id, 'open_src', e.target.checked)} />Open source</label>
+            </div>
+            <Field label="Nejlépe pro… (CZ)"><input value={v.best_for_cs} onChange={(e) => setV(id, 'best_for_cs', e.target.value)} /></Field>
+            <Field label="Nejlépe pro… (EN)"><input value={v.best_for_en} onChange={(e) => setV(id, 'best_for_en', e.target.value)} /></Field>
+          </div>
+        );
+      })}
       <FormActions busy={busy} onCancel={onClose} onSubmit={submit} />
     </Modal>
   );
@@ -702,6 +877,9 @@ function AppsTab({ data, reload, notify }) {
 function TextsTab({ data, reload, notify }) {
   const [edit, setEdit] = useState(undefined); // social edit
   const [cfg, setCfg] = useState(false);
+  const [strings, setStrings] = useState(false);
+  const [blog, setBlog] = useState(false);
+  const [cmp, setCmp] = useState(false);
   const [q, setQ] = useState('');
   const del = async (s) => {
     if (!window.confirm('Smazat síť „' + s.label + '"?')) return;
@@ -719,7 +897,13 @@ function TextsTab({ data, reload, notify }) {
   );
   return (
     <div>
-      <button className="btn btn-ghost" style={{ marginBottom: 16 }} onClick={() => setCfg(true)}>⚙️ Kontakt, odkazy & statistiky</button>
+      <div className="syne" style={{ fontWeight: 700, fontSize: 15, marginBottom: 10 }}>Obsah webu</div>
+      <div className="toolbar" style={{ marginBottom: 20 }}>
+        <button className="btn btn-ghost" onClick={() => setCfg(true)}>⚙️ Kontakt & statistiky</button>
+        <button className="btn btn-ghost" onClick={() => setStrings(true)}>📝 Hlavní texty</button>
+        <button className="btn btn-ghost" onClick={() => setBlog(true)}>🗓 Deník buildu</button>
+        <button className="btn btn-ghost" onClick={() => setCmp(true)}>⚖️ Srovnání appek</button>
+      </div>
       <div className="syne" style={{ fontWeight: 700, fontSize: 15, margin: '6px 0 10px' }}>Sociální sítě</div>
       <div className="toolbar">
         <AddBtn onClick={() => setEdit(null)} label="Nová síť" />
@@ -733,6 +917,12 @@ function TextsTab({ data, reload, notify }) {
         onClose={() => setEdit(undefined)} onSaved={() => { setEdit(undefined); reload(); }} />}
       {cfg && <ConfigForm config={data.config} notify={notify}
         onClose={() => setCfg(false)} onSaved={() => { setCfg(false); reload(); }} />}
+      {strings && <StringsEditor config={data.config} notify={notify}
+        onClose={() => setStrings(false)} onSaved={() => { setStrings(false); reload(); }} />}
+      {blog && <BuildLogEditor config={data.config} notify={notify}
+        onClose={() => setBlog(false)} onSaved={() => { setBlog(false); reload(); }} />}
+      {cmp && <ComparisonEditor config={data.config} apps={data.apps} notify={notify}
+        onClose={() => setCmp(false)} onSaved={() => { setCmp(false); reload(); }} />}
     </div>
   );
 }

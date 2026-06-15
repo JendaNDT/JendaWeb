@@ -116,10 +116,14 @@
     .tabcount { opacity:.6; font-weight:600; }
     .filelist { font-size:13px; color:var(--muted); margin-top:10px; max-height:120px; overflow:auto;
       border:1px solid var(--border); border-radius:var(--r-sm); padding:8px 10px; }
+    input[type=checkbox] { width:auto !important; padding:0 !important; height:auto !important; margin-right:6px;
+      accent-color:var(--a1); vertical-align:-1px; }
   </style>
 </head>
 <body>
   <div id="root"></div>
-  <script type="text/babel" src="admin.jsx?v=8"></script>
+  <!-- data.js jen kvůli výchozím textům webu (window.STRINGS); admin obsah jinak čte ze Supabase -->
+  <script src="data.js"></script>
+  <script type="text/babel" src="admin.jsx?v=9"></script>
 </body>
 </html>

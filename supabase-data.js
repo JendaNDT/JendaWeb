@@ -17,13 +17,13 @@
   function mapApps(rows) {
     return rows.map(function (a) {
       return { id: a.id, name: a.name, platform: a.platform, color: a.color,
-               cs: a.cs, en: a.en, link: a.link || '#' };
+               cs: a.cs, en: a.en, link: a.link || '#', case_study_url: a.case_study_url || null };
     });
   }
   function mapAlbums(rows) {
     return rows.map(function (a) {
       return { id: a.id, title: a.title, genre: a.genre, tracks: a.tracks,
-               year: a.year, g1: a.g1, g2: a.g2, cs: a.cs, en: a.en };
+               year: a.year, g1: a.g1, g2: a.g2, cs: a.cs, en: a.en, cover_url: a.cover_url || null };
     });
   }
   function mapTracks(rows) {
@@ -54,7 +54,19 @@
     if ('public_stats'        in cfg) window.PUBLIC_STATS        = cfg.public_stats;
     if ('build_log'          in cfg) window.BUILD_LOG           = cfg.build_log;
     if ('comparison'          in cfg) window.COMPARISON          = cfg.comparison;
-    if ('case_studies'        in cfg) window.CASE_STUDIES        = cfg.case_studies;
+    // case studies: postavit z apps.case_study_url (sjednoceno s adminem)
+    if (c.apps) {
+      var csm = {};
+      c.apps.forEach(function (a) { if (a.case_study_url) csm[a.id] = a.case_study_url; });
+      window.CASE_STUDIES = csm;
+    }
+    // editovatelné texty webu: merge override hodnot na window.STRINGS (defaulty z data.js)
+    if (cfg.strings && window.STRINGS) {
+      ['cs', 'en'].forEach(function (l) {
+        var ov = cfg.strings[l];
+        if (window.STRINGS[l] && ov) { for (var k in ov) { if (ov[k]) window.STRINGS[l][k] = ov[k]; } }
+      });
+    }
   }
 
   // 1) SYNC: vykreslit poslední známý obsah z cache JEŠTĚ než se app mountne.

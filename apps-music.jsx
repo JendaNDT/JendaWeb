@@ -203,7 +203,7 @@ function AlbumCard({ album, lang, onPlay, onFilter, selected, nowPlaying }) {
         cursor:'pointer',
       }}
       onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}>
-      <div style={{ height:175, position:'relative', backgroundImage:`url("${albumArt(album)}")`, backgroundSize:'cover', backgroundPosition:'center', overflow:'hidden' }}>
+      <div style={{ height:175, position:'relative', backgroundImage:`url("${album.cover_url || albumArt(album)}")`, backgroundSize:'cover', backgroundPosition:'center', overflow:'hidden' }}>
         <div style={{ position:'absolute', inset:0, background:'radial-gradient(circle at 28% 28%, rgba(255,255,255,0.12), transparent 60%), linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.45))' }} />
         <div style={{ position:'absolute', bottom:14, left:16, right:16 }}>
           <div style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:20, color:'#fff', textShadow:'0 2px 10px rgba(0,0,0,0.6)', lineHeight:1.15 }}>{album.title}</div>
