@@ -40,14 +40,14 @@ Identity sekvence `apps`/`tracks` nastaveny za seed (apps→20, tracks→15), no
 
 ## Co dál
 
-**Fáze 3 — web čte ze Supabase: HOTOVO (lokálně, 15. 06. 2026, čeká na nasazení).**
+**Fáze 3 — web čte ze Supabase: HOTOVO a NASAZENO (15. 06. 2026, commit `e8306ee`, live na jenda-web.vercel.app).**
 - Místo supabase-js použit **prostý `fetch` na REST** (`/rest/v1/<table>?select=*&order=sort.asc`) s anon klíčem — web jen čte, není proč vendorovat knihovnu.
 - Nový soubor **`supabase-data.js`** (plain `<script>` hned po `data.js` v `index.html`): synchronně načte localStorage cache → `window.*` globály, pak async stáhne z REST, uloží cache (`jw_content_v1`) a při změně přerenderuje (`Root` wrapper bumpne `key` na `<App>` přes událost `jw-data-updated`).
 - Mapování snake_case→tvar webu: `audio_url→audioUrl`, `album_id→album`, `lyrics_cs/en→lyrics{cs,en}`, `site_config` řádky → `window.CONTACT_EMAIL`, `PUBLIC_STATS`, `BUILD_LOG`, `COMPARISON`, `CASE_STUDIES`, … `data.js` zůstává jako offline/fallback seed.
 - SW bumpnut na `jw-v30` (+ `/supabase-data.js` do precache).
 - Ověřeno: anon RLS čtení, mapování (unit test), transpilace všech JSX.
-- **Nasazení:** dostat změny do `JendaNDT/JendaWeb` → Vercel. Pozor: lokální kopie nemá git remote (1 commit, větev `master`) + necommitnuté úpravy z 14. 6.
+- **Nasazení: hotovo** (commit `e8306ee` v `JendaNDT/JendaWeb` na `main` → Vercel deploy). Pozn.: mountovaná kopie neumí git zápis (lock soubory) — pushovalo se z čerstvého klonu repa v sandboxu, do něj zkopírovány změněné soubory.
 
-**Fáze 4 — admin auth:** vytvořit admin uživatele (Jendův e-mail + heslo), **vypnout signup**, `/admin` přihlašovací obrazovka (tady už dává smysl supabase-js / GoTrue).
+**Fáze 4 — admin auth: POSTAVENO (15. 06. 2026, čeká na deploy `/admin` + test loginu).** `admin.html` + `admin.jsx` — login přes GoTrue (`POST /auth/v1/token?grant_type=password`, anon key, session v localStorage). Admin user `mcnegr@gmail.com` vytvořen (uid `5a7c34fb-4c84-4786-8c2e-7f5efdb0ccf6`, potvrzený). **RLS zápis zúžen na tento uid** (policies `*_admin_write`) → vyřešilo 6 advisor warningů (zbývá jen volitelná „leaked password protection"). Pozn.: veřejný signup už není kritický (zápis je vázán na uid).
 
 **Fáze 5 — admin CRUD + upload:** formuláře skladby/alba/aplikace/texty + drag-drop upload do Storage (`audio`, `images`).

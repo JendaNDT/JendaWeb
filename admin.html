@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JendaWeb — Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#f97316">
+  <meta name="color-scheme" content="dark">
+
+  <!-- Self-hosted fonty (offline-capable) -->
+  <link rel="stylesheet" href="vendor/fonts.css">
+  <!-- Lokální knihovny (stejné jako web) -->
+  <script src="vendor/react.production.min.js"></script>
+  <script src="vendor/react-dom.production.min.js"></script>
+  <script src="vendor/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#000000; --bg2:#0b0805; --card:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.10);
+      --text:#f5f0ea; --muted:#a89684; --a1:#f97316; --a2:#fbbf24; --err:#f87171; --ok:#4ade80;
+      --r-sm:10px; --r-md:14px;
+    }
+    body {
+      background: radial-gradient(1200px 800px at 50% -10%, #1a1008, #000 60%);
+      color: var(--text); font-family:'DM Sans', system-ui, sans-serif; line-height:1.6;
+      min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    }
+    a { color: var(--a1); }
+    button { cursor:pointer; border:none; background:none; font-family:inherit; color:inherit; }
+    input {
+      width:100%; padding:13px 14px; background:var(--card); border:1px solid var(--border);
+      border-radius:var(--r-sm); color:var(--text); font:inherit; font-size:15px; outline:none;
+      transition:border-color .2s;
+    }
+    input:focus { border-color:var(--a1); }
+    .syne { font-family:'Syne', system-ui, sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" src="admin.jsx"></script>
+</body>
+</html>
