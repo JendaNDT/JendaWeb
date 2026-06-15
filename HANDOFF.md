@@ -17,13 +17,15 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
 - **Background tuned for OLED.** Pure-black base; cold orbs dimmed then brought back slightly, plus `.mesh-orb` now has `saturate(1.25)`; warm accent leads. Final orb opacities: teal `0.07`, indigo `0.105`, amber `0.17`, purple `0.11`; noise `0.04`.
 - **Other UX:** hero counters animate reliably (`useCountUp` starts when in viewport, threshold `0.15`), gentle `jwFade` on content (re)render, hero subtitle reworded music-first (`data.js`), floating "?" shortcut hint (desktop, hidden ≤768px).
 - **Security:** public sign-ups disabled in Supabase Auth; admin password changed; GitHub token kept (local only, gitignored — see `PROJECT_STATUS.md` decisions).
-- SW is now `jw-v45`. Full chronological detail lives in `PROJECT_STATUS.md`.
+- **Czech fonts (latin-ext):** Syne and DM Sans were self-hosted as the **latin subset only**, which lacks the Czech glyphs `č ď ě ň ř š ť ů ž` → they fell back to a system font (mismatched in big headings). Added the **latin-ext** subset of the *same* fonts (`@fontsource`, woff2+woff) with `unicode-range`; the latin files are unchanged, latin-ext only draws the accented glyphs. See `vendor/fonts.css`; added to the SW precache.
+- Contact heading renamed "Pojďme si říct" → **"Napiš mi"** (informal "ty" to match the subtitle; EN "Write to me"), in `data.js`.
+- SW is now `jw-v47`. Full chronological detail lives in `PROJECT_STATUS.md`.
 
 ## Tech stack
 
 - **React 18 + ReactDOM** — vendored locally in `vendor/` (production UMD builds), **not from CDN**.
 - **@babel/standalone** — vendored locally (`vendor/babel.min.js`); transpiles JSX in the browser, no bundler.
-- **Fonts (Syne, DM Sans)** — self-hosted in `vendor/fonts/` + `vendor/fonts.css` (no Google Fonts).
+- **Fonts (Syne, DM Sans)** — self-hosted in `vendor/fonts/` + `vendor/fonts.css` (no Google Fonts), **latin + latin-ext** subsets (latin-ext covers Czech `č ď ě ň ř š ť ů ž`; per-glyph via `unicode-range`).
 - Plain CSS in `<style>` block + inline-style JSX.
 - Service Worker for offline PWA cache (precaches the whole boot).
 - No npm, no build, no node_modules. Must be served over **http(s)** (or localhost) — `file://` won't run the SW.
@@ -36,7 +38,7 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 - **GitHub:** `JendaNDT/JendaWeb`, branch `main`.
 - **Vercel:** connected to the repo. **Push to `main` auto-deploys.** Framework preset "Other" (pure static, no build).
 - The site assumes deployment at the **domain root** — `sw.js` and the manifest use absolute paths (`/...`). A subpath deploy would need path tweaks.
-- After changing any cached asset, **bump `VERSION` in `sw.js`** (currently `jw-v45`) so clients pick up new content.
+- After changing any cached asset, **bump `VERSION` in `sw.js`** (currently `jw-v47`) so clients pick up new content.
 - `/admin` is routed via `vercel.json` (rewrite `/admin` → `/admin.html`) and served **online-only** (SW bypasses cache for it) with `Cache-Control: no-store` headers so it's never stale.
 - **Pushing from the sandbox:** the mounted working copy's `.git` can't take git writes (lock files), so deploys go via a fresh `git clone` in `/tmp`, copy the changed files in, commit, and `git push https://<token>@github.com/JendaNDT/JendaWeb.git HEAD:main`. Token is provided per-session (in `Token/`, gitignored), never stored. Verify the deploy actually landed (Vercel occasionally misses the webhook) and that no caches serve stale files.
 
@@ -64,9 +66,9 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 │   ├── react-dom.production.min.js
 │   ├── babel.min.js
 │   ├── fonts.css           # @font-face for self-hosted fonts
-│   └── fonts/              # Syne + DM Sans (woff2/woff, latin subset)
+│   └── fonts/              # Syne + DM Sans (woff2/woff, latin + latin-ext subset)
 ├── icons/                  # PNG app icons 180/192/512 (iOS apple-touch + maskable)
-├── sw.js                   # Service worker (jw-v45; precache shell, network-first HTML, /admin online-only)
+├── sw.js                   # Service worker (jw-v47; precache shell + latin-ext fonts, network-first HTML, /admin online-only)
 ├── manifest.webmanifest    # PWA manifest (icons point to icons/*.png)
 ├── og-image.svg            # 1200×630 social card
 ├── robots.txt · sitemap.xml · feed.xml · 404.html · embed.html
