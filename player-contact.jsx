@@ -603,7 +603,7 @@ function ContactForm({ lang }) {
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
         <div>
           <div className={`field${touched.name && errors.name ? ' err' : ''}`}>
-            <input id="cf-name" type="text" placeholder=" " value={name}
+            <input id="cf-name" name="name" type="text" placeholder=" " value={name}
               onChange={e=>setName(e.target.value)} onBlur={() => setTouched(t => ({ ...t, name:true }))}
               aria-invalid={!!(touched.name && errors.name)} />
             <label htmlFor="cf-name">{tx(lang,'contact_name')}</label>
@@ -612,7 +612,7 @@ function ContactForm({ lang }) {
         </div>
         <div>
           <div className={`field${touched.email && errors.email ? ' err' : ''}`}>
-            <input id="cf-email" type="email" placeholder=" " value={email}
+            <input id="cf-email" name="email" type="email" placeholder=" " value={email}
               onChange={e=>setEmail(e.target.value)} onBlur={() => setTouched(t => ({ ...t, email:true }))}
               aria-invalid={!!(touched.email && errors.email)} />
             <label htmlFor="cf-email">{tx(lang,'contact_email_lbl')}</label>
@@ -622,7 +622,7 @@ function ContactForm({ lang }) {
       </div>
       <div>
         <div className={`field${touched.msg && errors.msg ? ' err' : ''}`}>
-          <textarea id="cf-msg" placeholder=" " value={msg} rows={5}
+          <textarea id="cf-msg" name="message" placeholder=" " value={msg} rows={5}
             onChange={e=>setMsg(e.target.value)} onBlur={() => setTouched(t => ({ ...t, msg:true }))}
             aria-invalid={!!(touched.msg && errors.msg)} />
           <label htmlFor="cf-msg">{tx(lang,'contact_msg')}</label>
@@ -635,7 +635,7 @@ function ContactForm({ lang }) {
       <button type="submit" disabled={status==='sending'} style={{
         padding:'13px 30px', borderRadius:50, marginTop:8,
         background: status==='sending' ? 'var(--border)' : 'var(--a1)',
-        color:'#fff', fontWeight:600, fontSize:15, fontFamily:'inherit',
+        color: status==='sending' ? 'var(--muted)' : 'var(--bg)', fontWeight:600, fontSize:15, fontFamily:'inherit',
         border:'1px solid var(--a1)', cursor: status==='sending' ? 'wait' : 'pointer',
         boxShadow:'var(--shadow-glow)', transition:'all 0.2s', alignSelf:'flex-start',
       }}>

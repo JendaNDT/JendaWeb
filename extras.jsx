@@ -60,6 +60,8 @@ function NewsletterSection({ lang }) {
             flexWrap:'wrap', position:'relative',
           }}>
             <input
+              id="nl-email"
+              name="email"
               type="email" required
               value={email}
               onChange={e => { setEmail(e.target.value); if (status === 'err') setStatus('idle'); }}
@@ -76,7 +78,7 @@ function NewsletterSection({ lang }) {
             />
             <button type="submit" disabled={status === 'sending'} style={{
               padding:'12px 26px', borderRadius:50,
-              background:'var(--a1)', color:'#fff',
+              background:'var(--a1)', color: status === 'sending' ? 'var(--muted)' : 'var(--bg)',
               fontWeight:600, fontSize:14, fontFamily:'inherit',
               border:'1px solid var(--a1)', cursor: status === 'sending' ? 'wait' : 'pointer',
               boxShadow:'0 0 20px var(--glow)',
@@ -210,11 +212,12 @@ function ComparisonSection({ lang }) {
             <tbody>
               {cfg.rows.map((r, ri) => (
                 <tr key={r.key}>
-                  <td style={{
+                  <th scope="row" style={{
                     padding:'14px 20px', fontSize:13, color:'var(--muted)',
                     borderBottom: ri < cfg.rows.length - 1 ? '1px solid var(--border)' : 'none',
                     width:'30%',
-                  }}>{lang === 'cs' ? r.cs : r.en}</td>
+                    textAlign:'left', fontWeight:'normal',
+                  }}>{lang === 'cs' ? r.cs : r.en}</th>
                   {apps.map(a => (
                     <td key={a.id} style={{
                       padding:'14px 20px', fontSize:14,

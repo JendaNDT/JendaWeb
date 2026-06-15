@@ -178,14 +178,16 @@ function App() {
     <div style={{ minHeight:'100vh', paddingBottom: playerTrack ? 130 : 0, position:'relative', animation:'jwFade 0.25s ease' }}>
       <BackgroundFX />
       <Nav lang={lang} setLang={setLang} mode={tw.mode || 'auto'} setMode={(v) => setTweak('mode', v)} />
-      <Hero lang={lang} onPlay={handlePlay} />
-      <MusicSection lang={lang} onPlay={handlePlay} currentTrack={playerTrack} playing={playing} />
-      <MostPlayedSection lang={lang} onPlay={handlePlay} currentTrack={playerTrack} playing={playing} />
-      <AppsSection lang={lang} />
-      <ComparisonSection lang={lang} />
-      <StatsSection lang={lang} />
-      <NewsletterSection lang={lang} />
-      <ContactSection lang={lang} />
+      <main>
+        <Hero lang={lang} onPlay={handlePlay} />
+        <MusicSection lang={lang} onPlay={handlePlay} currentTrack={playerTrack} playing={playing} />
+        <MostPlayedSection lang={lang} onPlay={handlePlay} currentTrack={playerTrack} playing={playing} />
+        <AppsSection lang={lang} />
+        <ComparisonSection lang={lang} />
+        <StatsSection lang={lang} />
+        <NewsletterSection lang={lang} />
+        <ContactSection lang={lang} />
+      </main>
       <Footer lang={lang} />
 
       {playerTrack && (

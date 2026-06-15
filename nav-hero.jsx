@@ -230,7 +230,7 @@ function Nav({ lang, setLang, mode, setMode }) {
     langBtn: (active) => ({
       padding:'4px 11px', borderRadius:6, fontSize:13, fontWeight:700, letterSpacing:'0.04em',
       background: active ? 'var(--a1)' : 'transparent',
-      color: active ? '#fff' : 'var(--muted)',
+      color: active ? 'var(--bg)' : 'var(--muted)',
       border:`1px solid ${active ? 'var(--a1)' : 'var(--border)'}`,
       transition:'all 0.2s',
     }),

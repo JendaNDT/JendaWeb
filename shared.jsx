@@ -198,7 +198,7 @@ function Btn({ href, children, primary, outline, onClick, small }) {
     transition:'all 0.2s', cursor:'pointer',
   };
   const style = primary
-    ? { ...base, background:'var(--a1)', color:'#fff', border:'1px solid var(--a1)', boxShadow: hov ? '0 8px 40px var(--glow)' : '0 0 24px var(--glow)', transform: hov ? 'translateY(-2px)' : 'none' }
+    ? { ...base, background:'var(--a1)', color:'var(--bg)', border:'1px solid var(--a1)', boxShadow: hov ? '0 8px 40px var(--glow)' : '0 0 24px var(--glow)', transform: hov ? 'translateY(-2px)' : 'none' }
     : outline
     ? { ...base, background:'transparent', color: hov ? 'var(--a2)' : 'var(--text)', border:`1px solid ${hov ? 'var(--a2)' : 'var(--border)'}`, transform: hov ? 'translateY(-2px)' : 'none' }
     : { ...base, background: hov ? 'var(--card)' : 'transparent', color:'var(--muted)', border:'1px solid var(--border)' };
