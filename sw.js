@@ -1,5 +1,5 @@
 // sw.js — Service worker for offline-first PWA
-const VERSION = 'jw-v45';
+const VERSION = 'jw-v46';
 const SHELL = [
   '/',
   '/index.html',
@@ -29,6 +29,15 @@ const SHELL = [
   '/vendor/fonts/dm-sans-latin-400-normal.woff2',
   '/vendor/fonts/dm-sans-latin-400-italic.woff2',
   '/vendor/fonts/dm-sans-latin-500-normal.woff2',
+  // latin-ext (české znaky: č ď ě ň ř š ť ů ž …)
+  '/vendor/fonts/syne-latin-ext-400-normal.woff2',
+  '/vendor/fonts/syne-latin-ext-600-normal.woff2',
+  '/vendor/fonts/syne-latin-ext-700-normal.woff2',
+  '/vendor/fonts/syne-latin-ext-800-normal.woff2',
+  '/vendor/fonts/dm-sans-latin-ext-300-normal.woff2',
+  '/vendor/fonts/dm-sans-latin-ext-400-normal.woff2',
+  '/vendor/fonts/dm-sans-latin-ext-400-italic.woff2',
+  '/vendor/fonts/dm-sans-latin-ext-500-normal.woff2',
   // Manifest + ikony
   '/manifest.webmanifest',
   '/icons/icon-192.png',
