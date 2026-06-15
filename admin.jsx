@@ -1011,8 +1011,8 @@ function AnalyticsTab() {
         <div style={{ fontSize: 13, color: 'var(--muted)' }}>Živá návštěvnost z GoatCounter — soukromí-friendly, bez cookies. Data se sbírají od nasazení měření.</div>
         <a className="btn btn-ghost btn-sm" href={GOATCOUNTER} target="_blank" rel="noopener">Otevřít plný dashboard ↗</a>
       </div>
-      <iframe src={GOATCOUNTER + '?hideui=1'} title="Návštěvnost"
-        style={{ width: '100%', height: 1500, border: '1px solid var(--border)', borderRadius: 'var(--r-md)', background: '#fff' }} />
+      <iframe src={GOATCOUNTER + '?hideui=1'} title="Návštěvnost" loading="lazy"
+        style={{ width: '100%', height: 1500, border: '1px solid var(--border)', borderRadius: 'var(--r-md)', background: 'var(--bg2)' }} />
       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 8 }}>
         Když je rámeček prázdný / přihlašovací: v GoatCounter → Settings nastav „Dashboard viewable by" na public a do „Sites that can embed GoatCounter" přidej doménu webu.
       </div>
