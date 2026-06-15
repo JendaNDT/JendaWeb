@@ -439,11 +439,13 @@ function TracksTab({ data, reload, notify }) {
   return (
     <div>
       <AddBtn onClick={() => setEdit(null)} label="Nová skladba" />
+      <div className="list">
       {data.tracks.map((t) => (
         <ItemRow key={t.id} title={t.title}
           sub={(albMap[t.album_id] || '—') + (t.duration ? ' · ' + t.duration : '') + (t.audio_url ? ' · 🎵' : ' · bez audia')}
           onEdit={() => setEdit(t)} onDelete={() => del(t)} />
       ))}
+      </div>
       {data.tracks.length === 0 && <div style={{ color: 'var(--muted)', fontSize: 14 }}>Zatím žádné skladby.</div>}
       {edit !== undefined && <TrackForm initial={edit} albums={albums} notify={notify}
         onClose={() => setEdit(undefined)} onSaved={() => { setEdit(undefined); reload(); }} />}
@@ -460,11 +462,13 @@ function AlbumsTab({ data, reload, notify }) {
   return (
     <div>
       <AddBtn onClick={() => setEdit(null)} label="Nové album" />
+      <div className="list">
       {data.albums.map((a) => (
         <ItemRow key={a.id} title={a.title} sub={(a.genre || '') + (a.year ? ' · ' + a.year : '')}
           swatch={'linear-gradient(135deg,' + (a.g1 || '#888') + ',' + (a.g2 || '#444') + ')'}
           onEdit={() => setEdit(a)} onDelete={() => del(a)} />
       ))}
+      </div>
       {edit !== undefined && <AlbumForm initial={edit} notify={notify}
         onClose={() => setEdit(undefined)} onSaved={() => { setEdit(undefined); reload(); }} />}
     </div>
@@ -480,10 +484,12 @@ function AppsTab({ data, reload, notify }) {
   return (
     <div>
       <AddBtn onClick={() => setEdit(null)} label="Nová aplikace" />
+      <div className="list">
       {data.apps.map((a) => (
         <ItemRow key={a.id} title={a.name} sub={a.platform + (a.link && a.link !== '#' ? ' · ' + a.link : '')}
           swatch={a.color} onEdit={() => setEdit(a)} onDelete={() => del(a)} />
       ))}
+      </div>
       {edit !== undefined && <AppForm initial={edit} notify={notify}
         onClose={() => setEdit(undefined)} onSaved={() => { setEdit(undefined); reload(); }} />}
     </div>
@@ -502,9 +508,11 @@ function TextsTab({ data, reload, notify }) {
       <button className="btn btn-ghost" style={{ marginBottom: 16 }} onClick={() => setCfg(true)}>⚙️ Kontakt, odkazy & statistiky</button>
       <div className="syne" style={{ fontWeight: 700, fontSize: 15, margin: '6px 0 10px' }}>Sociální sítě</div>
       <AddBtn onClick={() => setEdit(null)} label="Nová síť" />
+      <div className="list">
       {data.socials.map((s) => (
         <ItemRow key={s.id} title={s.label} sub={s.url} onEdit={() => setEdit(s)} onDelete={() => del(s)} />
       ))}
+      </div>
       {edit !== undefined && <SocialForm initial={edit} notify={notify}
         onClose={() => setEdit(undefined)} onSaved={() => { setEdit(undefined); reload(); }} />}
       {cfg && <ConfigForm config={data.config} notify={notify}
@@ -543,7 +551,7 @@ function AdminApp({ session, onLogout }) {
 
   const email = (session.user && session.user.email) || 'admin';
   return (
-    <div style={Object.assign({}, wrap, { marginTop: 26, paddingBottom: 60 })}>
+    <div style={Object.assign({}, wrap, { maxWidth: 1080, marginTop: 26, paddingBottom: 60 })}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, gap: 10, flexWrap: 'wrap' }}>
         <div>
           <div className="syne" style={{ fontSize: 22, fontWeight: 800 }}>Administrace</div>

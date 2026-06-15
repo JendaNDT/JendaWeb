@@ -66,8 +66,10 @@
       color:var(--muted); border:1px solid var(--border); background:transparent; }
     .tab.active { color:#1a1008; background:linear-gradient(120deg, var(--a1), var(--a2)); border-color:transparent; }
 
+    .list { display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:10px; }
+    @media (max-width:560px){ .list { grid-template-columns:1fr; } }
     .item { display:flex; align-items:center; gap:12px; padding:13px 15px; border-radius:var(--r-md);
-      background:var(--card); border:1px solid var(--border); margin-bottom:9px; }
+      background:var(--card); border:1px solid var(--border); margin-bottom:0; }
     .item .grow { flex:1; min-width:0; }
     .item .t { font-weight:700; font-size:15px; }
     .item .s { font-size:12.5px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
