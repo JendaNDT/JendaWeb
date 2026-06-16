@@ -355,10 +355,6 @@ function MusicSection({ lang, onPlay, currentTrack, playing }) {
             ))}
           </div>
         </div>
-
-        <p style={{ marginTop:22, fontSize:12, color:'var(--muted)', opacity:0.5, fontStyle:'italic' }}>
-          {tx(lang,'music_note')}
-        </p>
       </div>
     </section>
   );
