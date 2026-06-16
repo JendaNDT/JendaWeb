@@ -341,6 +341,9 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
 
       <div className="player-controls" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
         <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+          <button className="player-mute-mobile" onClick={() => setMuted(m => !m)} aria-label="Mute" style={{ color: muted ? 'var(--a1)' : 'var(--muted)', padding:6 }}>
+            <VolIco />
+          </button>
           <button onClick={() => setShuffle(s => !s)} aria-label="Shuffle" title="Shuffle" style={{ color: shuffle ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:6 }}><ShuffleIco /></button>
           <button onClick={onPrev} aria-label="Previous (←)" title="Previous (←)" style={{ color:'var(--muted)', display:'flex', padding:6, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><PrevIco /></button>
           <button onClick={() => setIsPlaying(!isPlaying)} aria-label={isPlaying ? 'Pause (Space)' : 'Play (Space)'} title={isPlaying ? 'Pause (Space)' : 'Play (Space)'} style={{
@@ -353,9 +356,6 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
           <button onClick={onNext} aria-label="Next (→)" title="Next (→)" style={{ color:'var(--muted)', display:'flex', padding:6, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><NextIco /></button>
           <button onClick={() => setRepeat(r => r === 'off' ? 'all' : r === 'all' ? 'one' : 'off')} aria-label={`Repeat: ${repeat}`} title={`Repeat: ${repeat}`} style={{ color: repeat !== 'off' ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:6 }}>
             {repeat === 'one' ? <RepeatOneIco /> : <RepeatIco />}
-          </button>
-          <button className="player-mute-mobile" onClick={() => setMuted(m => !m)} aria-label="Mute" style={{ color: muted ? 'var(--a1)' : 'var(--muted)', padding:6 }}>
-            <VolIco />
           </button>
           <button className="player-mute-mobile" onClick={onClose} aria-label="Close" style={{ color:'var(--muted)', padding:6 }}>
             <CloseIco />
