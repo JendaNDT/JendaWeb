@@ -193,7 +193,7 @@ function BackgroundFX() {
       if (io) io.disconnect();
       if (onVis) document.removeEventListener('visibilitychange', onVis);
     };
-  }, []);
+  }, [active]);
   return <canvas ref={ref} aria-hidden="true" style={{
     position:'fixed', inset:0, width:'100%', height:'100%', zIndex:-1, pointerEvents:'none',
   }} />;
