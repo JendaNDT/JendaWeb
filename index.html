@@ -53,12 +53,35 @@
     "knowsAbout": ["Mobile development", "PWA", "Android", "AI music", "Electronic music"]
   }
   </script>
+  <!-- Preload kritických knihoven -->
+  <link rel="preload" href="vendor/react.production.min.js" as="script">
+  <link rel="preload" href="vendor/react-dom.production.min.js" as="script">
+  <link rel="preload" href="vendor/babel.min.js" as="script">
+  <link rel="preload" href="data.js" as="script">
+  <link rel="preload" href="supabase-data.js" as="script">
+
+  <!-- Preload písem z Hero sekce -->
+  <link rel="preload" href="vendor/fonts/syne-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="vendor/fonts/dm-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- Preload JSX komponent v paralelním stahování -->
+  <link rel="preload" href="tweaks-panel.jsx" as="fetch" crossorigin>
+  <link rel="preload" href="shared.jsx" as="fetch" crossorigin>
+  <link rel="preload" href="nav-hero.jsx" as="fetch" crossorigin>
+  <link rel="preload" href="apps-music.jsx" as="fetch" crossorigin>
+  <link rel="preload" href="player-contact.jsx" as="fetch" crossorigin>
+  <link rel="preload" href="player-expand.jsx" as="fetch" crossorigin>
+  <link rel="preload" href="queue.jsx" as="fetch" crossorigin>
+  <link rel="preload" href="extras.jsx" as="fetch" crossorigin>
+  <link rel="preload" href="search.jsx" as="fetch" crossorigin>
+  <link rel="preload" href="app.jsx" as="fetch" crossorigin>
+
   <!-- Self-hosted fonty (offline-capable, nahrazuje Google Fonts) -->
   <link rel="stylesheet" href="vendor/fonts.css">
   <!-- Lokální knihovny (offline-capable, produkční buildy) -->
-  <script src="vendor/react.production.min.js"></script>
-  <script src="vendor/react-dom.production.min.js"></script>
-  <script src="vendor/babel.min.js"></script>
+  <script src="vendor/react.production.min.js" defer></script>
+  <script src="vendor/react-dom.production.min.js" defer></script>
+  <script src="vendor/babel.min.js" defer></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -468,7 +491,39 @@
     <div class="mesh-orb mesh-4"></div>
     <div class="mesh-noise"></div>
   </div>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Premium CSS Skeleton Loader (rendered instantly, zero layout shift) -->
+    <nav style="position: fixed; top: 0; left: 0; right: 0; height: 64px; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; z-index: 100; border-bottom: 1px solid transparent; background: transparent;">
+      <span style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; background: linear-gradient(135deg, var(--a1), var(--a2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.04em;">jenda.dev</span>
+      <div class="nav-desktop" style="display: flex; gap: 36px; align-items: center;">
+        <span style="font-size: 15px; font-weight: 500; color: var(--muted);">Hudba</span>
+        <span style="font-size: 15px; font-weight: 500; color: var(--muted);">Aplikace</span>
+        <span style="font-size: 15px; font-weight: 500; color: var(--muted);">Kontakt</span>
+      </div>
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <div style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border);"></div>
+        <div style="padding: 4px 11px; border-radius: 6px; font-size: 13px; font-weight: 700; background: var(--a1); color: var(--bg); border: 1px solid var(--a1);">CZ</div>
+        <div style="padding: 4px 11px; border-radius: 6px; font-size: 13px; font-weight: 700; background: transparent; color: var(--muted); border: 1px solid var(--border);">EN</div>
+      </div>
+    </nav>
+    <section style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 90px 24px 80px; position: relative; overflow: hidden;">
+      <div style="max-width: 820px; width: 100%; display: flex; flex-direction: column; align-items: center;">
+        <div style="display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--a1); padding: 7px 18px; border-radius: 30px; border: 1px solid color-mix(in srgb, var(--a1) 40%, transparent); background: color-mix(in srgb, var(--a1) 8%, transparent); margin-bottom: 36px;">
+          Vibe Coder & AI Music
+        </div>
+        <h1 style="font-family: 'Syne', sans-serif; font-size: clamp(80px, 16vw, 160px); font-weight: 800; line-height: 0.88; letter-spacing: -0.05em; background: linear-gradient(135deg, var(--text) 20%, var(--a1) 55%, var(--a2) 85%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 32px;">
+          Jenda
+        </h1>
+        <p style="font-size: clamp(16px, 2.2vw, 20px); color: var(--muted); max-width: 500px; margin: 0 auto 52px; line-height: 1.65; font-weight: 300;">
+          Tvořím mobilní aplikace a experimentální elektronickou hudbu pomocí AI.
+        </p>
+        <div style="display: flex; gap: 14px; justify-content: center;">
+          <div style="padding: 14px 28px; border-radius: 12px; background: var(--a1); color: var(--bg); font-weight: 700; font-size: 15px; border: 1px solid var(--a1); cursor: pointer;">Poslouchat hudbu</div>
+          <div style="padding: 14px 28px; border-radius: 12px; background: transparent; color: var(--text); font-weight: 700; font-size: 15px; border: 1px solid var(--border); cursor: pointer;">Zobrazit aplikace</div>
+        </div>
+      </div>
+    </section>
+  </div>
   <script>
     // PWA service worker registration
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
@@ -477,18 +532,18 @@
       });
     }
   </script>
-  <script type="text/babel" src="tweaks-panel.jsx"></script>
-  <script src="data.js"></script>
+  <script type="text/babel" data-presets="react" src="tweaks-panel.jsx"></script>
+  <script src="data.js" defer></script>
   <!-- Fáze 3: přepíše globály z data.js obsahem ze Supabase (s offline cache) -->
-  <script src="supabase-data.js"></script>
-  <script type="text/babel" src="shared.jsx"></script>
-  <script type="text/babel" src="nav-hero.jsx"></script>
-  <script type="text/babel" src="apps-music.jsx"></script>
-  <script type="text/babel" src="player-contact.jsx"></script>
-  <script type="text/babel" src="player-expand.jsx"></script>
-  <script type="text/babel" src="queue.jsx"></script>
-  <script type="text/babel" src="extras.jsx"></script>
-  <script type="text/babel" src="search.jsx"></script>
-  <script type="text/babel" src="app.jsx"></script>
+  <script src="supabase-data.js" defer></script>
+  <script type="text/babel" data-presets="react" src="shared.jsx"></script>
+  <script type="text/babel" data-presets="react" src="nav-hero.jsx"></script>
+  <script type="text/babel" data-presets="react" src="apps-music.jsx"></script>
+  <script type="text/babel" data-presets="react" src="player-contact.jsx"></script>
+  <script type="text/babel" data-presets="react" src="player-expand.jsx"></script>
+  <script type="text/babel" data-presets="react" src="queue.jsx"></script>
+  <script type="text/babel" data-presets="react" src="extras.jsx"></script>
+  <script type="text/babel" data-presets="react" src="search.jsx"></script>
+  <script type="text/babel" data-presets="react" src="app.jsx"></script>
 </body>
 </html>
