@@ -2,17 +2,29 @@
   "name": "Jenda — Vibe Coder & AI Music",
   "short_name": "Jenda",
   "description": "Mobile apps and experimental electronic music with AI.",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#0d0805",
   "theme_color": "#f97316",
   "lang": "cs",
+  "dir": "ltr",
   "categories": ["music", "developer", "portfolio"],
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "screenshots/screenshot-narrow.png", "sizes": "1080x1920", "type": "image/png", "form_factor": "narrow", "label": "Domovská stránka (mobil)" },
+    { "src": "screenshots/screenshot-wide.png", "sizes": "1920x1080", "type": "image/png", "form_factor": "wide", "label": "Domovská stránka (desktop)" }
+  ],
+  "shortcuts": [
+    { "name": "Hudba", "short_name": "Hudba", "description": "Přehrát hudbu", "url": "/#music" },
+    { "name": "Aplikace", "short_name": "Aplikace", "description": "Prozkoumat aplikace", "url": "/#apps" },
+    { "name": "Kontakt", "short_name": "Kontakt", "description": "Napiš mi", "url": "/#contact" }
   ]
 }

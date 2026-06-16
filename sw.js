@@ -1,5 +1,5 @@
 // sw.js — Service worker for offline-first PWA
-const VERSION = 'jw-v64';
+const VERSION = 'jw-v65';
 const SHELL = [
   '/',
   '/index.html',
@@ -33,6 +33,8 @@ const SHELL = [
   '/manifest.webmanifest',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
+  '/icons/icon-maskable-192.png',
+  '/icons/icon-maskable-512.png',
   '/icons/apple-touch-icon-180.png',
 ];
 
