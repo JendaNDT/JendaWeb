@@ -42,8 +42,8 @@
       <text y="36" x="64" font-size="14" fill="#8a7060" font-weight="600" letter-spacing="1.6">APPS</text>
     </g>
     <g transform="translate(260,520)">
-      <text font-family="Syne, ui-sans-serif, system-ui, sans-serif" font-size="46" font-weight="800" fill="#f97316">16</text>
-      <text y="36" x="64" font-size="14" fill="#8a7060" font-weight="600" letter-spacing="1.6">TRACKS</text>
+      <text font-family="Syne, ui-sans-serif, system-ui, sans-serif" font-size="46" font-weight="800" fill="#f97316">4</text>
+      <text y="36" x="36" font-size="14" fill="#8a7060" font-weight="600" letter-spacing="1.6">TRACKS</text>
     </g>
     <g transform="translate(460,520)">
       <text font-family="Syne, ui-sans-serif, system-ui, sans-serif" font-size="46" font-weight="800" fill="#f97316">6</text>

@@ -1456,7 +1456,7 @@ function AlbumCard({ album, lang, onPlay, onFilter, selected, nowPlaying }) {
         <p style={{ fontSize:12, color:'var(--muted)', lineHeight:1.45 }}>{lang==='cs' ? album.cs : album.en}</p>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:10, gap:8 }}>
           <span style={{ fontSize:11, color:'var(--muted)', opacity:0.55 }}>
-            {album.tracks} {tx(lang,'tracks_label')} · {album.year}
+            {tracks.length} {tx(lang,'tracks_label')} · {album.year}
           </span>
           {onFilter && (
             <button onClick={showAlbum} style={{
