@@ -317,6 +317,13 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
     if (a && a.duration) a.currentTime = p * a.duration;
     else setCurrentTime(p * (duration || 0));
   };
+  const seekTo = (sec) => {
+    if (!isFinite(sec)) return;
+    const s = Math.max(0, sec);
+    const a = audioRef.current;
+    if (a) { try { a.currentTime = s; } catch (e) {} }
+    setCurrentTime(s);
+  };
 
   const isDraggingRef = __useR_pc(false);
 
@@ -469,7 +476,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
         track={track} album={album}
         currentTime={currentTime} duration={duration} progress={progress}
         bars={bars} fft={fft}
-        seekFromEvent={seekFromEvent}
+        seekFromEvent={seekFromEvent} onSeekTo={seekTo}
         hovBar={hovBar} setHovBar={setHovBar}
         isPlaying={isPlaying} setIsPlaying={setIsPlaying}
         onPrev={onPrev} onNext={onNext}

@@ -706,6 +706,25 @@ function albumArt(album) {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
+// Parse LRC-style timed lyrics → [{t: seconds, text}] sorted by time, or null if no timestamps.
+function parseLRC(text) {
+  if (!text || typeof text !== 'string') return null;
+  const re = /\[(\d{1,2}):(\d{1,2})(?:[.:](\d{1,3}))?\]/g;
+  const out = [];
+  text.split('\n').forEach((line) => {
+    re.lastIndex = 0; const stamps = []; let m, lastEnd = 0;
+    while ((m = re.exec(line)) !== null) {
+      const frac = m[3] != null ? parseInt(m[3], 10) / Math.pow(10, m[3].length) : 0;
+      stamps.push(parseInt(m[1], 10) * 60 + parseInt(m[2], 10) + frac);
+      lastEnd = re.lastIndex;
+    }
+    if (stamps.length) { const txt = line.slice(lastEnd).trim(); stamps.forEach((t) => out.push({ t, text: txt })); }
+  });
+  if (!out.length) return null;
+  out.sort((a, b) => a.t - b.t);
+  return out;
+}
+
 // Deterministic procedural artwork for a track. Returns a data: URI SVG.
 function trackArt(track, album) {
   if (track && typeof track === 'object' && track.cover) return track.cover;
@@ -835,7 +854,7 @@ Object.assign(window, {
   PlayIco, PauseIco, NextIco, PrevIco, DlIco, CloseIco, VolIco, MuteIco,
   ShuffleIco, RepeatIco, RepeatOneIco, ShareIco, SearchIco,
   SunIco, MoonIco, AutoIco, SocialIco,
-  EqBars, seededBars, fmtTime, parseDur, trackArt, albumArt,
+  EqBars, seededBars, fmtTime, parseDur, trackArt, albumArt, parseLRC,
   Btn, SectionLabel, SubLabel, SectionDivider, useCountUp,
 });
 
@@ -1914,6 +1933,13 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
     if (a && a.duration) a.currentTime = p * a.duration;
     else setCurrentTime(p * (duration || 0));
   };
+  const seekTo = (sec) => {
+    if (!isFinite(sec)) return;
+    const s = Math.max(0, sec);
+    const a = audioRef.current;
+    if (a) { try { a.currentTime = s; } catch (e) {} }
+    setCurrentTime(s);
+  };
 
   const isDraggingRef = __useR_pc(false);
 
@@ -2066,7 +2092,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
         track={track} album={album}
         currentTime={currentTime} duration={duration} progress={progress}
         bars={bars} fft={fft}
-        seekFromEvent={seekFromEvent}
+        seekFromEvent={seekFromEvent} onSeekTo={seekTo}
         hovBar={hovBar} setHovBar={setHovBar}
         isPlaying={isPlaying} setIsPlaying={setIsPlaying}
         onPrev={onPrev} onNext={onNext}
@@ -2498,7 +2524,7 @@ function GeoViz({ analyser, isPlaying }) {
 
 function ExpandMode({
   track, album,
-  currentTime, duration, progress, bars, fft, seekFromEvent, hovBar, setHovBar,
+  currentTime, duration, progress, bars, fft, seekFromEvent, onSeekTo, hovBar, setHovBar,
   isPlaying, setIsPlaying, onPrev, onNext, onClose,
   shuffle, setShuffle, repeat, setRepeat,
   vol, setVol, muted, setMuted,
@@ -2518,6 +2544,19 @@ function ExpandMode({
     document.body.style.overflow = 'hidden';
     return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
   }, [onClose, showLyrics]);
+
+  const lyricsBoxRef = __useR_xp(null);
+  const activeLineRef = __useR_xp(null);
+  const lyricsText = (track && track.lyrics) ? (lang === 'cs' ? track.lyrics.cs : track.lyrics.en) : '';
+  const synced = parseLRC(lyricsText);
+  let activeIdx = -1;
+  if (synced) { for (let i = 0; i < synced.length; i++) { if (synced[i].t <= currentTime + 0.15) activeIdx = i; else break; } }
+  __useE_xp(() => {
+    if (synced && showLyrics && lyricsBoxRef.current && activeLineRef.current) {
+      const box = lyricsBoxRef.current, el = activeLineRef.current;
+      box.scrollTo({ top: Math.max(0, el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2), behavior: 'smooth' });
+    }
+  }, [activeIdx, showLyrics]);
 
   if (!track) return null;
   const art = trackArt(track, album);
@@ -2861,13 +2900,27 @@ function ExpandMode({
               <CloseIco />
             </button>
           </div>
-          <div style={{
+          <div ref={lyricsBoxRef} style={{
             flex:1, overflowY:'auto', padding:'24px 32px',
             fontSize:16, lineHeight:1.85, color:'rgba(255,255,255,0.88)',
             fontFamily:"'Syne',sans-serif", fontWeight:500,
-            textAlign:'center', whiteSpace:'pre-line', textWrap:'pretty',
+            textAlign:'center', textWrap:'pretty',
           }}>
-            {lang === 'cs' ? track.lyrics.cs : track.lyrics.en}
+            {synced ? synced.map((l, i) => (
+              <div key={i} ref={i === activeIdx ? activeLineRef : null}
+                onClick={() => onSeekTo && onSeekTo(l.t)}
+                title={lang === 'cs' ? 'Skočit sem' : 'Jump here'}
+                style={{
+                  padding:'7px 4px', cursor:'pointer',
+                  transition:'color 0.25s ease, font-size 0.25s ease, text-shadow 0.25s ease',
+                  fontSize: i === activeIdx ? 20 : 16,
+                  fontWeight: i === activeIdx ? 800 : 500,
+                  color: i === activeIdx ? '#fff' : (i < activeIdx ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.55)'),
+                  textShadow: i === activeIdx ? '0 0 26px rgba(249,115,22,0.5)' : 'none',
+                }}>
+                {l.text || '♪'}
+              </div>
+            )) : <div style={{ whiteSpace:'pre-line' }}>{lang === 'cs' ? track.lyrics.cs : track.lyrics.en}</div>}
           </div>
         </div>
       )}

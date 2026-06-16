@@ -157,6 +157,25 @@ function albumArt(album) {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
+// Parse LRC-style timed lyrics → [{t: seconds, text}] sorted by time, or null if no timestamps.
+function parseLRC(text) {
+  if (!text || typeof text !== 'string') return null;
+  const re = /\[(\d{1,2}):(\d{1,2})(?:[.:](\d{1,3}))?\]/g;
+  const out = [];
+  text.split('\n').forEach((line) => {
+    re.lastIndex = 0; const stamps = []; let m, lastEnd = 0;
+    while ((m = re.exec(line)) !== null) {
+      const frac = m[3] != null ? parseInt(m[3], 10) / Math.pow(10, m[3].length) : 0;
+      stamps.push(parseInt(m[1], 10) * 60 + parseInt(m[2], 10) + frac);
+      lastEnd = re.lastIndex;
+    }
+    if (stamps.length) { const txt = line.slice(lastEnd).trim(); stamps.forEach((t) => out.push({ t, text: txt })); }
+  });
+  if (!out.length) return null;
+  out.sort((a, b) => a.t - b.t);
+  return out;
+}
+
 // Deterministic procedural artwork for a track. Returns a data: URI SVG.
 function trackArt(track, album) {
   if (track && typeof track === 'object' && track.cover) return track.cover;
@@ -286,6 +305,6 @@ Object.assign(window, {
   PlayIco, PauseIco, NextIco, PrevIco, DlIco, CloseIco, VolIco, MuteIco,
   ShuffleIco, RepeatIco, RepeatOneIco, ShareIco, SearchIco,
   SunIco, MoonIco, AutoIco, SocialIco,
-  EqBars, seededBars, fmtTime, parseDur, trackArt, albumArt,
+  EqBars, seededBars, fmtTime, parseDur, trackArt, albumArt, parseLRC,
   Btn, SectionLabel, SubLabel, SectionDivider, useCountUp,
 });

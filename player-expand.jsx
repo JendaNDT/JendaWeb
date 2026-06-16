@@ -154,7 +154,7 @@ function GeoViz({ analyser, isPlaying }) {
 
 function ExpandMode({
   track, album,
-  currentTime, duration, progress, bars, fft, seekFromEvent, hovBar, setHovBar,
+  currentTime, duration, progress, bars, fft, seekFromEvent, onSeekTo, hovBar, setHovBar,
   isPlaying, setIsPlaying, onPrev, onNext, onClose,
   shuffle, setShuffle, repeat, setRepeat,
   vol, setVol, muted, setMuted,
@@ -174,6 +174,19 @@ function ExpandMode({
     document.body.style.overflow = 'hidden';
     return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
   }, [onClose, showLyrics]);
+
+  const lyricsBoxRef = __useR_xp(null);
+  const activeLineRef = __useR_xp(null);
+  const lyricsText = (track && track.lyrics) ? (lang === 'cs' ? track.lyrics.cs : track.lyrics.en) : '';
+  const synced = parseLRC(lyricsText);
+  let activeIdx = -1;
+  if (synced) { for (let i = 0; i < synced.length; i++) { if (synced[i].t <= currentTime + 0.15) activeIdx = i; else break; } }
+  __useE_xp(() => {
+    if (synced && showLyrics && lyricsBoxRef.current && activeLineRef.current) {
+      const box = lyricsBoxRef.current, el = activeLineRef.current;
+      box.scrollTo({ top: Math.max(0, el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2), behavior: 'smooth' });
+    }
+  }, [activeIdx, showLyrics]);
 
   if (!track) return null;
   const art = trackArt(track, album);
@@ -517,13 +530,27 @@ function ExpandMode({
               <CloseIco />
             </button>
           </div>
-          <div style={{
+          <div ref={lyricsBoxRef} style={{
             flex:1, overflowY:'auto', padding:'24px 32px',
             fontSize:16, lineHeight:1.85, color:'rgba(255,255,255,0.88)',
             fontFamily:"'Syne',sans-serif", fontWeight:500,
-            textAlign:'center', whiteSpace:'pre-line', textWrap:'pretty',
+            textAlign:'center', textWrap:'pretty',
           }}>
-            {lang === 'cs' ? track.lyrics.cs : track.lyrics.en}
+            {synced ? synced.map((l, i) => (
+              <div key={i} ref={i === activeIdx ? activeLineRef : null}
+                onClick={() => onSeekTo && onSeekTo(l.t)}
+                title={lang === 'cs' ? 'Skočit sem' : 'Jump here'}
+                style={{
+                  padding:'7px 4px', cursor:'pointer',
+                  transition:'color 0.25s ease, font-size 0.25s ease, text-shadow 0.25s ease',
+                  fontSize: i === activeIdx ? 20 : 16,
+                  fontWeight: i === activeIdx ? 800 : 500,
+                  color: i === activeIdx ? '#fff' : (i < activeIdx ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.55)'),
+                  textShadow: i === activeIdx ? '0 0 26px rgba(249,115,22,0.5)' : 'none',
+                }}>
+                {l.text || '♪'}
+              </div>
+            )) : <div style={{ whiteSpace:'pre-line' }}>{lang === 'cs' ? track.lyrics.cs : track.lyrics.en}</div>}
           </div>
         </div>
       )}
