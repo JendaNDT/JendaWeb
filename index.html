@@ -77,11 +77,125 @@
   <link rel="preload" href="app.jsx" as="fetch" crossorigin>
 
   <!-- Self-hosted fonty (offline-capable, nahrazuje Google Fonts) -->
-  <link rel="stylesheet" href="vendor/fonts.css">
+  <style>
+/* Inlined vendor/fonts.css to remove render-blocking stylesheet request */
+/* vendor/fonts.css — self-hosted fonts (Syne, DM Sans). Nahrazuje Google Fonts → web funguje plně offline.
+   Latin + Latin-ext subset. Latin-ext NENÍ jiný font — je to stejné písmo (Syne / DM Sans),
+   jen doplňuje accentované znaky (č ď ě ň ř š ť ů ž …). `unicode-range` zařídí, že prohlížeč
+   použije latin-ext jen na tyto znaky; základní písmena se kreslí ze stejných latin souborů jako dřív. */
+
+/* ============================= Syne ============================= */
+/* -- 400 -- */
+@font-face {
+  font-family: 'Syne'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('vendor/fonts/syne-latin-400-normal.woff2') format('woff2'),
+       url('vendor/fonts/syne-latin-400-normal.woff') format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Syne'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('vendor/fonts/syne-latin-ext-400-normal.woff2') format('woff2'),
+       url('vendor/fonts/syne-latin-ext-400-normal.woff') format('woff');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+/* -- 600 -- */
+@font-face {
+  font-family: 'Syne'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url('vendor/fonts/syne-latin-600-normal.woff2') format('woff2'),
+       url('vendor/fonts/syne-latin-600-normal.woff') format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Syne'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url('vendor/fonts/syne-latin-ext-600-normal.woff2') format('woff2'),
+       url('vendor/fonts/syne-latin-ext-600-normal.woff') format('woff');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+/* -- 700 -- */
+@font-face {
+  font-family: 'Syne'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url('vendor/fonts/syne-latin-700-normal.woff2') format('woff2'),
+       url('vendor/fonts/syne-latin-700-normal.woff') format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Syne'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url('vendor/fonts/syne-latin-ext-700-normal.woff2') format('woff2'),
+       url('vendor/fonts/syne-latin-ext-700-normal.woff') format('woff');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+/* -- 800 -- */
+@font-face {
+  font-family: 'Syne'; font-style: normal; font-weight: 800; font-display: swap;
+  src: url('vendor/fonts/syne-latin-800-normal.woff2') format('woff2'),
+       url('vendor/fonts/syne-latin-800-normal.woff') format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Syne'; font-style: normal; font-weight: 800; font-display: swap;
+  src: url('vendor/fonts/syne-latin-ext-800-normal.woff2') format('woff2'),
+       url('vendor/fonts/syne-latin-ext-800-normal.woff') format('woff');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+/* ============================= DM Sans ============================= */
+/* -- 300 -- */
+@font-face {
+  font-family: 'DM Sans'; font-style: normal; font-weight: 300; font-display: swap;
+  src: url('vendor/fonts/dm-sans-latin-300-normal.woff2') format('woff2'),
+       url('vendor/fonts/dm-sans-latin-300-normal.woff') format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'DM Sans'; font-style: normal; font-weight: 300; font-display: swap;
+  src: url('vendor/fonts/dm-sans-latin-ext-300-normal.woff2') format('woff2'),
+       url('vendor/fonts/dm-sans-latin-ext-300-normal.woff') format('woff');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+/* -- 400 normal -- */
+@font-face {
+  font-family: 'DM Sans'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('vendor/fonts/dm-sans-latin-400-normal.woff2') format('woff2'),
+       url('vendor/fonts/dm-sans-latin-400-normal.woff') format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'DM Sans'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('vendor/fonts/dm-sans-latin-ext-400-normal.woff2') format('woff2'),
+       url('vendor/fonts/dm-sans-latin-ext-400-normal.woff') format('woff');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+/* -- 400 italic -- */
+@font-face {
+  font-family: 'DM Sans'; font-style: italic; font-weight: 400; font-display: swap;
+  src: url('vendor/fonts/dm-sans-latin-400-italic.woff2') format('woff2'),
+       url('vendor/fonts/dm-sans-latin-400-italic.woff') format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'DM Sans'; font-style: italic; font-weight: 400; font-display: swap;
+  src: url('vendor/fonts/dm-sans-latin-ext-400-italic.woff2') format('woff2'),
+       url('vendor/fonts/dm-sans-latin-ext-400-italic.woff') format('woff');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+/* -- 500 -- */
+@font-face {
+  font-family: 'DM Sans'; font-style: normal; font-weight: 500; font-display: swap;
+  src: url('vendor/fonts/dm-sans-latin-500-normal.woff2') format('woff2'),
+       url('vendor/fonts/dm-sans-latin-500-normal.woff') format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'DM Sans'; font-style: normal; font-weight: 500; font-display: swap;
+  src: url('vendor/fonts/dm-sans-latin-ext-500-normal.woff2') format('woff2'),
+       url('vendor/fonts/dm-sans-latin-ext-500-normal.woff') format('woff');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+</style>
   <!-- Lokální knihovny (offline-capable, produkční buildy) -->
   <script src="vendor/react.production.min.js" defer></script>
   <script src="vendor/react-dom.production.min.js" defer></script>
-  <script src="vendor/babel.min.js" defer></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -532,18 +646,95 @@
       });
     }
   </script>
-  <script type="text/babel" data-presets="react" src="tweaks-panel.jsx"></script>
   <script src="data.js" defer></script>
   <!-- Fáze 3: přepíše globály z data.js obsahem ze Supabase (s offline cache) -->
   <script src="supabase-data.js" defer></script>
-  <script type="text/babel" data-presets="react" src="shared.jsx"></script>
-  <script type="text/babel" data-presets="react" src="nav-hero.jsx"></script>
-  <script type="text/babel" data-presets="react" src="apps-music.jsx"></script>
-  <script type="text/babel" data-presets="react" src="player-contact.jsx"></script>
-  <script type="text/babel" data-presets="react" src="player-expand.jsx"></script>
-  <script type="text/babel" data-presets="react" src="queue.jsx"></script>
-  <script type="text/babel" data-presets="react" src="extras.jsx"></script>
-  <script type="text/babel" data-presets="react" src="search.jsx"></script>
-  <script type="text/babel" data-presets="react" src="app.jsx"></script>
+  <script>
+    (function() {
+      const VERSION = 'jw-v54'; // Match sw.js version
+      const jsxFiles = [
+        'tweaks-panel.jsx',
+        'shared.jsx',
+        'nav-hero.jsx',
+        'apps-music.jsx',
+        'player-contact.jsx',
+        'player-expand.jsx',
+        'queue.jsx',
+        'extras.jsx',
+        'search.jsx',
+        'app.jsx'
+      ];
+
+      let cacheValid = true;
+      try {
+        if (localStorage.getItem('jw_jsx_version') !== VERSION) {
+          cacheValid = false;
+        } else {
+          for (const file of jsxFiles) {
+            if (!localStorage.getItem('jw_jsx_cache_' + file)) {
+              cacheValid = false;
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        cacheValid = false;
+      }
+
+      if (cacheValid) {
+        console.log('[JSX Cache] Hit! Running cached scripts.');
+        jsxFiles.forEach(file => {
+          const js = localStorage.getItem('jw_jsx_cache_' + file);
+          const script = document.createElement('script');
+          script.text = js + '\n//# sourceURL=' + file + '.js';
+          document.body.appendChild(script);
+        });
+      } else {
+        console.log('[JSX Cache] Miss or version mismatch. Loading Babel Standalone...');
+        try {
+          for (const key of Object.keys(localStorage)) {
+            if (key.startsWith('jw_jsx_cache_')) localStorage.removeItem(key);
+          }
+        } catch (e) {}
+
+        const babelScript = document.createElement('script');
+        babelScript.src = 'vendor/babel.min.js';
+        babelScript.onload = () => {
+          console.log('[JSX Cache] Babel loaded. Fetching and compiling JSX files...');
+          Promise.all(jsxFiles.map(file => 
+            fetch(file)
+              .then(res => {
+                if (!res.ok) throw new Error('Fetch failed for ' + file);
+                return res.text();
+              })
+              .then(code => {
+                const compiled = Babel.transform(code, { presets: ['react'] }).code;
+                try {
+                  localStorage.setItem('jw_jsx_cache_' + file, compiled);
+                } catch (e) {
+                  console.warn('Failed to cache ' + file + ' in localStorage:', e);
+                }
+                return { file, compiled };
+              })
+          ))
+          .then(results => {
+            try {
+              localStorage.setItem('jw_jsx_version', VERSION);
+            } catch (e) {}
+            results.forEach(res => {
+              const script = document.createElement('script');
+              script.text = res.compiled + '\n//# sourceURL=' + res.file + '.js';
+              document.body.appendChild(script);
+            });
+            console.log('[JSX Cache] All scripts compiled, cached and executed.');
+          })
+          .catch(err => {
+            console.error('[JSX Cache] Compilation error:', err);
+          });
+        };
+        document.head.appendChild(babelScript);
+      }
+    })();
+  </script>
 </body>
 </html>

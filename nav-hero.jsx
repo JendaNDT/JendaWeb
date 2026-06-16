@@ -10,7 +10,16 @@ const { useState: __useState_nh, useEffect: __useEffect_nh, useRef: __useRef_nh 
 // i na skryté kartě, ladí barvy dle motivu webu.
 function BackgroundFX() {
   const ref = __useRef_nh(null);
+  const [active, setActive] = __useState_nh(false);
+
   __useEffect_nh(() => {
+    // Delay particles initialization to allow the page to mount and settle first
+    const handle = setTimeout(() => setActive(true), 250);
+    return () => clearTimeout(handle);
+  }, []);
+
+  __useEffect_nh(() => {
+    if (!active) return;
     const canvas = ref.current; if (!canvas) return;
     const ctx = canvas.getContext('2d'); if (!ctx) return;
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -205,9 +214,13 @@ function Nav({ lang, setLang, mode, setMode }) {
       }
       setActive(cur);
     };
-    fn();
+    // Defer the initial check to avoid forced reflow during React mount
+    const handle = setTimeout(fn, 150);
     window.addEventListener('scroll', fn, { passive: true });
-    return () => window.removeEventListener('scroll', fn);
+    return () => {
+      clearTimeout(handle);
+      window.removeEventListener('scroll', fn);
+    };
   }, []);
 
   const s = {
