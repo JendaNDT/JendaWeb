@@ -328,7 +328,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
       display:'grid', gridTemplateColumns:'1fr auto 1fr', alignItems:'center', gap:20,
       animation:'slideUp 0.35s ease',
     }}>
-      <div className="player-info" onClick={() => setExpanded(true)} style={{ display:'flex', alignItems:'center', gap:12, minWidth:0, cursor:'pointer' }} role="button" tabIndex={0} aria-label="Expand player (E)" title="Expand (E)"
+      <div className="player-info" onClick={() => setExpanded(true)} style={{ display:'flex', alignItems:'center', gap:12, minWidth:0, cursor:'pointer' }} role="button" tabIndex={0} aria-label={`${track ? `${track.title} - ${album?.title || ''}. ` : ''}Expand player (E)`} title="Expand (E)"
         onKeyDown={(e) => { if (e.key === 'Enter') setExpanded(true); }}>
         <div className={restoring ? 'shimmer-fx' : ''} style={{ position:'relative', width:42, height:42, borderRadius:8, flexShrink:0, overflow:'hidden', backgroundImage: track ? `url("${trackArt(track.id, album)}")` : '', backgroundSize:'cover', display:'flex', alignItems:'center', justifyContent:'center' }}>
           {isPlaying && <EqBars color="#fff" />}
@@ -391,7 +391,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
 
       <div className="player-right" style={{ display:'flex', alignItems:'center', gap:8, justifyContent:'flex-end', position:'relative' }}>
         <button onClick={() => setSpeed(s => ({ 0.75:1, 1:1.25, 1.25:1.5, 1.5:2, 2:0.75 })[s] || 1)}
-          aria-label={`Speed ${speed}x`} title={`Playback speed ${speed}×`} style={{
+          aria-label={`Speed ${speed}×`} title={`Playback speed ${speed}×`} style={{
             color: speed === 1 ? 'var(--muted)' : 'var(--a1)',
             display:'flex', padding:'4px 8px', borderRadius:6,
             fontSize:11, fontWeight:700, fontVariantNumeric:'tabular-nums',
