@@ -1,4 +1,7 @@
 {
+  "redirects": [
+    { "source": "/:path*", "has": [{ "type": "host", "value": "jenda-web.vercel.app" }], "destination": "https://jenda.cool/:path*", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/admin", "destination": "/admin.html" }
   ],
