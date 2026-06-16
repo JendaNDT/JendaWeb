@@ -650,91 +650,93 @@
   <!-- Fáze 3: přepíše globály z data.js obsahem ze Supabase (s offline cache) -->
   <script src="supabase-data.js" defer></script>
   <script>
-    (function() {
-      const VERSION = 'jw-v54'; // Match sw.js version
-      const jsxFiles = [
-        'tweaks-panel.jsx',
-        'shared.jsx',
-        'nav-hero.jsx',
-        'apps-music.jsx',
-        'player-contact.jsx',
-        'player-expand.jsx',
-        'queue.jsx',
-        'extras.jsx',
-        'search.jsx',
-        'app.jsx'
-      ];
+    window.addEventListener('DOMContentLoaded', () => {
+      (function() {
+        const VERSION = 'jw-v55'; // Match sw.js version
+        const jsxFiles = [
+          'tweaks-panel.jsx',
+          'shared.jsx',
+          'nav-hero.jsx',
+          'apps-music.jsx',
+          'player-contact.jsx',
+          'player-expand.jsx',
+          'queue.jsx',
+          'extras.jsx',
+          'search.jsx',
+          'app.jsx'
+        ];
 
-      let cacheValid = true;
-      try {
-        if (localStorage.getItem('jw_jsx_version') !== VERSION) {
-          cacheValid = false;
-        } else {
-          for (const file of jsxFiles) {
-            if (!localStorage.getItem('jw_jsx_cache_' + file)) {
-              cacheValid = false;
-              break;
+        let cacheValid = true;
+        try {
+          if (localStorage.getItem('jw_jsx_version') !== VERSION) {
+            cacheValid = false;
+          } else {
+            for (const file of jsxFiles) {
+              if (!localStorage.getItem('jw_jsx_cache_' + file)) {
+                cacheValid = false;
+                break;
+              }
             }
           }
+        } catch (e) {
+          cacheValid = false;
         }
-      } catch (e) {
-        cacheValid = false;
-      }
 
-      if (cacheValid) {
-        console.log('[JSX Cache] Hit! Running cached scripts.');
-        jsxFiles.forEach(file => {
-          const js = localStorage.getItem('jw_jsx_cache_' + file);
-          const script = document.createElement('script');
-          script.text = js + '\n//# sourceURL=' + file + '.js';
-          document.body.appendChild(script);
-        });
-      } else {
-        console.log('[JSX Cache] Miss or version mismatch. Loading Babel Standalone...');
-        try {
-          for (const key of Object.keys(localStorage)) {
-            if (key.startsWith('jw_jsx_cache_')) localStorage.removeItem(key);
-          }
-        } catch (e) {}
-
-        const babelScript = document.createElement('script');
-        babelScript.src = 'vendor/babel.min.js';
-        babelScript.onload = () => {
-          console.log('[JSX Cache] Babel loaded. Fetching and compiling JSX files...');
-          Promise.all(jsxFiles.map(file => 
-            fetch(file)
-              .then(res => {
-                if (!res.ok) throw new Error('Fetch failed for ' + file);
-                return res.text();
-              })
-              .then(code => {
-                const compiled = Babel.transform(code, { presets: ['react'] }).code;
-                try {
-                  localStorage.setItem('jw_jsx_cache_' + file, compiled);
-                } catch (e) {
-                  console.warn('Failed to cache ' + file + ' in localStorage:', e);
-                }
-                return { file, compiled };
-              })
-          ))
-          .then(results => {
-            try {
-              localStorage.setItem('jw_jsx_version', VERSION);
-            } catch (e) {}
-            results.forEach(res => {
-              const script = document.createElement('script');
-              script.text = res.compiled + '\n//# sourceURL=' + res.file + '.js';
-              document.body.appendChild(script);
-            });
-            console.log('[JSX Cache] All scripts compiled, cached and executed.');
-          })
-          .catch(err => {
-            console.error('[JSX Cache] Compilation error:', err);
+        if (cacheValid) {
+          console.log('[JSX Cache] Hit! Running cached scripts.');
+          jsxFiles.forEach(file => {
+            const js = localStorage.getItem('jw_jsx_cache_' + file);
+            const script = document.createElement('script');
+            script.text = js + '\n//# sourceURL=' + file + '.js';
+            document.body.appendChild(script);
           });
-        };
-        document.head.appendChild(babelScript);
-      }
-    })();
+        } else {
+          console.log('[JSX Cache] Miss or version mismatch. Loading Babel Standalone...');
+          try {
+            for (const key of Object.keys(localStorage)) {
+              if (key.startsWith('jw_jsx_cache_')) localStorage.removeItem(key);
+            }
+          } catch (e) {}
+
+          const babelScript = document.createElement('script');
+          babelScript.src = 'vendor/babel.min.js';
+          babelScript.onload = () => {
+            console.log('[JSX Cache] Babel loaded. Fetching and compiling JSX files...');
+            Promise.all(jsxFiles.map(file => 
+              fetch(file)
+                .then(res => {
+                  if (!res.ok) throw new Error('Fetch failed for ' + file);
+                  return res.text();
+                })
+                .then(code => {
+                  const compiled = Babel.transform(code, { presets: ['react'] }).code;
+                  try {
+                    localStorage.setItem('jw_jsx_cache_' + file, compiled);
+                  } catch (e) {
+                    console.warn('Failed to cache ' + file + ' in localStorage:', e);
+                  }
+                  return { file, compiled };
+                })
+            ))
+            .then(results => {
+              try {
+                localStorage.setItem('jw_jsx_version', VERSION);
+              } catch (e) {}
+              results.forEach(res => {
+                const script = document.createElement('script');
+                script.text = res.compiled + '\n//# sourceURL=' + res.file + '.js';
+                document.body.appendChild(script);
+              });
+              console.log('[JSX Cache] All scripts compiled, cached and executed.');
+            })
+            .catch(err => {
+              console.error('[JSX Cache] Compilation error:', err);
+            });
+          };
+          document.head.appendChild(babelScript);
+        }
+      })();
+    });
   </script>
 </body>
 </html>
