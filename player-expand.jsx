@@ -339,7 +339,7 @@ function ExpandMode({
           <button onClick={() => setMuted(m => !m)} aria-label="Mute" style={{ color: muted ? 'var(--a2)' : 'inherit', display:'flex' }}>
             {muted ? <MuteIco /> : <VolIco />}
           </button>
-          <input type="range" min="0" max="1" step="0.01" value={muted ? 0 : vol}
+          <input id="expanded-player-volume" name="volume" type="range" min="0" max="1" step="0.01" value={muted ? 0 : vol}
             onChange={e => { setVol(+e.target.value); setMuted(false); }}
             style={{ flex:1 }} aria-label="Volume" />
         </div>

@@ -130,7 +130,10 @@ function AppsSection({ lang }) {
               <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
             </svg>
             <input
+              id="apps-search-input"
+              name="search"
               type="text"
+              autoComplete="off"
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder={tx(lang,'apps_search')}

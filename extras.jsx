@@ -63,6 +63,7 @@ function NewsletterSection({ lang }) {
               id="nl-email"
               name="email"
               type="email" required
+              autoComplete="email"
               value={email}
               onChange={e => { setEmail(e.target.value); if (status === 'err') setStatus('idle'); }}
               placeholder={tx(lang,'newsletter_email')}

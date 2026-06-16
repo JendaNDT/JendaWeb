@@ -1358,7 +1358,10 @@ function AppsSection({ lang }) {
               <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
             </svg>
             <input
+              id="apps-search-input"
+              name="search"
               type="text"
+              autoComplete="off"
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder={tx(lang,'apps_search')}
@@ -2055,7 +2058,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
         <button onClick={() => setMuted(m => !m)} aria-label="Mute (M)" title="Mute (M)" style={{ color: muted ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:4 }}>
           {muted ? <MuteIco /> : <VolIco />}
         </button>
-        <input type="range" min="0" max="1" step="0.01" value={muted ? 0 : vol} onChange={e => { setVol(+e.target.value); setMuted(false); }} style={{ width:80 }} aria-label="Volume" />
+        <input id="player-volume" name="volume" type="range" min="0" max="1" step="0.01" value={muted ? 0 : vol} onChange={e => { setVol(+e.target.value); setMuted(false); }} style={{ width:80 }} aria-label="Volume" />
         <button onClick={onClose} aria-label="Close player" title="Close" style={{ color:'var(--muted)', display:'flex', padding:6, marginLeft:8, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><CloseIco /></button>
       </div>
     </div>
@@ -2229,7 +2232,7 @@ function ContactForm({ lang }) {
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
         <div>
           <div className={`field${touched.name && errors.name ? ' err' : ''}`}>
-            <input id="cf-name" name="name" type="text" placeholder=" " value={name}
+            <input id="cf-name" name="name" type="text" autoComplete="name" placeholder=" " value={name}
               onChange={e=>setName(e.target.value)} onBlur={() => setTouched(t => ({ ...t, name:true }))}
               aria-invalid={!!(touched.name && errors.name)} />
             <label htmlFor="cf-name">{tx(lang,'contact_name')}</label>
@@ -2238,7 +2241,7 @@ function ContactForm({ lang }) {
         </div>
         <div>
           <div className={`field${touched.email && errors.email ? ' err' : ''}`}>
-            <input id="cf-email" name="email" type="email" placeholder=" " value={email}
+            <input id="cf-email" name="email" type="email" autoComplete="email" placeholder=" " value={email}
               onChange={e=>setEmail(e.target.value)} onBlur={() => setTouched(t => ({ ...t, email:true }))}
               aria-invalid={!!(touched.email && errors.email)} />
             <label htmlFor="cf-email">{tx(lang,'contact_email_lbl')}</label>
@@ -2682,7 +2685,7 @@ function ExpandMode({
           <button onClick={() => setMuted(m => !m)} aria-label="Mute" style={{ color: muted ? 'var(--a2)' : 'inherit', display:'flex' }}>
             {muted ? <MuteIco /> : <VolIco />}
           </button>
-          <input type="range" min="0" max="1" step="0.01" value={muted ? 0 : vol}
+          <input id="expanded-player-volume" name="volume" type="range" min="0" max="1" step="0.01" value={muted ? 0 : vol}
             onChange={e => { setVol(+e.target.value); setMuted(false); }}
             style={{ flex:1 }} aria-label="Volume" />
         </div>
@@ -2966,6 +2969,7 @@ function NewsletterSection({ lang }) {
               id="nl-email"
               name="email"
               type="email" required
+              autoComplete="email"
               value={email}
               onChange={e => { setEmail(e.target.value); if (status === 'err') setStatus('idle'); }}
               placeholder={tx(lang,'newsletter_email')}
@@ -3389,7 +3393,10 @@ function SearchOverlay({ lang, onClose, onPlay }) {
           <SearchIco />
           <input
             ref={inputRef}
+            id="search-input"
+            name="search"
             type="text"
+            autoComplete="off"
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder={lang === 'cs' ? 'Hledat aplikace, alba, skladby…' : 'Search apps, albums, tracks…'}

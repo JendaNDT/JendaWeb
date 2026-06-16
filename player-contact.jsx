@@ -459,7 +459,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
         <button onClick={() => setMuted(m => !m)} aria-label="Mute (M)" title="Mute (M)" style={{ color: muted ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:4 }}>
           {muted ? <MuteIco /> : <VolIco />}
         </button>
-        <input type="range" min="0" max="1" step="0.01" value={muted ? 0 : vol} onChange={e => { setVol(+e.target.value); setMuted(false); }} style={{ width:80 }} aria-label="Volume" />
+        <input id="player-volume" name="volume" type="range" min="0" max="1" step="0.01" value={muted ? 0 : vol} onChange={e => { setVol(+e.target.value); setMuted(false); }} style={{ width:80 }} aria-label="Volume" />
         <button onClick={onClose} aria-label="Close player" title="Close" style={{ color:'var(--muted)', display:'flex', padding:6, marginLeft:8, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><CloseIco /></button>
       </div>
     </div>
@@ -633,7 +633,7 @@ function ContactForm({ lang }) {
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
         <div>
           <div className={`field${touched.name && errors.name ? ' err' : ''}`}>
-            <input id="cf-name" name="name" type="text" placeholder=" " value={name}
+            <input id="cf-name" name="name" type="text" autoComplete="name" placeholder=" " value={name}
               onChange={e=>setName(e.target.value)} onBlur={() => setTouched(t => ({ ...t, name:true }))}
               aria-invalid={!!(touched.name && errors.name)} />
             <label htmlFor="cf-name">{tx(lang,'contact_name')}</label>
@@ -642,7 +642,7 @@ function ContactForm({ lang }) {
         </div>
         <div>
           <div className={`field${touched.email && errors.email ? ' err' : ''}`}>
-            <input id="cf-email" name="email" type="email" placeholder=" " value={email}
+            <input id="cf-email" name="email" type="email" autoComplete="email" placeholder=" " value={email}
               onChange={e=>setEmail(e.target.value)} onBlur={() => setTouched(t => ({ ...t, email:true }))}
               aria-invalid={!!(touched.email && errors.email)} />
             <label htmlFor="cf-email">{tx(lang,'contact_email_lbl')}</label>

@@ -136,7 +136,10 @@ function SearchOverlay({ lang, onClose, onPlay }) {
           <SearchIco />
           <input
             ref={inputRef}
+            id="search-input"
+            name="search"
             type="text"
+            autoComplete="off"
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder={lang === 'cs' ? 'Hledat aplikace, alba, skladby…' : 'Search apps, albums, tracks…'}
