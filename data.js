@@ -120,7 +120,7 @@ window.CASE_STUDIES = {
 
 // Newsletter endpoint. Sign up at https://buttondown.com and replace with your form id.
 // If left null, the form gracefully degrades to a static "thanks" message.
-window.NEWSLETTER_ENDPOINT = null; // e.g. 'https://buttondown.com/api/emails/embed-subscribe/jenda'
+window.NEWSLETTER_ENDPOINT = 'https://buttondown.email/api/emails/embed-subscribe/svatos';
 
 // Ko-fi / Buy Me a Coffee username. Set to display a tip widget in Contact section.
 window.KOFI_USERNAME = null; // e.g. 'jenda'
