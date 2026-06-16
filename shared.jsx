@@ -158,7 +158,9 @@ function albumArt(album) {
 }
 
 // Deterministic procedural artwork for a track. Returns a data: URI SVG.
-function trackArt(seed, album) {
+function trackArt(track, album) {
+  if (track && typeof track === 'object' && track.cover) return track.cover;
+  const seed = (track && typeof track === 'object') ? track.id : track;
   const sid = (Number(seed) || 1) * 9301 + 49297;
   const rand = (n) => {
     let s = (sid + n * 1009) >>> 0;

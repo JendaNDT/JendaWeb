@@ -27,7 +27,7 @@ function QueueDrawer({ playlist, currentTrack, history, onPlay, onClose, lang })
       }}
       onMouseEnter={e => { if (kind !== 'current') e.currentTarget.style.background = 'var(--card)'; }}
       onMouseLeave={e => { if (kind !== 'current') e.currentTarget.style.background = 'transparent'; }}>
-        <div style={{ width:32, height:32, borderRadius:6, flexShrink:0, backgroundImage:`url("${trackArt(t.id, al)}")`, backgroundSize:'cover' }} />
+        <div style={{ width:32, height:32, borderRadius:6, flexShrink:0, backgroundImage:`url("${trackArt(t, al)}")`, backgroundSize:'cover' }} />
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontSize:13, fontWeight:600, color: kind === 'current' ? 'var(--a1)' : 'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{t.title}</div>
           <div style={{ fontSize:11, color:'var(--muted)' }}>{al?.title || ''}</div>

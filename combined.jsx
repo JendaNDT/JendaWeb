@@ -707,7 +707,9 @@ function albumArt(album) {
 }
 
 // Deterministic procedural artwork for a track. Returns a data: URI SVG.
-function trackArt(seed, album) {
+function trackArt(track, album) {
+  if (track && typeof track === 'object' && track.cover) return track.cover;
+  const seed = (track && typeof track === 'object') ? track.id : track;
   const sid = (Number(seed) || 1) * 9301 + 49297;
   const rand = (n) => {
     let s = (sid + n * 1009) >>> 0;
@@ -1488,7 +1490,7 @@ function TrackRow({ track, album, idx, active, playing, onPlay }) {
       <div style={{ width:28, textAlign:'center', color: active ? 'var(--a1)' : 'var(--muted)', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
         {active && playing ? <EqBars /> : (hov || active) ? <PlayIco /> : <span style={{ fontSize:13 }}>{idx + 1}</span>}
       </div>
-      <div style={{ width:38, height:38, borderRadius:7, flexShrink:0, backgroundImage:`url("${trackArt(track.id, album)}")`, backgroundSize:'cover' }} />
+      <div style={{ width:38, height:38, borderRadius:7, flexShrink:0, backgroundImage:`url("${trackArt(track, album)}")`, backgroundSize:'cover' }} />
       <div style={{ flex:1, minWidth:0 }}>
         <div style={{ fontSize:14, fontWeight:600, color: active?'var(--a1)':'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{track.title}</div>
         <div style={{ fontSize:12, color:'var(--muted)', marginTop:1 }}>{album?.title || ''}</div>
@@ -1942,7 +1944,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
     }}>
       <div className="player-info" onClick={() => setExpanded(true)} style={{ display:'flex', alignItems:'center', gap:12, minWidth:0, cursor:'pointer' }} role="button" tabIndex={0} aria-label={`${track ? `${track.title} - ${album?.title || ''}. ` : ''}Expand player (E)`} title="Expand (E)"
         onKeyDown={(e) => { if (e.key === 'Enter') setExpanded(true); }}>
-        <div className={restoring ? 'shimmer-fx' : ''} style={{ position:'relative', width:42, height:42, borderRadius:8, flexShrink:0, overflow:'hidden', backgroundImage: track ? `url("${trackArt(track.id, album)}")` : '', backgroundSize:'cover', display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <div className={restoring ? 'shimmer-fx' : ''} style={{ position:'relative', width:42, height:42, borderRadius:8, flexShrink:0, overflow:'hidden', backgroundImage: track ? `url("${trackArt(track, album)}")` : '', backgroundSize:'cover', display:'flex', alignItems:'center', justifyContent:'center' }}>
           {isPlaying && <EqBars color="#fff" />}
         </div>
         <div style={{ minWidth:0 }}>
@@ -2518,7 +2520,7 @@ function ExpandMode({
   }, [onClose, showLyrics]);
 
   if (!track) return null;
-  const art = trackArt(track.id, album);
+  const art = trackArt(track, album);
   const hasLyrics = !!track.lyrics;
 
   // Render waveform based on vizMode
@@ -2958,7 +2960,7 @@ function QueueDrawer({ playlist, currentTrack, history, onPlay, onClose, lang })
       }}
       onMouseEnter={e => { if (kind !== 'current') e.currentTarget.style.background = 'var(--card)'; }}
       onMouseLeave={e => { if (kind !== 'current') e.currentTarget.style.background = 'transparent'; }}>
-        <div style={{ width:32, height:32, borderRadius:6, flexShrink:0, backgroundImage:`url("${trackArt(t.id, al)}")`, backgroundSize:'cover' }} />
+        <div style={{ width:32, height:32, borderRadius:6, flexShrink:0, backgroundImage:`url("${trackArt(t, al)}")`, backgroundSize:'cover' }} />
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontSize:13, fontWeight:600, color: kind === 'current' ? 'var(--a1)' : 'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{t.title}</div>
           <div style={{ fontSize:11, color:'var(--muted)' }}>{al?.title || ''}</div>
@@ -3378,7 +3380,7 @@ function MostPlayedSection({ lang, onPlay, currentTrack, playing }) {
                 <div style={{ width:24, fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:800, color:'var(--a1)', textAlign:'center' }}>
                   {active && playing ? <EqBars /> : `#${i + 1}`}
                 </div>
-                <div style={{ width:38, height:38, borderRadius:7, flexShrink:0, backgroundImage:`url("${trackArt(row.track.id, al)}")`, backgroundSize:'cover' }} />
+                <div style={{ width:38, height:38, borderRadius:7, flexShrink:0, backgroundImage:`url("${trackArt(row.track, al)}")`, backgroundSize:'cover' }} />
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontSize:14, fontWeight:600, color: active ? 'var(--a1)' : 'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{row.track.title}</div>
                   <div style={{ fontSize:12, color:'var(--muted)' }}>{al?.title || ''}</div>

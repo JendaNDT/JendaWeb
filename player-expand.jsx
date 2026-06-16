@@ -176,7 +176,7 @@ function ExpandMode({
   }, [onClose, showLyrics]);
 
   if (!track) return null;
-  const art = trackArt(track.id, album);
+  const art = trackArt(track, album);
   const hasLyrics = !!track.lyrics;
 
   // Render waveform based on vizMode

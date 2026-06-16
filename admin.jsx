@@ -245,13 +245,16 @@ function TrackForm({ initial, albums, onClose, onSaved, notify }) {
   const [f, setF] = useState(() => initial ? {
     title: initial.title || '', album_id: initial.album_id || (albums[0] && albums[0].id) || '',
     duration: initial.duration || '', lyrics_cs: initial.lyrics_cs || '', lyrics_en: initial.lyrics_en || '',
-    sort: initial.sort != null ? initial.sort : 0, audio_url: initial.audio_url || '', download_url: initial.download_url || '',
-  } : { title: '', album_id: (albums[0] && albums[0].id) || '', duration: '', lyrics_cs: '', lyrics_en: '', sort: 0, audio_url: '', download_url: '' });
+    sort: initial.sort != null ? initial.sort : 0, audio_url: initial.audio_url || '', download_url: initial.download_url || '', cover_url: initial.cover_url || '',
+  } : { title: '', album_id: (albums[0] && albums[0].id) || '', duration: '', lyrics_cs: '', lyrics_en: '', sort: 0, audio_url: '', download_url: '', cover_url: '' });
   const [file, setFile] = useState(null);
+  const [coverFile, setCoverFile] = useState(null);
+  const [coverPreview, setCoverPreview] = useState(initial && initial.cover_url ? initial.cover_url : '');
   const [busy, setBusy] = useState(false);
   const [prog, setProg] = useState(-1);
   const set = (k, v) => setF((o) => Object.assign({}, o, { [k]: v }));
   const onPickAudio = (fl) => { setFile(fl); readAudioDuration(fl).then((d) => { if (d) set('duration', d); }); };
+  const onPickCover = (fl) => { setCoverFile(fl); try { setCoverPreview(URL.createObjectURL(fl)); } catch (e) {} };
 
   const submit = async () => {
     if (!f.title.trim()) { notify('Zadej název skladby', 'err'); return; }
@@ -264,10 +267,13 @@ function TrackForm({ initial, albums, onClose, onSaved, notify }) {
         audio_url = url; download_url = url;
         setProg(-1);
       }
+      let cover_url = f.cover_url;
+      if (coverFile) { setProg(0); cover_url = await uploadFile('images', 'covers', coverFile, setProg); setProg(-1); }
       const row = {
         title: f.title.trim(), album_id: f.album_id || null, duration: f.duration.trim() || null,
         audio_url: audio_url || null, download_url: download_url || null,
         lyrics_cs: f.lyrics_cs.trim() || null, lyrics_en: f.lyrics_en.trim() || null,
+        cover_url: cover_url || null,
         sort: Number(f.sort) || 0,
       };
       if (initial) await sbUpdate('tracks', 'id', initial.id, row);
@@ -289,6 +295,12 @@ function TrackForm({ initial, albums, onClose, onSaved, notify }) {
       <Field label={'Audio (mp3)' + (f.audio_url ? ' — nahráno ✓' : '')}>
         <FileDrop accept="audio/*" file={file} onFile={onPickAudio} label="Přetáhni mp3, nebo klikni (délka se vyplní sama)" />
         {f.audio_url && !file && <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}><PlayBtn url={f.audio_url} /><span style={{ fontSize: 12, color: 'var(--muted)' }}>přehrát nahrané audio</span></div>}
+      </Field>
+      <Field label={'Obrázek skladby' + (f.cover_url ? ' — nahráno ✓' : ' (nepovinné, jinak procedurální art)')}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          {coverPreview && <img className="thumb" src={coverPreview} alt="" />}
+          <div style={{ flex: 1 }}><FileDrop accept="image/*" file={coverFile} onFile={onPickCover} label="Přetáhni obrázek, nebo klikni" /></div>
+        </div>
       </Field>
       <Field label="Text CZ (nepovinné)"><textarea value={f.lyrics_cs} onChange={(e) => set('lyrics_cs', e.target.value)} /></Field>
       <Field label="Text EN (nepovinné)"><textarea value={f.lyrics_en} onChange={(e) => set('lyrics_en', e.target.value)} /></Field>

@@ -33,6 +33,7 @@
       var hasLyrics = (t.lyrics_cs != null) || (t.lyrics_en != null);
       return { id: t.id, title: t.title, album: t.album_id, duration: t.duration,
                audioUrl: t.audio_url, downloadUrl: t.download_url, plays: t.plays || 0,
+               cover: t.cover_url || null,
                lyrics: hasLyrics ? { cs: t.lyrics_cs, en: t.lyrics_en } : null };
     });
   }

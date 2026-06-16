@@ -322,7 +322,7 @@ function MostPlayedSection({ lang, onPlay, currentTrack, playing }) {
                 <div style={{ width:24, fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:800, color:'var(--a1)', textAlign:'center' }}>
                   {active && playing ? <EqBars /> : `#${i + 1}`}
                 </div>
-                <div style={{ width:38, height:38, borderRadius:7, flexShrink:0, backgroundImage:`url("${trackArt(row.track.id, al)}")`, backgroundSize:'cover' }} />
+                <div style={{ width:38, height:38, borderRadius:7, flexShrink:0, backgroundImage:`url("${trackArt(row.track, al)}")`, backgroundSize:'cover' }} />
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontSize:14, fontWeight:600, color: active ? 'var(--a1)' : 'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{row.track.title}</div>
                   <div style={{ fontSize:12, color:'var(--muted)' }}>{al?.title || ''}</div>
