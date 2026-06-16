@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NoteFlow — Case Study · Jenda</title>
+  <meta name="description" content="PWA poznámkový blok s tagy a okamžitým fulltextovým hledáním, plně offline.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script data-goatcounter="https://jendaweb.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.cool</a>
+    <a href="../index.html#apps" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-pwa">PWA</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2025 · 3 týdny</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #06d6a028, #06d6a050); border:1px solid #06d6a040; color:#06d6a0;">N</div>
+      <div>
+        <h1>NoteFlow</h1>
+        <p class="subtitle" data-cs="Poznámky, které najdeš rychleji, než je napíšeš. Tagy, fulltext, plně offline — bez účtu a bez cloudu." data-en="Notes you find faster than you can write them. Tags, full-text, fully offline — no account, no cloud.">Poznámky, které najdeš rychleji, než je napíšeš. Tagy, fulltext, plně offline — bez účtu a bez cloudu.</p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Většina poznámkových appek tě tlačí do účtu, synchronizace a složek. Když si chceš jen rychle něco poznamenat a pak to zase najít, je to zbytečné tření. Chtěl jsem blok, který se otevře okamžitě a hledá od prvního písmene." data-en="Most note apps push you into accounts, sync and folders. When you just want to jot something down and find it again, that is needless friction. I wanted a notepad that opens instantly and searches from the first keystroke.">Většina poznámkových appek tě tlačí do účtu, synchronizace a složek. Když si chceš jen rychle něco poznamenat a pak to zase najít, je to zbytečné tření. Chtěl jsem blok, který se otevře okamžitě a hledá od prvního písmene.</p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="Lokální úložiště v IndexedDB — žádný server, žádná registrace" data-en="Local storage in IndexedDB — no server, no signup">Lokální úložiště v IndexedDB — žádný server, žádná registrace</li>
+      <li data-cs="Fulltext přes invertovaný index ve Web Workeru (výsledky pod 16 ms i u tisíců poznámek)" data-en="Full-text via an inverted index in a Web Worker (results under 16 ms even with thousands of notes)">Fulltext přes invertovaný index ve Web Workeru (výsledky pod 16 ms i u tisíců poznámek)</li>
+      <li data-cs="Tagy parsované přímo z textu (#tag) a filtrování jejich kombinací" data-en="Tags parsed straight from text (#tag) and filtering by their combinations">Tagy parsované přímo z textu (#tag) a filtrování jejich kombinací</li>
+      <li data-cs="Markdown náhled v reálném čase s klávesovými zkratkami" data-en="Real-time Markdown preview with keyboard shortcuts">Markdown náhled v reálném čase s klávesovými zkratkami</li>
+      <li data-cs="Plně offline (Service Worker), export do .md i JSON" data-en="Fully offline (Service Worker), export to .md and JSON">Plně offline (Service Worker), export do .md i JSON</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">3,4 k</div><div class="lbl" data-cs="aktivní uživatelé" data-en="active users">aktivní uživatelé</div></div>
+      <div class="metric"><div class="num">16 ms</div><div class="lbl" data-cs="medián hledání" data-en="median search">medián hledání</div></div>
+      <div class="metric"><div class="num">0</div><div class="lbl" data-cs="serverů" data-en="servers">serverů</div></div>
+      <div class="metric"><div class="num">4,7★</div><div class="lbl" data-cs="hodnocení" data-en="rating">hodnocení</div></div>
+    </div>
+    <p data-cs="Lidem se nejvíc líbí, že appka nic nechce — žádná registrace, žádné upselly. Část uživatelů ji drží jako rychlý scratchpad na druhém monitoru, protože naběhne dřív než nativní poznámky." data-en="What people like most is that the app asks for nothing — no signup, no upsells. Some keep it as a quick scratchpad on a second monitor because it loads faster than the native notes app.">Lidem se nejvíc líbí, že appka nic nechce — žádná registrace, žádné upselly. Část uživatelů ji drží jako rychlý scratchpad na druhém monitoru, protože naběhne dřív než nativní poznámky.</p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">IndexedDB</span>
+      <span class="chip">Web Workers</span>
+      <span class="chip">Fulltext index</span>
+      <span class="chip">Markdown</span>
+      <span class="chip">Service Worker</span>
+      <span class="chip">Vanilla JS</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Inspirovalo tě to k podobnému projektu?" data-en="Inspired to build something similar?">Inspirovalo tě to k podobnému projektu?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+  </main>
+
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>

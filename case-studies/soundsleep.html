@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoundSleep — Case Study · Jenda</title>
+  <meta name="description" content="Generátor relaxačních zvuků pro spánek — procedurální, ne smyčky.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script data-goatcounter="https://jendaweb.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.cool</a>
+    <a href="../index.html#apps" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-android">Android</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2024 · 4 týdny</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #06b6d428, #06b6d450); border:1px solid #06b6d440; color:#06b6d4;">S</div>
+      <div>
+        <h1>SoundSleep</h1>
+        <p class="subtitle" data-cs="Zvuky pro spánek, které se nikdy neopakují. Déšť, oceán i šum města — generované, ne ze smyčky." data-en="Sleep sounds that never repeat. Rain, ocean and city hum — generated, not looped.">Zvuky pro spánek, které se nikdy neopakují. Déšť, oceán i šum města — generované, ne ze smyčky.</p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Většina spánkových appek hraje krátké smyčky, jejichž šev mozek po chvíli pozná a zbystří se. Chtěl jsem zvuky generované za běhu, takže nikdy nejsou dvakrát stejné, a aby to nesnědlo baterku přes noc." data-en="Most sleep apps play short loops whose seam the brain eventually notices and perks up. I wanted sounds generated on the fly so they are never twice the same, without eating the battery overnight.">Většina spánkových appek hraje krátké smyčky, jejichž šev mozek po chvíli pozná a zbystří se. Chtěl jsem zvuky generované za běhu, takže nikdy nejsou dvakrát stejné, a aby to nesnědlo baterku přes noc.</p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="Procedurální syntéza zvuku (filtrovaný šum a vrstvy) místo nahrávek" data-en="Procedural sound synthesis (filtered noise and layers) instead of recordings">Procedurální syntéza zvuku (filtrovaný šum a vrstvy) místo nahrávek</li>
+      <li data-cs="Mixér vrstev — déšť, hrom, vítr, oceán s vlastní hlasitostí" data-en="Layer mixer — rain, thunder, wind, ocean each with its own volume">Mixér vrstev — déšť, hrom, vítr, oceán s vlastní hlasitostí</li>
+      <li data-cs="Časovač s pozvolným ztišením a chytrý budík v lehké fázi spánku" data-en="Timer with gradual fade-out and a smart alarm in light sleep">Časovač s pozvolným ztišením a chytrý budík v lehké fázi spánku</li>
+      <li data-cs="Přehrávání na pozadí s minimální spotřebou, funguje při zhasnuté obrazovce" data-en="Background playback with minimal draw, works with the screen off">Přehrávání na pozadí s minimální spotřebou, funguje při zhasnuté obrazovce</li>
+      <li data-cs="Žádné reklamy uprostřed noci, žádné účty" data-en="No ads in the middle of the night, no accounts">Žádné reklamy uprostřed noci, žádné účty</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">9,3 k</div><div class="lbl" data-cs="stažení" data-en="downloads">stažení</div></div>
+      <div class="metric"><div class="num">∞</div><div class="lbl" data-cs="bez opakování" data-en="no repeats">bez opakování</div></div>
+      <div class="metric"><div class="num">&lt;2 %</div><div class="lbl" data-cs="baterie za noc" data-en="battery per night">baterie za noc</div></div>
+      <div class="metric"><div class="num">4,6★</div><div class="lbl" data-cs="hodnocení" data-en="rating">hodnocení</div></div>
+    </div>
+    <p data-cs="Lidé píší, že po letech smyček konečně neslyší ten otravný skok na konci nahrávky. Rodiče appku používají na uspávání dětí." data-en="People write that after years of loops they finally do not hear the annoying jump at the end of the recording. Parents use the app to get kids to sleep.">Lidé píší, že po letech smyček konečně neslyší ten otravný skok na konci nahrávky. Rodiče appku používají na uspávání dětí.</p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">Kotlin</span>
+      <span class="chip">Oboe (C++ audio)</span>
+      <span class="chip">Procedural DSP</span>
+      <span class="chip">MediaSession</span>
+      <span class="chip">Foreground Service</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Inspirovalo tě to k podobnému projektu?" data-en="Inspired to build something similar?">Inspirovalo tě to k podobnému projektu?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+  </main>
+
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>

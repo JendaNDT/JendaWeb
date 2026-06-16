@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PixelCam — Case Study · Jenda</title>
+  <meta name="description" content="Retro filmový filtr s lo-fi estetikou aplikovaný živě v hledáčku fotoaparátu.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script data-goatcounter="https://jendaweb.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.cool</a>
+    <a href="../index.html#apps" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-android">Android</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2024 · 5 týdnů</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #f43f5e28, #f43f5e50); border:1px solid #f43f5e40; color:#f43f5e;">P</div>
+      <div>
+        <h1>PixelCam</h1>
+        <p class="subtitle" data-cs="Foťák, který fotí rovnou na film. Zrno, halace a barvy 90. let — živě v hledáčku, ne až potom." data-en="A camera that shoots straight to film. Grain, halation and 90s color — live in the viewfinder, not after.">Foťák, který fotí rovnou na film. Zrno, halace a barvy 90. let — živě v hledáčku, ne až potom.</p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Retro filtry se obvykle plácnou na hotovou fotku a vypadají lacině. Chtěl jsem, aby člověk viděl výsledek už při komponování záběru — opravdový filmový look počítaný v reálném čase na GPU." data-en="Retro filters are usually slapped on a finished photo and look cheap. I wanted you to see the result while framing the shot — a real film look computed in real time on the GPU.">Retro filtry se obvykle plácnou na hotovou fotku a vypadají lacině. Chtěl jsem, aby člověk viděl výsledek už při komponování záběru — opravdový filmový look počítaný v reálném čase na GPU.</p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="Filtry jako GPU shadery (zrno, halace, vinětace, color grade) v reálném čase" data-en="Filters as GPU shaders (grain, halation, vignette, color grade) in real time">Filtry jako GPU shadery (zrno, halace, vinětace, color grade) v reálném čase</li>
+      <li data-cs="Náhled přímo v hledáčku přes Camera2 a GLSurfaceView" data-en="Preview straight in the viewfinder via Camera2 and GLSurfaceView">Náhled přímo v hledáčku přes Camera2 a GLSurfaceView</li>
+      <li data-cs="Sada filmových looků s odlišnou barevnou křivkou a zrnitostí" data-en="A set of film stocks each with a distinct color curve and grain">Sada filmových looků s odlišnou barevnou křivkou a zrnitostí</li>
+      <li data-cs="Ukládání ve full rozlišení, EXIF zachován" data-en="Saving at full resolution, EXIF preserved">Ukládání ve full rozlišení, EXIF zachován</li>
+      <li data-cs="Žádné vodoznaky, žádné předplatné na filtry" data-en="No watermarks, no subscription for filters">Žádné vodoznaky, žádné předplatné na filtry</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">7,6 k</div><div class="lbl" data-cs="stažení" data-en="downloads">stažení</div></div>
+      <div class="metric"><div class="num">60 fps</div><div class="lbl" data-cs="živý náhled" data-en="live preview">živý náhled</div></div>
+      <div class="metric"><div class="num">12</div><div class="lbl" data-cs="filmových looků" data-en="film looks">filmových looků</div></div>
+      <div class="metric"><div class="num">4,5★</div><div class="lbl" data-cs="hodnocení" data-en="rating">hodnocení</div></div>
+    </div>
+    <p data-cs="Nejvíc se sdílí fotky pořízené potmě v barech — uživatelům se líbí, že zrno a halace vznikají opravdově, ne jako nálepka. Pár lidí appku používá místo digitálu na výlety." data-en="The most shared photos are taken in dim bars — users like that the grain and halation are genuine, not a sticker. Some use the app instead of a digital camera on trips.">Nejvíc se sdílí fotky pořízené potmě v barech — uživatelům se líbí, že zrno a halace vznikají opravdově, ne jako nálepka. Pár lidí appku používá místo digitálu na výlety.</p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">Kotlin</span>
+      <span class="chip">Camera2</span>
+      <span class="chip">OpenGL ES</span>
+      <span class="chip">GLSL Shaders</span>
+      <span class="chip">GPUImage</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Inspirovalo tě to k podobnému projektu?" data-en="Inspired to build something similar?">Inspirovalo tě to k podobnému projektu?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+  </main>
+
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>

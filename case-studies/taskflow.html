@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow — Case Study · Jenda</title>
+  <meta name="description" content="Osobní kanban tabule pro projekty a každodenní úkoly, plně offline.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script data-goatcounter="https://jendaweb.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.cool</a>
+    <a href="../index.html#apps" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-pwa">PWA</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2024 · 4 týdny</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #6366f128, #6366f150); border:1px solid #6366f140; color:#6366f1;">T</div>
+      <div>
+        <h1>TaskFlow</h1>
+        <p class="subtitle" data-cs="Kanban tak jednoduchý, že ho fakt používáš. Tři sloupce, drag and drop, žádný onboarding." data-en="Kanban simple enough that you actually use it. Three columns, drag and drop, no onboarding.">Kanban tak jednoduchý, že ho fakt používáš. Tři sloupce, drag and drop, žádný onboarding.</p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Týmové nástroje na úkoly jsou pro jednoho člověka přebujelé — boardy, role, automatizace. Pro osobní projekty stačí tři sloupce a možnost přetáhnout kartu. Chtěl jsem to nejjednodušší, co ještě dává smysl." data-en="Team task tools are bloated for a single person — boards, roles, automations. For personal projects three columns and dragging a card is enough. I wanted the simplest thing that still makes sense.">Týmové nástroje na úkoly jsou pro jednoho člověka přebujelé — boardy, role, automatizace. Pro osobní projekty stačí tři sloupce a možnost přetáhnout kartu. Chtěl jsem to nejjednodušší, co ještě dává smysl.</p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="Plynulý drag and drop karet i mezi sloupci, na myš i dotyk" data-en="Smooth drag and drop of cards across columns, mouse and touch">Plynulý drag and drop karet i mezi sloupci, na myš i dotyk</li>
+      <li data-cs="Více tabulí, štítky, termíny a podúkoly v kartě" data-en="Multiple boards, labels, due dates and subtasks in a card">Více tabulí, štítky, termíny a podúkoly v kartě</li>
+      <li data-cs="Klávesové zkratky pro rychlé přidávání a přesouvání" data-en="Keyboard shortcuts for fast adding and moving">Klávesové zkratky pro rychlé přidávání a přesouvání</li>
+      <li data-cs="Plně offline (IndexedDB + Service Worker), instalovatelné jako appka" data-en="Fully offline (IndexedDB plus Service Worker), installable as an app">Plně offline (IndexedDB + Service Worker), instalovatelné jako appka</li>
+      <li data-cs="Export tabule do Markdownu pro sdílení" data-en="Export a board to Markdown for sharing">Export tabule do Markdownu pro sdílení</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">5,5 k</div><div class="lbl" data-cs="aktivní uživatelé" data-en="active users">aktivní uživatelé</div></div>
+      <div class="metric"><div class="num">3</div><div class="lbl" data-cs="sloupce, ne 30" data-en="columns, not 30">sloupce, ne 30</div></div>
+      <div class="metric"><div class="num">0 s</div><div class="lbl" data-cs="onboarding" data-en="onboarding">onboarding</div></div>
+      <div class="metric"><div class="num">4,7★</div><div class="lbl" data-cs="hodnocení" data-en="rating">hodnocení</div></div>
+    </div>
+    <p data-cs="Lidé si chválí, že se nemusí nic učit — otevřou a táhnou. Pár freelancerů ji používá na klientské projekty místo těžkých nástrojů." data-en="People appreciate having nothing to learn — they open it and drag. A few freelancers use it for client projects instead of heavy tools.">Lidé si chválí, že se nemusí nic učit — otevřou a táhnou. Pár freelancerů ji používá na klientské projekty místo těžkých nástrojů.</p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">PWA</span>
+      <span class="chip">IndexedDB</span>
+      <span class="chip">Drag &amp; Drop API</span>
+      <span class="chip">Service Worker</span>
+      <span class="chip">React</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Inspirovalo tě to k podobnému projektu?" data-en="Inspired to build something similar?">Inspirovalo tě to k podobnému projektu?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+  </main>
+
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>

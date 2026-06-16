@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrailGPS — Case Study · Jenda</title>
+  <meta name="description" content="Offline GPS navigace pro turisty bez mobilního signálu, s předstaženými mapami.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script data-goatcounter="https://jendaweb.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.cool</a>
+    <a href="../index.html#apps" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-android">Android</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2024 · 6 týdnů</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #3b82f628, #3b82f650); border:1px solid #3b82f640; color:#3b82f6;">T</div>
+      <div>
+        <h1>TrailGPS</h1>
+        <p class="subtitle" data-cs="Mapa, která funguje tam, kde končí signál. Předstáhni si oblast doma a v horách tě navede i bez dat." data-en="A map that works where the signal ends. Pre-download a region at home and it guides you in the mountains with no data.">Mapa, která funguje tam, kde končí signál. Předstáhni si oblast doma a v horách tě navede i bez dat.</p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Běžné navigace v lese kolabují — chytají signál, vybíjejí baterku a bez dat nic neukážou. Turista potřebuje mapu, která je celá v telefonu a pozici drží jen z GPS čipu, bez internetu." data-en="Mainstream navigation falls apart in the woods — hunting for signal, draining the battery, and showing nothing offline. A hiker needs a map that lives entirely on the phone and holds position from the GPS chip alone, no internet.">Běžné navigace v lese kolabují — chytají signál, vybíjejí baterku a bez dat nic neukážou. Turista potřebuje mapu, která je celá v telefonu a pozici drží jen z GPS čipu, bez internetu.</p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="Vektorové mapy (MBTiles) stažené po oblastech, vykreslované lokálně" data-en="Vector maps (MBTiles) downloaded by region, rendered locally">Vektorové mapy (MBTiles) stažené po oblastech, vykreslované lokálně</li>
+      <li data-cs="Poloha čistě z GPS čipu — funguje v letovém režimu" data-en="Location purely from the GPS chip — works in airplane mode">Poloha čistě z GPS čipu — funguje v letovém režimu</li>
+      <li data-cs="Záznam trasy do GPX + nadmořský profil a převýšení" data-en="Track recording to GPX plus elevation profile and ascent">Záznam trasy do GPX + nadmořský profil a převýšení</li>
+      <li data-cs="Agresivní šetření baterie: vykreslování jen při pohybu, ztlumení na display-off" data-en="Aggressive battery saving: render only while moving, throttle on display-off">Agresivní šetření baterie: vykreslování jen při pohybu, ztlumení na display-off</li>
+      <li data-cs="Sdílení pozice přes generovaný odkaz, jakmile je zase signál" data-en="Share position via a generated link once back in coverage">Sdílení pozice přes generovaný odkaz, jakmile je zase signál</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">5,2 k</div><div class="lbl" data-cs="stažení" data-en="downloads">stažení</div></div>
+      <div class="metric"><div class="num">100 %</div><div class="lbl" data-cs="funkcí offline" data-en="features offline">funkcí offline</div></div>
+      <div class="metric"><div class="num">~9 h</div><div class="lbl" data-cs="výdrž záznamu" data-en="recording battery">výdrž záznamu</div></div>
+      <div class="metric"><div class="num">4,6★</div><div class="lbl" data-cs="hodnocení" data-en="rating">hodnocení</div></div>
+    </div>
+    <p data-cs="Nejčastější zpětná vazba je od lidí, kterým appka pomohla najít cestu zpět, když jim došel signál i data. Pár běžkařů ji používá na záznam tras kvůli přesnému převýšení." data-en="The most common feedback is from people the app helped find the way back when signal and data ran out. A few cross-country skiers use it to record routes for the accurate elevation gain.">Nejčastější zpětná vazba je od lidí, kterým appka pomohla najít cestu zpět, když jim došel signál i data. Pár běžkařů ji používá na záznam tras kvůli přesnému převýšení.</p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">Kotlin</span>
+      <span class="chip">Mapbox GL Native</span>
+      <span class="chip">MBTiles</span>
+      <span class="chip">Room</span>
+      <span class="chip">GPX</span>
+      <span class="chip">Foreground Service</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Inspirovalo tě to k podobnému projektu?" data-en="Inspired to build something similar?">Inspirovalo tě to k podobnému projektu?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+  </main>
+
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>

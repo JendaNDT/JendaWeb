@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DreamLog — Case Study · Jenda</title>
+  <meta name="description" content="Deník snů s rychlým hlasovým záznamem a analýzou opakujících se vzorů.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script data-goatcounter="https://jendaweb.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.cool</a>
+    <a href="../index.html#apps" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-android">Android</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2025 · 4 týdny</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #8b5cf628, #8b5cf650); border:1px solid #8b5cf640; color:#8b5cf6;">D</div>
+      <div>
+        <h1>DreamLog</h1>
+        <p class="subtitle" data-cs="Zapiš sen dřív, než se rozplyne. Stačí ráno zašeptat do telefonu — zbytek appka přepíše a propojí." data-en="Capture a dream before it fades. Just whisper into your phone in the morning — the app transcribes and connects the rest.">Zapiš sen dřív, než se rozplyne. Stačí ráno zašeptat do telefonu — zbytek appka přepíše a propojí.</p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Sny mizí během pár minut po probuzení a psát potmě na klávesnici je beznadějné. Potřeboval jsem nástroj, který zachytí sen jedním stiskem ještě v polospánku a pak v něm sám najde opakující se motivy." data-en="Dreams vanish within minutes of waking, and typing in the dark is hopeless. I needed a tool that captures a dream with one tap while still half-asleep, then surfaces recurring motifs on its own.">Sny mizí během pár minut po probuzení a psát potmě na klávesnici je beznadějné. Potřeboval jsem nástroj, který zachytí sen jedním stiskem ještě v polospánku a pak v něm sám najde opakující se motivy.</p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="Hlasový záznam jedním tlačítkem + on-device přepis (žádný zvuk neopouští telefon)" data-en="One-button voice capture plus on-device transcription (no audio leaves the phone)">Hlasový záznam jedním tlačítkem + on-device přepis (žádný zvuk neopouští telefon)</li>
+      <li data-cs="Automatické tagování motivů (osoby, místa, emoce) z přepisu" data-en="Automatic motif tagging (people, places, emotions) from the transcript">Automatické tagování motivů (osoby, místa, emoce) z přepisu</li>
+      <li data-cs="Kalendářní heatmapa a graf nejčastějších témat v čase" data-en="Calendar heatmap and a graph of the most frequent themes over time">Kalendářní heatmapa a graf nejčastějších témat v čase</li>
+      <li data-cs="Tmavé rozhraní s velkými tlačítky pro ospalé prsty" data-en="Dark UI with large buttons for sleepy fingers">Tmavé rozhraní s velkými tlačítky pro ospalé prsty</li>
+      <li data-cs="Vše šifrované lokálně, volitelný zámek otiskem" data-en="Everything encrypted locally, optional fingerprint lock">Vše šifrované lokálně, volitelný zámek otiskem</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">2,1 k</div><div class="lbl" data-cs="aktivní uživatelé" data-en="active users">aktivní uživatelé</div></div>
+      <div class="metric"><div class="num">100 %</div><div class="lbl" data-cs="on-device přepis" data-en="on-device transcription">on-device přepis</div></div>
+      <div class="metric"><div class="num">31 %</div><div class="lbl" data-cs="vede deník &gt;30 dní" data-en="journaling &gt;30 days">vede deník &gt;30 dní</div></div>
+      <div class="metric"><div class="num">4,8★</div><div class="lbl" data-cs="hodnocení" data-en="rating">hodnocení</div></div>
+    </div>
+    <p data-cs="Uživatelé oceňují hlavně soukromí — sny jsou intimní a nikam se neposílají. Část lidí píše, že je překvapilo, jaké vzorce se po měsíci objevily." data-en="Users value the privacy above all — dreams are intimate and never leave the device. Several say they were surprised by the patterns that emerged after a month.">Uživatelé oceňují hlavně soukromí — sny jsou intimní a nikam se neposílají. Část lidí píše, že je překvapilo, jaké vzorce se po měsíci objevily.</p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">Kotlin</span>
+      <span class="chip">Jetpack Compose</span>
+      <span class="chip">Android Speech</span>
+      <span class="chip">Room</span>
+      <span class="chip">SQLCipher</span>
+      <span class="chip">WorkManager</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Inspirovalo tě to k podobnému projektu?" data-en="Inspired to build something similar?">Inspirovalo tě to k podobnému projektu?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+  </main>
+
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>

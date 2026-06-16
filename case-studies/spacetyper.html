@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpaceTyper — Case Study · Jenda</title>
+  <meta name="description" content="Sci-fi trenér psaní všemi deseti, kde rychlost a přesnost rozhodují o přežití v kosmu.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script data-goatcounter="https://jendaweb.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.cool</a>
+    <a href="../index.html#apps" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-pwa">PWA</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2025 · 4 týdny</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #a3e63528, #a3e63550); border:1px solid #a3e63540; color:#a3e635;">S</div>
+      <div>
+        <h1>SpaceTyper</h1>
+        <p class="subtitle" data-cs="Trénink psaní převlečený za vesmírnou hru. Každé správné slovo je výstřel, každý překlep zásah." data-en="Touch-typing practice disguised as a space game. Every correct word is a shot, every typo a hit.">Trénink psaní převlečený za vesmírnou hru. Každé správné slovo je výstřel, každý překlep zásah.</p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Klasické trenažéry psaní jsou nudné jako tabulky, takže u nich nikdo nevydrží. Chtěl jsem hru, kde se rychlost a přesnost psaní přímo promítají do toho, jestli přežiješ vlnu nepřátel." data-en="Classic typing trainers are as dull as spreadsheets, so nobody sticks with them. I wanted a game where typing speed and accuracy directly decide whether you survive a wave of enemies.">Klasické trenažéry psaní jsou nudné jako tabulky, takže u nich nikdo nevydrží. Chtěl jsem hru, kde se rychlost a přesnost psaní přímo promítají do toho, jestli přežiješ vlnu nepřátel.</p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="Slova nalétávají jako nepřátelé, správně napsané je sestřelí" data-en="Words descend as enemies; typing them correctly shoots them down">Slova nalétávají jako nepřátelé, správně napsané je sestřelí</li>
+      <li data-cs="Obtížnost se adaptuje na tvoji aktuální rychlost a chybovost" data-en="Difficulty adapts to your current speed and error rate">Obtížnost se adaptuje na tvoji aktuální rychlost a chybovost</li>
+      <li data-cs="Cílený trénink slabých kláves podle statistik chyb" data-en="Targeted drilling of weak keys from your error stats">Cílený trénink slabých kláves podle statistik chyb</li>
+      <li data-cs="Plynulá grafika na canvasu, ~60 fps i na slabších strojích" data-en="Smooth canvas graphics, ~60 fps even on weaker machines">Plynulá grafika na canvasu, ~60 fps i na slabších strojích</li>
+      <li data-cs="Plně offline, žebříček lokálně" data-en="Fully offline, leaderboard kept locally">Plně offline, žebříček lokálně</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">4,4 k</div><div class="lbl" data-cs="aktivní uživatelé" data-en="active users">aktivní uživatelé</div></div>
+      <div class="metric"><div class="num">+18 WPM</div><div class="lbl" data-cs="medián zlepšení" data-en="median improvement">medián zlepšení</div></div>
+      <div class="metric"><div class="num">60 fps</div><div class="lbl" data-cs="plynulost" data-en="frame rate">plynulost</div></div>
+      <div class="metric"><div class="num">4,6★</div><div class="lbl" data-cs="hodnocení" data-en="rating">hodnocení</div></div>
+    </div>
+    <p data-cs="Učitelé informatiky appku pouštějí ve třídě, protože děti trénují psaní dobrovolně. Uživatelé hlásí znatelný posun rychlosti po pár týdnech." data-en="IT teachers run the app in class because kids practice typing willingly. Users report a noticeable speed jump after a few weeks.">Učitelé informatiky appku pouštějí ve třídě, protože děti trénují psaní dobrovolně. Uživatelé hlásí znatelný posun rychlosti po pár týdnech.</p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">PWA</span>
+      <span class="chip">Canvas 2D</span>
+      <span class="chip">RequestAnimationFrame</span>
+      <span class="chip">IndexedDB</span>
+      <span class="chip">TypeScript</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Inspirovalo tě to k podobnému projektu?" data-en="Inspired to build something similar?">Inspirovalo tě to k podobnému projektu?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+  </main>
+
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>

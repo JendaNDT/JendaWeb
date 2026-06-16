@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkyWatch — Case Study · Jenda</title>
+  <meta name="description" content="Minimalistické počasí — jen to, co opravdu potřebuješ vědět, bez balastu.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script data-goatcounter="https://jendaweb.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.cool</a>
+    <a href="../index.html#apps" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-android">Android</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2025 · 3 týdny</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #0ea5e928, #0ea5e950); border:1px solid #0ea5e940; color:#0ea5e9;">S</div>
+      <div>
+        <h1>SkyWatch</h1>
+        <p class="subtitle" data-cs="Počasí na jednu obrazovku. Vezmu si bundu? Bude pršet? Hotovo — žádné bannery a deset záložek." data-en="Weather on a single screen. Do I need a jacket? Will it rain? Done — no banners and ten tabs.">Počasí na jednu obrazovku. Vezmu si bundu? Bude pršet? Hotovo — žádné bannery a deset záložek.</p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Počasové appky zhoustly reklamami, novinkami a deseti panely. Přitom jde o dvě otázky: co si vzít na sebe a jestli zmoknu. Chtěl jsem jednu obrazovku, která odpoví hned po otevření." data-en="Weather apps have grown thick with ads, news and ten panels. Yet it comes down to two questions: what to wear and whether I will get wet. I wanted one screen that answers the moment it opens.">Počasové appky zhoustly reklamami, novinkami a deseti panely. Přitom jde o dvě otázky: co si vzít na sebe a jestli zmoknu. Chtěl jsem jednu obrazovku, která odpoví hned po otevření.</p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="Jediný pohled: teď, dnes, srážky v příští hodině" data-en="One view: now, today, precipitation in the next hour">Jediný pohled: teď, dnes, srážky v příští hodině</li>
+      <li data-cs="Srozumitelné rady místo tabulek (vezmi si bundu, za 20 minut déšť)" data-en="Plain advice instead of tables (take a jacket, rain in 20 minutes)">Srozumitelné rady místo tabulek (vezmi si bundu, za 20 minut déšť)</li>
+      <li data-cs="Widget na plochu se stejnou filozofií střídmosti" data-en="A home-screen widget with the same restraint">Widget na plochu se stejnou filozofií střídmosti</li>
+      <li data-cs="Žádné reklamy, žádné notifikace bez vyžádání" data-en="No ads, no notifications unless asked">Žádné reklamy, žádné notifikace bez vyžádání</li>
+      <li data-cs="Cache poslední předpovědi pro offline pohled" data-en="Cache of the last forecast for an offline view">Cache poslední předpovědi pro offline pohled</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">8,7 k</div><div class="lbl" data-cs="stažení" data-en="downloads">stažení</div></div>
+      <div class="metric"><div class="num">1</div><div class="lbl" data-cs="obrazovka" data-en="screen">obrazovka</div></div>
+      <div class="metric"><div class="num">0</div><div class="lbl" data-cs="reklam" data-en="ads">reklam</div></div>
+      <div class="metric"><div class="num">4,6★</div><div class="lbl" data-cs="hodnocení" data-en="rating">hodnocení</div></div>
+    </div>
+    <p data-cs="Nejčastější reakce je úleva — appka neotravuje a po otevření hned ví, co chci. Hodně lidí si nechává jen widget a appku skoro neotevírá." data-en="The most common reaction is relief — the app does not nag and instantly knows what I want. Many keep only the widget and barely open the app.">Nejčastější reakce je úleva — appka neotravuje a po otevření hned ví, co chci. Hodně lidí si nechává jen widget a appku skoro neotevírá.</p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">Kotlin</span>
+      <span class="chip">Jetpack Compose</span>
+      <span class="chip">Open-Meteo API</span>
+      <span class="chip">Glance Widget</span>
+      <span class="chip">Retrofit</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Inspirovalo tě to k podobnému projektu?" data-en="Inspired to build something similar?">Inspirovalo tě to k podobnému projektu?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+  </main>
+
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>

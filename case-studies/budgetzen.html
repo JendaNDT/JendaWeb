@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BudgetZen — Case Study · Jenda</title>
+  <meta name="description" content="Minimalistický správce osobních financí bez bankovních přístupů a zbytečností.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script data-goatcounter="https://jendaweb.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.cool</a>
+    <a href="../index.html#apps" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-pwa">PWA</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2025 · 4 týdny</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #14b8a628, #14b8a650); border:1px solid #14b8a640; color:#14b8a6;">B</div>
+      <div>
+        <h1>BudgetZen</h1>
+        <p class="subtitle" data-cs="Rozpočet, který pochopíš na první pohled. Žádné napojení na banku, jen ty a tři čísla, na kterých záleží." data-en="A budget you grasp at a glance. No bank linking, just you and the three numbers that matter.">Rozpočet, který pochopíš na první pohled. Žádné napojení na banku, jen ty a tři čísla, na kterých záleží.</p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Finanční appky buď chtějí přístup k bankovnímu účtu, nebo tě utopí v grafech. Chtěl jsem nástroj, kde za deset vteřin zapíšeš výdaj a hned víš, kolik ti do konce měsíce zbývá — a nic víc." data-en="Finance apps either want access to your bank account or drown you in charts. I wanted a tool where you log an expense in ten seconds and instantly know what is left for the month — and nothing more.">Finanční appky buď chtějí přístup k bankovnímu účtu, nebo tě utopí v grafech. Chtěl jsem nástroj, kde za deset vteřin zapíšeš výdaj a hned víš, kolik ti do konce měsíce zbývá — a nic víc.</p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="Obálková metoda — peníze rozdělíš do kategorií, appka hlídá zůstatky" data-en="Envelope method — split money into categories, the app watches the balances">Obálková metoda — peníze rozdělíš do kategorií, appka hlídá zůstatky</li>
+      <li data-cs="Rychlý zápis výdaje s našeptáváním z historie" data-en="Fast expense entry with suggestions from history">Rychlý zápis výdaje s našeptáváním z historie</li>
+      <li data-cs="Jediný hlavní pohled: kolik zbývá do konce měsíce" data-en="One main view: how much is left until month end">Jediný hlavní pohled: kolik zbývá do konce měsíce</li>
+      <li data-cs="Vše lokálně (žádné bankovní API), export do CSV" data-en="Everything local (no bank API), export to CSV">Vše lokálně (žádné bankovní API), export do CSV</li>
+      <li data-cs="Opakované platby a měsíční reset jedním tapem" data-en="Recurring payments and a one-tap monthly reset">Opakované platby a měsíční reset jedním tapem</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">3,9 k</div><div class="lbl" data-cs="aktivní uživatelé" data-en="active users">aktivní uživatelé</div></div>
+      <div class="metric"><div class="num">10 s</div><div class="lbl" data-cs="na zápis výdaje" data-en="per expense">na zápis výdaje</div></div>
+      <div class="metric"><div class="num">0</div><div class="lbl" data-cs="bankovních přístupů" data-en="bank logins">bankovních přístupů</div></div>
+      <div class="metric"><div class="num">4,6★</div><div class="lbl" data-cs="hodnocení" data-en="rating">hodnocení</div></div>
+    </div>
+    <p data-cs="Uživatelé píší, že poprvé u rozpočtu vydrželi déle než měsíc, protože je to bez tření. Část lidí appku vědomě volí kvůli tomu, že nemá přístup k bance." data-en="Users write that for the first time they stuck with budgeting longer than a month because there is no friction. Some deliberately choose it precisely because it has no bank access.">Uživatelé píší, že poprvé u rozpočtu vydrželi déle než měsíc, protože je to bez tření. Část lidí appku vědomě volí kvůli tomu, že nemá přístup k bance.</p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">PWA</span>
+      <span class="chip">IndexedDB</span>
+      <span class="chip">Service Worker</span>
+      <span class="chip">Vue</span>
+      <span class="chip">CSV export</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Inspirovalo tě to k podobnému projektu?" data-en="Inspired to build something similar?">Inspirovalo tě to k podobnému projektu?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+  </main>
+
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>

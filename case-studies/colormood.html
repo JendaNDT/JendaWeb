@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ColorMood — Case Study · Jenda</title>
+  <meta name="description" content="Generátor barevných palet podle nálady nebo fotky, s kontrolou kontrastu pro přístupnost.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script data-goatcounter="https://jendaweb.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.cool</a>
+    <a href="../index.html#apps" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-pwa">PWA</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2024 · 3 týdny</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #fb923c28, #fb923c50); border:1px solid #fb923c40; color:#fb923c;">C</div>
+      <div>
+        <h1>ColorMood</h1>
+        <p class="subtitle" data-cs="Řekni náladu nebo hoď fotku — dostaneš paletu, která spolu ladí a projde i testem přístupnosti." data-en="Name a mood or drop a photo — get a palette that works together and passes the accessibility check.">Řekni náladu nebo hoď fotku — dostaneš paletu, která spolu ladí a projde i testem přístupnosti.</p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Generátory palet většinou hodí náhodné barvy bez ohledu na to, jestli spolu fungují a jsou čitelné. Chtěl jsem nástroj, který vyjde z nálady nebo fotky a rovnou ohlídá kontrast pro reálné použití." data-en="Palette generators usually throw random colors with no regard for whether they work together and stay legible. I wanted a tool that starts from a mood or photo and checks contrast for real use right away.">Generátory palet většinou hodí náhodné barvy bez ohledu na to, jestli spolu fungují a jsou čitelné. Chtěl jsem nástroj, který vyjde z nálady nebo fotky a rovnou ohlídá kontrast pro reálné použití.</p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="Extrakce dominantních barev z fotky (k-means v prohlížeči)" data-en="Extract dominant colors from a photo (k-means in the browser)">Extrakce dominantních barev z fotky (k-means v prohlížeči)</li>
+      <li data-cs="Generování harmonií z nálady v prostoru HSL" data-en="Generate harmonies from a mood in HSL space">Generování harmonií z nálady v prostoru HSL</li>
+      <li data-cs="Automatická kontrola kontrastu (WCAG AA/AAA) u každé dvojice" data-en="Automatic contrast check (WCAG AA/AAA) for every pair">Automatická kontrola kontrastu (WCAG AA/AAA) u každé dvojice</li>
+      <li data-cs="Export do CSS proměnných, Tailwind configu nebo PNG" data-en="Export to CSS variables, a Tailwind config or PNG">Export do CSS proměnných, Tailwind configu nebo PNG</li>
+      <li data-cs="Plně v prohlížeči, žádný upload fotek na server" data-en="Fully in the browser, no photo uploads to a server">Plně v prohlížeči, žádný upload fotek na server</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">5,0 k</div><div class="lbl" data-cs="aktivní uživatelé" data-en="active users">aktivní uživatelé</div></div>
+      <div class="metric"><div class="num">WCAG</div><div class="lbl" data-cs="kontrast hlídán" data-en="contrast checked">kontrast hlídán</div></div>
+      <div class="metric"><div class="num">0</div><div class="lbl" data-cs="uploadů na server" data-en="server uploads">uploadů na server</div></div>
+      <div class="metric"><div class="num">4,7★</div><div class="lbl" data-cs="hodnocení" data-en="rating">hodnocení</div></div>
+    </div>
+    <p data-cs="Nejvíc appku používají vývojáři a začínající designéři, kterým se líbí, že palety rovnou projdou kontrastem. Pár lidí z ní bere barvy pro prezentace." data-en="It is used most by developers and beginner designers who like that palettes pass the contrast check out of the box. Some pull colors from it for presentations.">Nejvíc appku používají vývojáři a začínající designéři, kterým se líbí, že palety rovnou projdou kontrastem. Pár lidí z ní bere barvy pro prezentace.</p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">PWA</span>
+      <span class="chip">Canvas</span>
+      <span class="chip">k-means</span>
+      <span class="chip">WCAG contrast</span>
+      <span class="chip">Color theory</span>
+      <span class="chip">Svelte</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Inspirovalo tě to k podobnému projektu?" data-en="Inspired to build something similar?">Inspirovalo tě to k podobnému projektu?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+  </main>
+
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>

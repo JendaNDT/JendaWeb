@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MoodTrack — Case Study · Jenda</title>
+  <meta name="description" content="Sledovač nálady a emocí s přehlednými grafy a vizualizacemi, plně soukromě.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script data-goatcounter="https://jendaweb.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.cool</a>
+    <a href="../index.html#apps" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-pwa">PWA</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2025 · 3 týdny</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #84cc1628, #84cc1650); border:1px solid #84cc1640; color:#84cc16;">M</div>
+      <div>
+        <h1>MoodTrack</h1>
+        <p class="subtitle" data-cs="Jeden tap denně a po měsíci vidíš svoji náladu jako mapu, ne jako pocit. Data zůstávají u tebe." data-en="One tap a day and after a month you see your mood as a map, not a feeling. Your data stays with you.">Jeden tap denně a po měsíci vidíš svoji náladu jako mapu, ne jako pocit. Data zůstávají u tebe.</p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Sledovat náladu má smysl jen tehdy, když je to otázka vteřin a člověk to neopustí po týdnu. Wellness appky to ale komplikují účty a paywally. Chtěl jsem rychlý zápis a poctivé grafy, které něco ukážou." data-en="Tracking mood only works if it takes seconds and you do not quit after a week. Wellness apps complicate it with accounts and paywalls. I wanted a fast entry and honest charts that actually show something.">Sledovat náladu má smysl jen tehdy, když je to otázka vteřin a člověk to neopustí po týdnu. Wellness appky to ale komplikují účty a paywally. Chtěl jsem rychlý zápis a poctivé grafy, které něco ukážou.</p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="Zápis nálady jedním tapem a volitelná poznámka se štítky aktivit" data-en="Log mood in one tap plus an optional note and activity tags">Zápis nálady jedním tapem a volitelná poznámka se štítky aktivit</li>
+      <li data-cs="Korelace nálady s aktivitami (spánek, sport, lidé) v přehledných grafech" data-en="Correlate mood with activities (sleep, sport, people) in clear charts">Korelace nálady s aktivitami (spánek, sport, lidé) v přehledných grafech</li>
+      <li data-cs="Týdenní a roční heatmapa, žádná gamifikace navíc" data-en="Weekly and yearly heatmap, no extra gamification">Týdenní a roční heatmapa, žádná gamifikace navíc</li>
+      <li data-cs="Data jen lokálně (IndexedDB), export do CSV pro vlastní analýzu" data-en="Data local only (IndexedDB), export to CSV for your own analysis">Data jen lokálně (IndexedDB), export do CSV pro vlastní analýzu</li>
+      <li data-cs="Jemné připomenutí jednou denně, plně volitelné" data-en="A gentle reminder once a day, fully optional">Jemné připomenutí jednou denně, plně volitelné</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">4,1 k</div><div class="lbl" data-cs="aktivní uživatelé" data-en="active users">aktivní uživatelé</div></div>
+      <div class="metric"><div class="num">1 tap</div><div class="lbl" data-cs="na záznam" data-en="per entry">na záznam</div></div>
+      <div class="metric"><div class="num">100 %</div><div class="lbl" data-cs="data lokálně" data-en="data local">data lokálně</div></div>
+      <div class="metric"><div class="num">4,7★</div><div class="lbl" data-cs="hodnocení" data-en="rating">hodnocení</div></div>
+    </div>
+    <p data-cs="Lidé hlásí, že je po měsíci překvapilo, jak silně jejich náladu táhne spánek. Pár terapeutů ji doporučuje klientům, protože data zůstávají soukromá." data-en="People report being surprised after a month by how strongly sleep drives their mood. A few therapists recommend it to clients because the data stays private.">Lidé hlásí, že je po měsíci překvapilo, jak silně jejich náladu táhne spánek. Pár terapeutů ji doporučuje klientům, protože data zůstávají soukromá.</p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">PWA</span>
+      <span class="chip">IndexedDB</span>
+      <span class="chip">Chart rendering</span>
+      <span class="chip">Service Worker</span>
+      <span class="chip">Svelte</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Inspirovalo tě to k podobnému projektu?" data-en="Inspired to build something similar?">Inspirovalo tě to k podobnému projektu?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+  </main>
+
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>

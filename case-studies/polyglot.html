@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PolyGlot — Case Study · Jenda</title>
+  <meta name="description" content="Jazykové flashkarty s plánovačem opakovaného učení (SRS), plně offline.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script data-goatcounter="https://jendaweb.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.cool</a>
+    <a href="../index.html#apps" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-pwa">PWA</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2024 · 5 týdnů</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #f9731628, #f9731650); border:1px solid #f9731640; color:#f97316;">P</div>
+      <div>
+        <h1>PolyGlot</h1>
+        <p class="subtitle" data-cs="Učení slovíček, které ti nepřipomíná, co umíš, ale co se chystáš zapomenout. Klasické SRS, žádné předplatné." data-en="Vocabulary learning that reminds you not of what you know, but of what you are about to forget. Plain SRS, no subscription.">Učení slovíček, které ti nepřipomíná, co umíš, ale co se chystáš zapomenout. Klasické SRS, žádné předplatné.</p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Velké jazykové appky cpou streaky, srdíčka a notifikace, ale samotné opakování dělají hůř než papírové kartičky. Chtěl jsem čistý SRS, který respektuje tvůj čas a funguje i v letadle." data-en="The big language apps push streaks, hearts and notifications, yet handle the actual repetition worse than paper cards. I wanted clean SRS that respects your time and works on a plane.">Velké jazykové appky cpou streaky, srdíčka a notifikace, ale samotné opakování dělají hůř než papírové kartičky. Chtěl jsem čistý SRS, který respektuje tvůj čas a funguje i v letadle.</p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="Plánování opakování algoritmem SM-2 (jako Anki), počítané lokálně" data-en="Repetition scheduling with the SM-2 algorithm (like Anki), computed locally">Plánování opakování algoritmem SM-2 (jako Anki), počítané lokálně</li>
+      <li data-cs="Vlastní balíčky: import z CSV nebo rychlé přidání během dne" data-en="Custom decks: import from CSV or quick add during the day">Vlastní balíčky: import z CSV nebo rychlé přidání během dne</li>
+      <li data-cs="Obousměrné karty a výslovnost přes Web Speech API" data-en="Two-way cards and pronunciation via the Web Speech API">Obousměrné karty a výslovnost přes Web Speech API</li>
+      <li data-cs="Denní dávka rozumně omezená, aby učení nevyhořelo" data-en="Daily batch sensibly capped so learning does not burn out">Denní dávka rozumně omezená, aby učení nevyhořelo</li>
+      <li data-cs="Plně offline (IndexedDB + Service Worker), synchronizace volitelná přes export" data-en="Fully offline (IndexedDB plus Service Worker), optional sync via export">Plně offline (IndexedDB + Service Worker), synchronizace volitelná přes export</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">6,8 k</div><div class="lbl" data-cs="aktivní uživatelé" data-en="active users">aktivní uživatelé</div></div>
+      <div class="metric"><div class="num">1,2 M</div><div class="lbl" data-cs="zopakovaných karet" data-en="cards reviewed">zopakovaných karet</div></div>
+      <div class="metric"><div class="num">0 Kč</div><div class="lbl" data-cs="předplatné" data-en="subscription">předplatné</div></div>
+      <div class="metric"><div class="num">4,7★</div><div class="lbl" data-cs="hodnocení" data-en="rating">hodnocení</div></div>
+    </div>
+    <p data-cs="Nejvíc kladných reakcí je na to, že appka nehraje na pocit viny. Studenti jazyků si chválí import vlastních balíčků z hodin." data-en="The most positive reactions are about the app not playing the guilt game. Language students praise importing their own decks from class.">Nejvíc kladných reakcí je na to, že appka nehraje na pocit viny. Studenti jazyků si chválí import vlastních balíčků z hodin.</p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">PWA</span>
+      <span class="chip">IndexedDB</span>
+      <span class="chip">SM-2 SRS</span>
+      <span class="chip">Web Speech API</span>
+      <span class="chip">Service Worker</span>
+      <span class="chip">Preact</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Inspirovalo tě to k podobnému projektu?" data-en="Inspired to build something similar?">Inspirovalo tě to k podobnému projektu?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+  </main>
+
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>

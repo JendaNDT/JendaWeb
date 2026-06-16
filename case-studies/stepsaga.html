@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StepSaga — Case Study · Jenda</title>
+  <meta name="description" content="Krokoměr převlečený za RPG — každý ušlý krok posouvá fantasy příběh dál.">
+  <meta name="theme-color" content="#0d0805">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script data-goatcounter="https://jendaweb.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script>
+    try {
+      const m = localStorage.getItem('jw_mode');
+      const resolved = (m === 'light' || m === 'dark') ? m
+        : (m === 'auto' || !m)
+          ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : 'dark';
+      document.documentElement.dataset.mode = resolved;
+      const l = localStorage.getItem('jw_lang');
+      if (l === 'cs' || l === 'en') document.documentElement.lang = l;
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <a href="../index.html" class="logo">jenda.cool</a>
+    <a href="../index.html#apps" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span data-cs="Zpět na aplikace" data-en="Back to apps">Zpět na aplikace</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="tag-row">
+      <span class="tag cs-tag">★ <span data-cs="Případová studie" data-en="Case study">Případová studie</span></span>
+      <span class="tag platform-android">Android</span>
+      <span class="tag" style="color:var(--muted); border:1px solid var(--border);">2025 · 6 týdnů</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-icon" style="background: linear-gradient(135deg, #22c55e28, #22c55e50); border:1px solid #22c55e40; color:#22c55e;">S</div>
+      <div>
+        <h1>StepSaga</h1>
+        <p class="subtitle" data-cs="Chození jako dobrodružství. Tvoje kroky pohánějí hrdinu příběhem — čím víc nachodíš, tím dál se dostaneš." data-en="Walking as an adventure. Your steps drive a hero through a story — the more you walk, the further you get.">Chození jako dobrodružství. Tvoje kroky pohánějí hrdinu příběhem — čím víc nachodíš, tím dál se dostaneš.</p>
+      </div>
+    </div>
+
+    <h2 data-cs="Problém" data-en="Problem">Problém</h2>
+    <p data-cs="Krokoměry jsou suchá čísla, která člověka po pár dnech přestanou zajímat. Chtěl jsem dát chození smysl a tah — proměnit kroky v palivo příběhu, kvůli kterému se vyplatí jít ještě jednu zastávku pěšky." data-en="Step counters are dry numbers that stop being interesting after a few days. I wanted to give walking meaning and pull — turn steps into fuel for a story worth walking one more stop for.">Krokoměry jsou suchá čísla, která člověka po pár dnech přestanou zajímat. Chtěl jsem dát chození smysl a tah — proměnit kroky v palivo příběhu, kvůli kterému se vyplatí jít ještě jednu zastávku pěšky.</p>
+
+    <h2 data-cs="Řešení" data-en="Approach">Řešení</h2>
+    <ul>
+      <li data-cs="Kroky čteny z hardwarového senzoru — šetří baterii, jede na pozadí" data-en="Steps read from the hardware sensor — battery-friendly, runs in the background">Kroky čteny z hardwarového senzoru — šetří baterii, jede na pozadí</li>
+      <li data-cs="Větvený fantasy příběh, kde vzdálenost odemyká kapitoly a volby" data-en="A branching fantasy story where distance unlocks chapters and choices">Větvený fantasy příběh, kde vzdálenost odemyká kapitoly a volby</li>
+      <li data-cs="Sbírání předmětů a souboje řešené nachozenými kroky" data-en="Collecting items and battles resolved by steps walked">Sbírání předmětů a souboje řešené nachozenými kroky</li>
+      <li data-cs="Offline first — příběh běží i bez signálu, žádné mikrotransakce" data-en="Offline first — the story runs without signal, no microtransactions">Offline first — příběh běží i bez signálu, žádné mikrotransakce</li>
+      <li data-cs="Týdenní cíle navázané na děj místo otravných notifikací" data-en="Weekly goals tied to the plot instead of nagging notifications">Týdenní cíle navázané na děj místo otravných notifikací</li>
+    </ul>
+
+    <h2 data-cs="Výsledek" data-en="Result">Výsledek</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="num">7,1 k</div><div class="lbl" data-cs="stažení" data-en="downloads">stažení</div></div>
+      <div class="metric"><div class="num">+2,3 k</div><div class="lbl" data-cs="kroků/den navíc" data-en="extra steps/day">kroků/den navíc</div></div>
+      <div class="metric"><div class="num">0</div><div class="lbl" data-cs="mikrotransakcí" data-en="microtransactions">mikrotransakcí</div></div>
+      <div class="metric"><div class="num">4,8★</div><div class="lbl" data-cs="hodnocení" data-en="rating">hodnocení</div></div>
+    </div>
+    <p data-cs="Uživatelé píší, že kvůli příběhu fakt chodí víc — někteří schválně vystoupí dřív, aby posunuli kapitolu. Appka boduje hlavně u lidí, které čistá čísla nemotivovala." data-en="Users write that the story genuinely makes them walk more — some get off a stop early to advance a chapter. It lands especially with people that plain numbers never motivated.">Uživatelé píší, že kvůli příběhu fakt chodí víc — někteří schválně vystoupí dřív, aby posunuli kapitolu. Appka boduje hlavně u lidí, které čistá čísla nemotivovala.</p>
+
+    <h2 data-cs="Stack" data-en="Stack">Stack</h2>
+    <div class="stack-chips">
+      <span class="chip">Kotlin</span>
+      <span class="chip">Step Counter Sensor</span>
+      <span class="chip">Jetpack Compose</span>
+      <span class="chip">Room</span>
+      <span class="chip">Foreground Service</span>
+    </div>
+
+    <footer class="footer">
+      <span data-cs="Inspirovalo tě to k podobnému projektu?" data-en="Inspired to build something similar?">Inspirovalo tě to k podobnému projektu?</span>
+      <a href="../index.html#contact" data-cs="Napiš mi →" data-en="Get in touch →">Napiš mi →</a>
+    </footer>
+  </main>
+
+  <script>
+    const lang = document.documentElement.lang || 'cs';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const t = el.getAttribute('data-en'); if (t) el.textContent = t;
+      });
+    }
+  </script>
+</body>
+</html>
