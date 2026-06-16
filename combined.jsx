@@ -1914,6 +1914,23 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
     else setCurrentTime(p * (duration || 0));
   };
 
+  const isDraggingRef = __useR_pc(false);
+
+  const handlePointerDown = (e) => {
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
+    isDraggingRef.current = true;
+    seekFromEvent(e);
+  };
+
+  const handlePointerMove = (e) => {
+    if (!isDraggingRef.current) return;
+    seekFromEvent(e);
+  };
+
+  const handlePointerUp = (e) => {
+    isDraggingRef.current = false;
+  };
+
   return (
     <>
     <div className="player-grid" style={{
@@ -1960,12 +1977,21 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
         <div className="player-wave" style={{ display:'flex', alignItems:'center', gap:10, width:380 }}>
           <span style={{ fontSize:11, color:'var(--muted)', minWidth:34, textAlign:'right', fontVariantNumeric:'tabular-nums' }}>{fmtTime(currentTime)}</span>
           <div
-            onClick={seekFromEvent}
-            onMouseMove={e => { const r=e.currentTarget.getBoundingClientRect(); setHovBar(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))); }}
-            onMouseLeave={() => setHovBar(null)}
+            onPointerDown={handlePointerDown}
+            onPointerMove={e => {
+              if (isDraggingRef.current) {
+                seekFromEvent(e);
+              } else {
+                const r=e.currentTarget.getBoundingClientRect();
+                setHovBar(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)));
+              }
+            }}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            onPointerLeave={() => { if (!isDraggingRef.current) setHovBar(null); }}
             role="slider" aria-label="Seek"
             aria-valuemin={0} aria-valuemax={duration || 0} aria-valuenow={currentTime}
-            style={{ flex:1, height:28, display:'flex', alignItems:'center', justifyContent:'space-between', gap:1, cursor:'pointer', position:'relative' }}
+            style={{ flex:1, height:28, display:'flex', alignItems:'center', justifyContent:'space-between', gap:1, cursor:'pointer', position:'relative', touchAction:'none' }}
           >
             {bars.map((h, i) => {
               const p = (i + 0.5) / bars.length;
@@ -2055,6 +2081,10 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
         loopA={loopA} loopB={loopB}
         setLoopA={setLoopA} setLoopB={setLoopB}
         analyser={analyserRef.current}
+        handlePointerDown={handlePointerDown}
+        handlePointerMove={handlePointerMove}
+        handlePointerUp={handlePointerUp}
+        isDraggingRef={isDraggingRef}
       />
     )}
     </>
@@ -2326,6 +2356,7 @@ function ExpandMode({
   showLyrics, setShowLyrics,
   loopA, loopB, setLoopA, setLoopB,
   analyser,
+  handlePointerDown, handlePointerMove, handlePointerUp, isDraggingRef,
 }) {
   __useE_xp(() => {
     const onKey = (e) => {
@@ -2352,14 +2383,23 @@ function ExpandMode({
 
   const renderBars = () => (
     <div
-      onClick={seekFromEvent}
-      onMouseMove={e => { const r=e.currentTarget.getBoundingClientRect(); setHovBar?.(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))); }}
-      onMouseLeave={() => setHovBar?.(null)}
+      onPointerDown={handlePointerDown}
+      onPointerMove={e => {
+        if (isDraggingRef?.current) {
+          handlePointerMove(e);
+        } else {
+          const r=e.currentTarget.getBoundingClientRect();
+          setHovBar?.(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)));
+        }
+      }}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onPointerLeave={() => { if (!isDraggingRef?.current) setHovBar?.(null); }}
       role="slider" aria-label="Seek"
       aria-valuemin={0} aria-valuemax={duration || 0} aria-valuenow={currentTime}
       style={{
         height:54, display:'flex', alignItems:'center', justifyContent:'space-between',
-        gap:1, cursor:'pointer', position:'relative',
+        gap:1, cursor:'pointer', position:'relative', touchAction:'none',
       }}>
       {bars.map((h, i) => {
         const p = (i + 0.5) / bars.length;
@@ -2378,8 +2418,13 @@ function ExpandMode({
   );
 
   const renderMirror = () => (
-    <div onClick={seekFromEvent} role="slider" aria-label="Seek"
-      style={{ height:72, position:'relative', cursor:'pointer' }}>
+    <div
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      role="slider" aria-label="Seek"
+      style={{ height:72, position:'relative', cursor:'pointer', touchAction:'none' }}>
       {/* Top half */}
       <div style={{ position:'absolute', top:0, left:0, right:0, height:'50%', display:'flex', alignItems:'flex-end', gap:1 }}>
         {bars.map((h, i) => {

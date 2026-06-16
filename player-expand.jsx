@@ -13,6 +13,7 @@ function ExpandMode({
   showLyrics, setShowLyrics,
   loopA, loopB, setLoopA, setLoopB,
   analyser,
+  handlePointerDown, handlePointerMove, handlePointerUp, isDraggingRef,
 }) {
   __useE_xp(() => {
     const onKey = (e) => {
@@ -39,14 +40,23 @@ function ExpandMode({
 
   const renderBars = () => (
     <div
-      onClick={seekFromEvent}
-      onMouseMove={e => { const r=e.currentTarget.getBoundingClientRect(); setHovBar?.(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))); }}
-      onMouseLeave={() => setHovBar?.(null)}
+      onPointerDown={handlePointerDown}
+      onPointerMove={e => {
+        if (isDraggingRef?.current) {
+          handlePointerMove(e);
+        } else {
+          const r=e.currentTarget.getBoundingClientRect();
+          setHovBar?.(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)));
+        }
+      }}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onPointerLeave={() => { if (!isDraggingRef?.current) setHovBar?.(null); }}
       role="slider" aria-label="Seek"
       aria-valuemin={0} aria-valuemax={duration || 0} aria-valuenow={currentTime}
       style={{
         height:54, display:'flex', alignItems:'center', justifyContent:'space-between',
-        gap:1, cursor:'pointer', position:'relative',
+        gap:1, cursor:'pointer', position:'relative', touchAction:'none',
       }}>
       {bars.map((h, i) => {
         const p = (i + 0.5) / bars.length;
@@ -65,8 +75,13 @@ function ExpandMode({
   );
 
   const renderMirror = () => (
-    <div onClick={seekFromEvent} role="slider" aria-label="Seek"
-      style={{ height:72, position:'relative', cursor:'pointer' }}>
+    <div
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      role="slider" aria-label="Seek"
+      style={{ height:72, position:'relative', cursor:'pointer', touchAction:'none' }}>
       {/* Top half */}
       <div style={{ position:'absolute', top:0, left:0, right:0, height:'50%', display:'flex', alignItems:'flex-end', gap:1 }}>
         {bars.map((h, i) => {
