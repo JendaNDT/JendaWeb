@@ -2,7 +2,7 @@
 
 Personal portfolio site for "Jenda — Vibe Coder & AI Music". A React SPA built with inline Babel + JSX, **no build step**. Installable, **fully offline-capable** PWA, bilingual (CZ / EN), dark/light mode with accent themes.
 
-Content is now managed through a **Supabase-backed CMS** (login-protected `/admin`): the site reads apps/albums/tracks/socials/texts from the database with an offline localStorage cache (`data.js` is the fallback seed). A full-page **audio-reactive + parallax** particle background (`BackgroundFX`) runs behind all content. Backend specifics live in **`SUPABASE_BACKEND.md`**; current state + decisions in **`PROJECT_STATUS.md`**.
+Content is now managed through a **Supabase-backed CMS** (login-protected `/admin`): the site reads apps/albums/tracks/socials/texts from the database with an offline localStorage cache (`data.js` is the fallback seed). A full-page **audio-reactive + parallax** particle background (`BackgroundFX`) runs behind all content, and the full-screen player has its own audio-reactive geometric visualization (`GeoViz`). Backend specifics live in **`SUPABASE_BACKEND.md`**; current state + decisions in **`PROJECT_STATUS.md`**.
 
 - **Live:** https://jenda-web.vercel.app · **Admin:** https://jenda-web.vercel.app/admin
 - **Repo:** https://github.com/JendaNDT/JendaWeb — push to `main` → Vercel auto-deploys.
@@ -10,6 +10,8 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
 
 ## Recent updates (16 Jun 2026)
 
+- **Full-screen player visualization (`GeoViz`):** New canvas component in `player-expand.jsx`, behind the expanded "now playing" content — a morphing geometric figure of dots + links (4 layers, ~3–6-fold symmetry) in theme colors (`--a1/--a2`), centered on the cover (`#jw-expand-cover`) and filling the screen. **Desktop:** reacts to the real spectrum via the shared `window.__jwAnalyser` (bass bloom, treble speeds rotation, beat → flash + ring, per-node frequency bin). **Mobile (no FFT, direct `<audio>`):** smooth time-driven motion (lives but doesn't read real frequencies, by design — see jw-v39). Respects `prefers-reduced-motion`, pauses on hidden tab. Always-on ambient layer, separate from the small `V` waveform. Shipped `jw-v61`.
+- **JSX cache-staleness fix (`combined.jsx?v=<VERSION>`):** The localStorage compiled-JSX cache could get stamped with the new version while the fetched `combined.jsx` was still the stale one (served cache-first by the old SW mid-update) → the site ran old code under the new version tag (symptom: a correct deploy "looked unchanged"). Fix: `index.html` now fetches `combined.jsx?v=<VERSION>` (version in the URL) and the SW precaches that same versioned URL, so a stale cache can't serve old content for a new version. **`VERSION` must now match in BOTH `sw.js` and `index.html`.** Quick unstick for a stuck client: clear `jw_jsx_*` in localStorage + reload. Shipped `jw-v62`.
 - **Console Warning Cleanup:** Added missing `autoComplete` attributes (name, email) and `id` and `name` attributes for form controls, search fields, and range sliders across all components (`extras.jsx`, `player-contact.jsx`, `player-expand.jsx`, `search.jsx`, `apps-music.jsx`).
 - **Preload Optimization:** Removed preloads for `babel.min.js` and `combined.jsx` in `index.html` to prevent redundant 3+ MB downloads on repeat visits (which use compiled cache).
 - **Absolute Social Cards:** Set `og:image` and `twitter:image` tags to absolute URL paths (`https://jenda-web.vercel.app/og-image.svg`) and added `og:url` for correct preview rendering on social platforms.
@@ -17,7 +19,7 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
 - **In-Browser JSX Compilation Cache:** Consolidated all 10 JSX scripts into `combined.jsx` (compiled via `python3 build_jsx.py`) and implemented a caching loader in `index.html` that saves compiled scripts to `localStorage` under the Service Worker version tag (`jw-v60`). Bypasses Babel compilation entirely on repeat visits.
 - **Mobile Play Button Centered:** Adjusted button layouts in the audio player to position the Play button perfectly centered on mobile viewports.
 - **Touch-Friendly Seek Bar:** Migrated the player seek bar controls to Pointer Events (`setPointerCapture` and `touch-action: none`) for smooth touch dragging/scrubbing on mobile devices.
-- **SW is now `jw-v60`.** Full chronological detail lives in `PROJECT_STATUS.md`.
+- **SW is now `jw-v62`.** Full chronological detail lives in `PROJECT_STATUS.md`.
 
 ## Recent updates (15 Jun 2026, evening)
 
@@ -49,7 +51,7 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 - **GitHub:** `JendaNDT/JendaWeb`, branch `main`.
 - **Vercel:** connected to the repo. **Push to `main` auto-deploys.** Framework preset "Other" (pure static, no build).
 - The site assumes deployment at the **domain root** — `sw.js` and the manifest use absolute paths (`/...`). A subpath deploy would need path tweaks.
-- After changing any cached asset, **bump `VERSION` in `sw.js`** (currently `jw-v60`) so clients pick up new content.
+- After changing any cached asset, **bump `VERSION` in both `sw.js` and `index.html`** (currently `jw-v62`) so clients pick up new content. (`index.html` loads `combined.jsx?v=<VERSION>`, so the two must stay in sync.)
 - `/admin` is routed via `vercel.json` (rewrite `/admin` → `/admin.html`) and served **online-only** (SW bypasses cache for it) with `Cache-Control: no-store` headers so it's never stale.
 - **Pushing from the sandbox:** the mounted working copy's `.git` can't take git writes (lock files), so deploys go via a fresh `git clone` in `/tmp`, copy the changed files in, commit, and `git push https://<token>@github.com/JendaNDT/JendaWeb.git HEAD:main`. Token is provided per-session (in `Token/`, gitignored), never stored. Verify the deploy actually landed (Vercel occasionally misses the webhook) and that no caches serve stale files.
 
@@ -67,7 +69,7 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 ├── nav-hero.jsx            # Nav + Hero + BackgroundFX (full-page audio-reactive + parallax particle canvas)
 ├── apps-music.jsx          # AppCard, AppsSection, AlbumCard, TrackRow (▶ play counts), MusicSection
 ├── player-contact.jsx      # AudioPlayer (mini, exposes window.__jwAnalyser + increments plays), Shortcuts, Contact, Footer
-├── player-expand.jsx       # ExpandMode full-screen player + AnalyzerOverlay
+├── player-expand.jsx       # ExpandMode full-screen player + AnalyzerOverlay + GeoViz (geometric audio-reactive viz)
 ├── search.jsx              # Cmd+K SearchOverlay
 ├── queue.jsx               # QueueDrawer (Q)
 ├── extras.jsx              # Newsletter, Stats, Comparison, MostPlayed (global plays), DonationButton
@@ -79,7 +81,7 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 │   ├── fonts.css           # @font-face for self-hosted fonts
 │   └── fonts/              # Syne + DM Sans (woff2/woff, latin + latin-ext subset)
 ├── icons/                  # PNG app icons 180/192/512 (iOS apple-touch + maskable)
-├── sw.js                   # Service worker (jw-v60; precache shell + latin-ext fonts, network-first HTML, /admin online-only)
+├── sw.js                   # Service worker (jw-v62; precache shell + latin-ext fonts, network-first HTML, /admin online-only)
 ├── manifest.webmanifest    # PWA manifest (icons point to icons/*.png)
 ├── og-image.svg            # 1200×630 social card
 ├── robots.txt · sitemap.xml · feed.xml · 404.html · embed.html
@@ -113,9 +115,9 @@ To optimize mobile performance (bypassing the heavy 3.1 MB Babel Standalone comp
 - **Script Loading in `index.html`:**
   React, React-DOM, `data.js` and `supabase-data.js` are loaded in `<head>` using the `defer` attribute.
   At the end of `<body>`, a custom caching loader runs inside a `DOMContentLoaded` event listener:
-  1. It checks if `localStorage` contains compiled scripts for the current Service Worker version tag (`jw-v60`).
+  1. It checks if `localStorage` contains compiled scripts for the current version tag (`jw-v62`; `VERSION` is defined in **both** `sw.js` and `index.html` and the two must match).
   2. **Cache Hit:** Executes the compiled JS directly from `localStorage`, cutting Babel compile time to 0 ms.
-  3. **Cache Miss / Version Mismatch:** Clears old cache keys, dynamically appends `<script src="vendor/babel.min.js">`, fetches `combined.jsx`, transpiles it in-browser, saves the compiled output to `localStorage`, and executes it.
+  3. **Cache Miss / Version Mismatch:** Clears old cache keys, dynamically appends `<script src="vendor/babel.min.js">`, fetches **`combined.jsx?v=<VERSION>`** (version in the URL so a stale SW cache can't serve old content for a new version), transpiles it in-browser, saves the compiled output to `localStorage`, and executes it.
 
 **Component order in `build_jsx.py`:**
 1. `tweaks-panel.jsx`
@@ -177,7 +179,7 @@ To avoid Babel scope collisions each file destructures with unique names: `const
 | `window.PUBLIC_STATS` / `window.BUILD_LOG` | Replace placeholder numbers/entries |
 
 Analytics are already wired — **GoatCounter** (`data-goatcounter` script in `index.html` + the case-study pages), shown in the admin **Návštěvnost** tab. (This replaced the earlier Plausible plan.) Still TODO in `index.html`: set OG meta tags to absolute URLs (`https://jenda-web.vercel.app/...`).
-In **`sw.js`**: bump `VERSION` on any cached-asset change.
+In **`sw.js`** (and matching **`index.html`**): bump `VERSION` on any cached-asset change.
 In **case study HTML**: uncomment giscus block + fill `data-repo` etc.
 
 ## Theming
@@ -208,6 +210,7 @@ In **case study HTML**: uncomment giscus block + fill `data-repo` etc.
 - **Play counts (global)** — each time a track starts, the player calls the Supabase `increment_play(track_id)` RPC (once per track per visit) which bumps `tracks.plays`. Shown as "▶ N×" on tracks, in the **Most Played** section, and "přehrání celkem" in admin Přehled. The old per-browser `localStorage.jw_plays` still updates but the site reads the global DB value (`window.TRACKS_DATA[].plays`).
 - **Most Played section** — reads global `tracks.plays` (via `window.TRACKS_DATA`), hidden if all zero.
 - **Audio-reactive + parallax background** — `BackgroundFX`, see the Background section above.
+- **Full-screen player visualization** — `GeoViz` (`player-expand.jsx`): morphing geometric dots+links behind the expanded player, centered on the cover, filling the screen. Desktop reacts to the real spectrum (`window.__jwAnalyser`); mobile is time-driven (no FFT). Always-on ambient layer, distinct from the `V` waveform modes. Like `BackgroundFX`, its rAF pauses in a hidden tab — verify the math via a Node check, not a background browser tab.
 
 ## Things deliberately not done
 
@@ -222,7 +225,7 @@ In **case study HTML**: uncomment giscus block + fill `data-repo` etc.
 2. Open the live site, hit `?` and `Cmd+K` to see the feature surface.
 3. Read `shared.jsx` (shared helpers), then `app.jsx` (root + state), then the section you need.
 4. New component: define in a `.jsx`, alias React hooks (`__useS_xxx`), `Object.assign(window, {...})` at the end, add a `<script type="text/babel">` to `index.html` in the right load order.
-5. **Bump `sw.js` `VERSION`** after any cached-asset change.
+5. **Bump `VERSION` in both `sw.js` and `index.html`** after any cached-asset change (they must match; `index.html` fetches `combined.jsx?v=<VERSION>`).
 6. Avoid `scrollIntoView` (project convention) — use `window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 80 })`.
 7. **Deploy = `git push` to `main`** (Vercel auto-deploys). No manual build.
 8. `handoff/` is a frozen old-version backup — ignore it for current work.
