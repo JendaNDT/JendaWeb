@@ -302,8 +302,11 @@ function TrackForm({ initial, albums, onClose, onSaved, notify }) {
           <div style={{ flex: 1 }}><FileDrop accept="image/*" file={coverFile} onFile={onPickCover} label="Přetáhni obrázek, nebo klikni" /></div>
         </div>
       </Field>
-      <Field label="Text CZ (nepovinné)"><textarea value={f.lyrics_cs} onChange={(e) => set('lyrics_cs', e.target.value)} /></Field>
-      <Field label="Text EN (nepovinné)"><textarea value={f.lyrics_en} onChange={(e) => set('lyrics_en', e.target.value)} /></Field>
+      <div style={{ fontSize: 12, color: 'var(--muted)', margin: '2px 0 6px', lineHeight: 1.5 }}>
+        Tip: pro synchronizovaný (rolovací) text vlož řádky s časovými značkami ve formátu <code style={{ background: 'rgba(255,255,255,.08)', padding: '1px 5px', borderRadius: 4 }}>[mm:ss.xx] text</code> — přehrávač je pak během přehrávání sám zvýrazňuje. Bez značek se text ukáže jako obyčejný blok.
+      </div>
+      <Field label="Text / LRC (CZ)"><textarea value={f.lyrics_cs} onChange={(e) => set('lyrics_cs', e.target.value)} placeholder={'[00:00.00] první řádek\n[00:12.34] druhý řádek'} /></Field>
+      <Field label="Text / LRC (EN)"><textarea value={f.lyrics_en} onChange={(e) => set('lyrics_en', e.target.value)} placeholder={'[00:00.00] first line\n[00:12.34] second line'} /></Field>
       <Field label="Pořadí"><input type="number" value={f.sort} onChange={(e) => set('sort', e.target.value)} /></Field>
       <FormActions busy={busy} progress={prog} onCancel={onClose} onSubmit={submit} />
     </Modal>
