@@ -640,7 +640,7 @@
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       (function() {
-        const VERSION = 'jw-v61'; // Match sw.js version
+        const VERSION = 'jw-v62'; // Match sw.js version
         const jsxFiles = [
           'combined.jsx'
         ];
@@ -682,7 +682,7 @@
           babelScript.onload = () => {
             console.log('[JSX Cache] Babel loaded. Fetching and compiling JSX files...');
             Promise.all(jsxFiles.map(file => 
-              fetch(file)
+              fetch(file + '?v=' + VERSION)
                 .then(res => {
                   if (!res.ok) throw new Error('Fetch failed for ' + file);
                   return res.text();

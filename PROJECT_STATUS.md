@@ -15,6 +15,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 **Vše hotové a NASAZENÉ** — backend (1–2), web čte z DB (3), `/admin` login (4), správa obsahu (5), plnohodnotný CMS, dashboard Přehled, návštěvnost (GoatCounter). Detaily níž a v `SUPABASE_BACKEND.md`.
 
 ## ✅ Hotovo
+- **Oprava cache-pasti načítání JSX (16. 06. 2026, NASAZENO, SW `jw-v62`):** Zkompilovaný `combined.jsx` v `localStorage` se mohl označit *aktuální* verzí, i když se obsah natáhl ze **staré SW cache** během přepínání service workeru → web pak servíroval starý kód pod novou verzí (projevilo se u GeoViz: „vypadá to pořád stejně"). Fix: `index.html` načítá **`combined.jsx?v=<VERSION>`** (verze v URL = unikátní URL na verzi → stará cache nemůže podstrčit starý soubor), SW precachuje stejnou versioned URL. Ověřeno přes Claude-in-Chrome: produkce i SW cache měly správný soubor (GeoViz), jen `localStorage` byl zaseklý; po vyčištění se GeoViz hned načetl. Po bumpu na v62 se zaseklé klienty (i mobil) samy spraví při dalším načtení.
 - **Geometrická audio-reaktivní vizualizace na celoobrazovkovém přehrávači (16. 06. 2026, NASAZENO, SW `jw-v61`, commit `9f85331`):** Nová komponenta `GeoViz` (canvas, `player-expand.jsx`) za obsahem expand přehrávače — **morfující geometrický útvar** ze 4 propojených vrstev teček + spojů (stejná struktura jako pozadí webu), centrovaný na obal, roztažený přes obrazovku. Symetrie morfuje mezi ~3–6 cípy, vrstvy rotují různými směry. Barvy z motivu (`--a1/--a2`). **Desktop:** reaguje na reálné spektrum (sdílený `window.__jwAnalyser`) — basy nafouknou/rozzáří, výšky zrychlí rotaci, beat problikne + vyšle prstenec, každá tečka má „svůj" frekvenční bin. **Mobil (bez FFT, přímé `<audio>`):** plynulý život přes čas (rotace + jemné dýchání), **bez falešných beatů** (poctivé — nepředstírá reakci na frekvence, které neslyší). Respektuje `prefers-reduced-motion`, pauzuje na skryté kartě. Vzhled odsouhlasen Jendou přes živý náhled. Ověřeno: Babel transpilace (vendor babel) + Node sanity (beat detekce ~8/5s, rozsahy, žádné NaN) + Vercel deploy READY.
 - **Vyčištění konzole a oprava metadat (16. 06. 2026, NASAZENO, SW `jw-v60`):** Vyřešena všechna varování v konzoli prohlížeče. Doplněny `autoComplete` atributy pro jméno a e-mail, přidány `id` a `name` k posuvníkům hlasitosti a vyhledávání. Odstraněny nepoužívané preloady pro Babel a JSX (které na repeat-visitech stahovaly zbytečně 3+ MB a vyvolávaly varování). Opraveny a přidány kanonické a absolutní OG/Twitter meta tagy pro sdílení (`og:url`, `og:image`, `twitter:image`).
 - **Optimalizace FCP/LCP a CPU TBT (16. 06. 2026, NASAZENO, SW `jw-v59`):** Zavedena klientská cache pro transpilovaný `combined.jsx` v `localStorage` (pod verzí SW), čímž se při opakované návštěvě zcela obchází stahování a běh 3.1 MB Babel Standalone (TBT/TTI kleslo na 0 ms). Inlinován CSS pro fonty, čímž se eliminoval poslední render-blocking požadavek. Odloženy forced reflow operace (ResizeObserver a offsetTop scroll detekce) o 150-250 ms po mountu, což zvýšilo skóre Performance na 100/100 na PC a 76/100 na mobilu.
@@ -107,7 +108,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - **Bez build stepu:** JSX transpiluje Babel v prohlížeči. Nutný http server / hosting (`file://` nefunguje).
 - **Komunikace mezi soubory přes `window` globály** — pořadí skriptů v `index.html` se nesmí měnit.
 - **Web předpokládá nasazení v kořeni domény** — `sw.js`/manifest mají absolutní cesty (`/...`).
-- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v61`).
+- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v62`). `index.html` načítá `combined.jsx?v=<VERSION>` — proto bumpni `VERSION` i v `index.html` (drží se shodně se `sw.js`).
 - **Nepoužívat `scrollIntoView`** — místo toho `window.scrollTo({...})`.
 - **`handoff/` je starší 4souborová záloha**, ne aktuální verze.
 
@@ -124,7 +125,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - `tweaks-panel.jsx` – panel nastavení
 - `vendor/` – lokální React/ReactDOM/Babel + fonty (offline) · `vendor/fonts.css`
 - `icons/` – PNG ikony 180/192/512
-- `sw.js` – service worker (`jw-v61`) · `manifest.webmanifest`
+- `sw.js` – service worker (`jw-v62`) · `manifest.webmanifest`
 - `player-expand.jsx` → `GeoViz` – celoobrazovková geometrická audio-reaktivní vizualizace (canvas, za obsahem expand přehrávače; desktop = reálné spektrum, mobil = time-driven)
 - `vendor/fonts.css` + `vendor/fonts/` – Syne + DM Sans, **latin + latin-ext** (latin-ext kvůli české diakritice), offline precache
 - `case-studies/` – 3 case studies + styly
