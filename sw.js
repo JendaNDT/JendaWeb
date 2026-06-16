@@ -1,20 +1,11 @@
 // sw.js — Service worker for offline-first PWA
-const VERSION = 'jw-v55';
+const VERSION = 'jw-v56';
 const SHELL = [
   '/',
   '/index.html',
   '/data.js',
   '/supabase-data.js',
-  '/shared.jsx',
-  '/nav-hero.jsx',
-  '/apps-music.jsx',
-  '/player-contact.jsx',
-  '/player-expand.jsx',
-  '/queue.jsx',
-  '/extras.jsx',
-  '/search.jsx',
-  '/app.jsx',
-  '/tweaks-panel.jsx',
+  '/combined.jsx',
   // Lokální knihovny (dříve CDN) — nutné pro offline boot
   '/vendor/react.production.min.js',
   '/vendor/react-dom.production.min.js',

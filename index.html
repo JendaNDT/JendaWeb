@@ -65,16 +65,7 @@
   <link rel="preload" href="vendor/fonts/dm-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- Preload JSX komponent v paralelním stahování -->
-  <link rel="preload" href="tweaks-panel.jsx" as="fetch" crossorigin>
-  <link rel="preload" href="shared.jsx" as="fetch" crossorigin>
-  <link rel="preload" href="nav-hero.jsx" as="fetch" crossorigin>
-  <link rel="preload" href="apps-music.jsx" as="fetch" crossorigin>
-  <link rel="preload" href="player-contact.jsx" as="fetch" crossorigin>
-  <link rel="preload" href="player-expand.jsx" as="fetch" crossorigin>
-  <link rel="preload" href="queue.jsx" as="fetch" crossorigin>
-  <link rel="preload" href="extras.jsx" as="fetch" crossorigin>
-  <link rel="preload" href="search.jsx" as="fetch" crossorigin>
-  <link rel="preload" href="app.jsx" as="fetch" crossorigin>
+  <link rel="preload" href="combined.jsx" as="fetch" crossorigin>
 
   <!-- Self-hosted fonty (offline-capable, nahrazuje Google Fonts) -->
   <style>
@@ -652,18 +643,9 @@
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       (function() {
-        const VERSION = 'jw-v55'; // Match sw.js version
+        const VERSION = 'jw-v56'; // Match sw.js version
         const jsxFiles = [
-          'tweaks-panel.jsx',
-          'shared.jsx',
-          'nav-hero.jsx',
-          'apps-music.jsx',
-          'player-contact.jsx',
-          'player-expand.jsx',
-          'queue.jsx',
-          'extras.jsx',
-          'search.jsx',
-          'app.jsx'
+          'combined.jsx'
         ];
 
         let cacheValid = true;
