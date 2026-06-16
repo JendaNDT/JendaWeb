@@ -1,5 +1,6 @@
 {
   "redirects": [
+    { "source": "/", "has": [{ "type": "host", "value": "jenda-web.vercel.app" }], "destination": "https://jenda.cool/", "permanent": true },
     { "source": "/:path*", "has": [{ "type": "host", "value": "jenda-web.vercel.app" }], "destination": "https://jenda.cool/:path*", "permanent": true }
   ],
   "rewrites": [
