@@ -1099,7 +1099,7 @@ function Nav({ lang, setLang, mode, setMode }) {
 
   return (
     <nav style={s.nav}>
-      <a href="#hero" style={s.logo}>jenda.dev</a>
+      <a href="#hero" style={s.logo}>jenda.cool</a>
       <div className="nav-desktop" style={{ display:'flex', gap:36, alignItems:'center' }}>
         {links.map(l => {
           const on = active === l.href.slice(1);

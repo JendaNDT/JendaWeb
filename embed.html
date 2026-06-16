@@ -102,7 +102,7 @@
             <div class="info">
               <div class="title">${track.title}</div>
               <div class="album">${album?.title || ''}</div>
-              <div class="branding"><a href="https://jenda.dev/#track=${track.id}" target="_blank" rel="noopener">▶ jenda.dev</a></div>
+              <div class="branding"><a href="https://jenda.cool/#track=${track.id}" target="_blank" rel="noopener">▶ jenda.cool</a></div>
             </div>
             <button class="play-btn" id="play" aria-label="Play">
               <svg width="16" height="16" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
@@ -133,7 +133,7 @@
 
       playBtn.addEventListener('click', () => {
         if (!track.audioUrl) {
-          window.open(`https://jenda.dev/#track=${track.id}`, '_blank');
+          window.open(`https://jenda.cool/#track=${track.id}`, '_blank');
           return;
         }
         playing = !playing;
