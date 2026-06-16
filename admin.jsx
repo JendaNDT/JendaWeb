@@ -70,8 +70,12 @@ async function sbReq(method, path, body) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const txt = await r.text();
-  const data = txt ? JSON.parse(txt) : null;
-  if (!r.ok) throw new Error((data && (data.message || data.details || data.hint)) || ('Chyba ' + r.status));
+  let data = null;
+  if (txt) { try { data = JSON.parse(txt); } catch (e) {} }
+  if (!r.ok) {
+    if (r.status === 401 && loadSession()) { clearSession(); try { location.reload(); } catch (e) {} }
+    throw new Error((data && (data.message || data.details || data.hint)) || ('Chyba ' + r.status));
+  }
   return data;
 }
 const sbList = (table, qs) => sbReq('GET', table + '?' + (qs || 'select=*'));
@@ -318,9 +322,9 @@ function slugify(s) { return String(s || '').toLowerCase().normalize('NFD').repl
 function AlbumForm({ initial, onClose, onSaved, notify }) {
   const [f, setF] = useState(() => initial ? {
     id: initial.id, title: initial.title || '', genre: initial.genre || '', year: initial.year || '',
-    g1: initial.g1 || '#f59e0b', g2: initial.g2 || '#b45309', tracks: initial.tracks != null ? initial.tracks : '',
+    g1: initial.g1 || '#f59e0b', g2: initial.g2 || '#b45309',
     cs: initial.cs || '', en: initial.en || '', sort: initial.sort != null ? initial.sort : 0, cover_url: initial.cover_url || '',
-  } : { id: '', title: '', genre: '', year: new Date().getFullYear(), g1: '#f59e0b', g2: '#b45309', tracks: '', cs: '', en: '', sort: 0, cover_url: '' });
+  } : { id: '', title: '', genre: '', year: new Date().getFullYear(), g1: '#f59e0b', g2: '#b45309', cs: '', en: '', sort: 0, cover_url: '' });
   const [busy, setBusy] = useState(false);
   const [prog, setProg] = useState(-1);
   const [file, setFile] = useState(null);
@@ -338,7 +342,7 @@ function AlbumForm({ initial, onClose, onSaved, notify }) {
       if (file) { setProg(0); cover_url = await uploadFile('images', 'covers', file, setProg); setProg(-1); }
       const row = {
         title: f.title.trim(), genre: f.genre.trim() || null, year: Number(f.year) || null,
-        g1: f.g1, g2: f.g2, tracks: f.tracks === '' ? null : Number(f.tracks),
+        g1: f.g1, g2: f.g2,
         cs: f.cs.trim() || null, en: f.en.trim() || null, sort: Number(f.sort) || 0, cover_url: cover_url || null,
       };
       if (initial) await sbUpdate('albums', 'id', initial.id, row);
@@ -354,7 +358,6 @@ function AlbumForm({ initial, onClose, onSaved, notify }) {
       <Field label="Název"><input value={f.title} onChange={(e) => set('title', e.target.value)} /></Field>
       <Field label="Žánr"><input value={f.genre} onChange={(e) => set('genre', e.target.value)} /></Field>
       <Field label="Rok"><input type="number" value={f.year} onChange={(e) => set('year', e.target.value)} /></Field>
-      <Field label="Počet skladeb (zobrazené číslo)"><input type="number" value={f.tracks} onChange={(e) => set('tracks', e.target.value)} /></Field>
       <Field label={'Obálka alba' + (f.cover_url ? ' — nahráno ✓' : ' (jinak se použijí barvy)')}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           {preview && <img className="thumb" src={preview} alt="" />}
