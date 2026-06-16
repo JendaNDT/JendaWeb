@@ -61,6 +61,21 @@
   <!-- GoatCounter – návštěvnost (soukromí-friendly, bez cookies) -->
   <script data-goatcounter="https://jendaweb.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 
+  <!-- Zachycení nabídky instalace co nejdřív (než se připojí React) -->
+  <script>
+    (function () {
+      window.__jwBIP = null;
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault(); window.__jwBIP = e;
+        try { window.dispatchEvent(new Event('jw-bip')); } catch (_) {}
+      });
+      window.addEventListener('appinstalled', function () {
+        window.__jwBIP = null;
+        try { window.dispatchEvent(new Event('jw-appinstalled')); } catch (_) {}
+      });
+    })();
+  </script>
+
   <!-- Structured data -->
   <script type="application/ld+json">
   {
@@ -659,7 +674,7 @@
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       (function() {
-        const VERSION = 'jw-v65'; // Match sw.js version
+        const VERSION = 'jw-v66'; // Match sw.js version
         const jsxFiles = [
           'combined.jsx'
         ];

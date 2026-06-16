@@ -3642,6 +3642,97 @@ const { useState: __useS_app, useEffect: __useE_app, useCallback: __useC_app, us
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{ theme:'ember', mode:'auto' }/*EDITMODE-END*/;
 
+// Výzva k instalaci PWA. Chrome/Android/desktop přes zachycený `beforeinstallprompt`
+// (stashnutý early v index.html do window.__jwBIP); iOS Safari dostane manuální hint
+// (tam beforeinstallprompt neexistuje). Skryje se, když appka už běží standalone,
+// a po zavření se 14 dní neukáže.
+function InstallPrompt({ lang, hasPlayer }) {
+  const [show, setShow] = __useS_app(false);
+  const [ios, setIos]   = __useS_app(false);
+
+  __useE_app(() => {
+    let standalone = false;
+    try { standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; } catch {}
+    if (standalone) return;
+    try {
+      const d = localStorage.getItem('jw_install_dismissed');
+      if (d && Date.now() - Number(d) < 1209600000) return; // 14 dní
+    } catch {}
+
+    const ua = navigator.userAgent || '';
+    const isIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isSafari = /safari/i.test(ua) && !/(crios|fxios|edgios|chrome|android)/i.test(ua);
+    if (isIOS && isSafari) {
+      const t = setTimeout(() => setIos(true), 2500);
+      return () => clearTimeout(t);
+    }
+
+    if (window.__jwBIP) setShow(true);
+    const onBip  = () => setShow(true);
+    const onInst = () => { setShow(false); setIos(false); };
+    window.addEventListener('jw-bip', onBip);
+    window.addEventListener('jw-appinstalled', onInst);
+    window.addEventListener('appinstalled', onInst);
+    return () => {
+      window.removeEventListener('jw-bip', onBip);
+      window.removeEventListener('jw-appinstalled', onInst);
+      window.removeEventListener('appinstalled', onInst);
+    };
+  }, []);
+
+  const dismiss = () => {
+    setShow(false); setIos(false);
+    try { localStorage.setItem('jw_install_dismissed', String(Date.now())); } catch {}
+  };
+  const install = async () => {
+    const e = window.__jwBIP;
+    if (!e) { setShow(false); return; }
+    try { e.prompt(); await e.userChoice; } catch {}
+    window.__jwBIP = null; setShow(false);
+  };
+
+  if (!show && !ios) return null;
+  const en = lang === 'en';
+  const card = {
+    position:'fixed', bottom: hasPlayer ? 150 : 24, left:'50%', transform:'translateX(-50%)',
+    zIndex:240, width:'min(440px, calc(100vw - 28px))',
+    display:'flex', alignItems:'center', gap:13, padding:'12px 14px',
+    background:'color-mix(in srgb, var(--bg) 90%, transparent)',
+    backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
+    border:'1px solid var(--border)', borderRadius:18,
+    boxShadow:'0 14px 50px rgba(0,0,0,0.5)', animation:'overlayPop 0.25s ease',
+  };
+  return (
+    <div role="region" aria-label={en ? 'Install app' : 'Instalace aplikace'} style={card}>
+      <img src="/icons/icon-192.png" alt="" width="46" height="46" style={{ borderRadius:11, flexShrink:0 }} />
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ fontWeight:700, fontSize:15, color:'var(--text)', letterSpacing:'-0.01em' }}>
+          {en ? 'Install the app' : 'Nainstaluj si appku'}
+        </div>
+        {ios ? (
+          <div style={{ fontSize:12.5, color:'var(--muted)', display:'flex', alignItems:'center', gap:5, flexWrap:'wrap', marginTop:2 }}>
+            <span>{en ? 'Tap' : 'Ťukni na'}</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--a1)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>
+            </svg>
+            <span>{en ? 'and “Add to Home Screen”.' : 'a zvol „Přidat na plochu".'}</span>
+          </div>
+        ) : (
+          <div style={{ fontSize:12.5, color:'var(--muted)', marginTop:2 }}>
+            {en ? 'Home-screen access, works offline.' : 'Přístup z plochy, funguje i offline.'}
+          </div>
+        )}
+      </div>
+      {!ios && (
+        <button onClick={install} style={{ padding:'9px 16px', background:'var(--a1)', color:'var(--bg)', border:'none', borderRadius:50, fontWeight:700, fontSize:13.5, cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 }}>
+          {en ? 'Install' : 'Instalovat'}
+        </button>
+      )}
+      <button onClick={dismiss} aria-label={en ? 'Dismiss' : 'Zavřít'} style={{ background:'none', border:'none', color:'var(--muted)', fontSize:18, lineHeight:1, cursor:'pointer', padding:'2px 4px', flexShrink:0, alignSelf:'flex-start' }}>✕</button>
+    </div>
+  );
+}
+
 function App() {
   const [tw, setTweak] = useTweaks(TWEAK_DEFAULTS);
   const [lang, setLang] = __useS_app(() => {
@@ -3858,6 +3949,8 @@ function App() {
 
       <button className="kbd-hint" aria-label="Klávesové zkratky" title="Klávesové zkratky (?)"
         style={{ bottom: playerTrack ? 145 : 24 }} onClick={() => setShowShortcuts(true)}>?</button>
+
+      <InstallPrompt lang={lang} hasPlayer={!!playerTrack} />
 
       {showShortcuts && <ShortcutsOverlay lang={lang} onClose={() => setShowShortcuts(false)} />}
       {showSearch    && <SearchOverlay    lang={lang} onClose={() => setShowSearch(false)} onPlay={handlePlay} />}
