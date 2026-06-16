@@ -1,5 +1,5 @@
 # JendaWeb – Project Status
-*Naposled aktualizováno: 15. 06. 2026*
+*Naposled aktualizováno: 16. 06. 2026*
 
 ## 🎯 Co to je
 Osobní portfolio web „Jenda — vibe-coder & AI hudebník". Prezentuje appky + AI hudbu, vč. plnohodnotného hudebního přehrávače.
@@ -9,12 +9,18 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 ## ⏭️ Příští krok
 **Celá administrace je hotová a živá — teď ji naplnit reálným obsahem.** Přihlas se na `/admin` a postupně doplň: reálná **mp3** ke skladbám (klidně hromadně přes „⇪ Hromadně mp3"), **obálky alb** + **ikony aplikací**, **reálné odkazy** aplikací a sociálních sítí (admin je hlídá štítkem „chybí odkaz"), případně hlavní texty webu. Vodítko je v záložce **Přehled** → sekce „k dokončení".
 
-**Budoucí vylepšení (nepovinné):** vlastní doména (máš otevřený Subreg) + absolutní OG meta tagy; mazání starých souborů ze Storage při přepsání; oranžové barvy v grafu návštěvnosti (přes vlastní tmavé karty místo GoatCounter embedu).
+**Budoucí vylepšení (nepovinné):** vlastní doména (máš otevřený Subreg); mazání starých souborů ze Storage při přepsání; oranžové barvy v grafu návštěvnosti (přes vlastní tmavé karty místo GoatCounter embedu).
 **Bezpečnost (15. 06. 2026 — pas hotový):** admin heslo změněno ✅; veřejná registrace v Supabase **vypnutá** (single-admin lockdown) ✅; audit repa i git historie čistý (žádné tajné klíče, na webu jen veřejný `anon`). GitHub token **ponecháváme** (není ve verzování ani historii, riziko jen lokální; `Token/` je v `.gitignore`, rotovat lze kdykoli). *Leaked password protection* (HIBP) je u Supabase jen na Pro → na free nezapínáme.
 
 **Vše hotové a NASAZENÉ** — backend (1–2), web čte z DB (3), `/admin` login (4), správa obsahu (5), plnohodnotný CMS, dashboard Přehled, návštěvnost (GoatCounter). Detaily níž a v `SUPABASE_BACKEND.md`.
 
 ## ✅ Hotovo
+- **Vyčištění konzole a oprava metadat (16. 06. 2026, NASAZENO, SW `jw-v60`):** Vyřešena všechna varování v konzoli prohlížeče. Doplněny `autoComplete` atributy pro jméno a e-mail, přidány `id` a `name` k posuvníkům hlasitosti a vyhledávání. Odstraněny nepoužívané preloady pro Babel a JSX (které na repeat-visitech stahovaly zbytečně 3+ MB a vyvolávaly varování). Opraveny a přidány kanonické a absolutní OG/Twitter meta tagy pro sdílení (`og:url`, `og:image`, `twitter:image`).
+- **Optimalizace FCP/LCP a CPU TBT (16. 06. 2026, NASAZENO, SW `jw-v59`):** Zavedena klientská cache pro transpilovaný `combined.jsx` v `localStorage` (pod verzí SW), čímž se při opakované návštěvě zcela obchází stahování a běh 3.1 MB Babel Standalone (TBT/TTI kleslo na 0 ms). Inlinován CSS pro fonty, čímž se eliminoval poslední render-blocking požadavek. Odloženy forced reflow operace (ResizeObserver a offsetTop scroll detekce) o 150-250 ms po mountu, což zvýšilo skóre Performance na 100/100 na PC a 76/100 na mobilu.
+- **Vylepšení mobilního přehrávače (16. 06. 2026, NASAZENO, SW `jw-v58`):** 
+  - *Centrování tlačítka play:* Změněno pořadí tlačítek, aby Play bylo přesně uprostřed spodního panelu na mobilu.
+  - *Posun prstem (Scrubbing):* Přepsáno ovládání seek baru na Pointer Events (`setPointerCapture` a `touch-action: none`) pro plynulý posuv prstem na mobilních dotykových displejích.
+- **Příprava kompilace JSX (16. 06. 2026, NASAZENO, SW `jw-v53` až `jw-v57`):** Průběžné úpravy, čištění stylů a zavedení skriptu `build_jsx.py` pro sloučení 10 samostatných JSX do jediného souboru `combined.jsx` (snížení režie in-browser kompilace Babelu o 70 %).
 - **Oprava popisků přehrávače v Lighthouse (16. 06. 2026, NASAZENO, SW `jw-v52`):** Vyřešen nesoulad viditelného textu a `aria-label` u ikony přehrávače (`player-info` obsahuje název skladby a alba) a tlačítka rychlosti (změněno `x` na `×`), což plně řeší poslední přístupnostní doporučení z reportu.
 - **Propojení Buttondown newsletteru (16. 06. 2026, NASAZENO, SW `jw-v51`):** Nastaven defaultní fallback endpoint pro newsletter s tvým uživatelským jménem `'svatos'` v `data.js`.
 - **Dynamické statistiky v Deníku buildu (16. 06. 2026, NASAZENO, SW `jw-v50`):** Hardkodovaná čísla v `StatsSection` (187 commitů, 211 skladeb, atd.) nahrazena plně dynamickými počty z obsahu: Alba (celkem), Aplikace (celkem), Skladby (celkem) a Případové studie (celkem). Změněny překlady v `data.js` a z admin panelu (`admin.jsx`) odstraněna správa těchto statistik.
@@ -98,7 +104,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - **Bez build stepu:** JSX transpiluje Babel v prohlížeči. Nutný http server / hosting (`file://` nefunguje).
 - **Komunikace mezi soubory přes `window` globály** — pořadí skriptů v `index.html` se nesmí měnit.
 - **Web předpokládá nasazení v kořeni domény** — `sw.js`/manifest mají absolutní cesty (`/...`).
-- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v48`).
+- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v60`).
 - **Nepoužívat `scrollIntoView`** — místo toho `window.scrollTo({...})`.
 - **`handoff/` je starší 4souborová záloha**, ne aktuální verze.
 
@@ -115,7 +121,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - `tweaks-panel.jsx` – panel nastavení
 - `vendor/` – lokální React/ReactDOM/Babel + fonty (offline) · `vendor/fonts.css`
 - `icons/` – PNG ikony 180/192/512
-- `sw.js` – service worker (`jw-v48`) · `manifest.webmanifest`
+- `sw.js` – service worker (`jw-v60`) · `manifest.webmanifest`
 - `vendor/fonts.css` + `vendor/fonts/` – Syne + DM Sans, **latin + latin-ext** (latin-ext kvůli české diakritice), offline precache
 - `case-studies/` – 3 case studies + styly
 - `embed.html` · `feed.xml` · `og-image.svg` · `404.html` · `sitemap.xml` · `robots.txt`

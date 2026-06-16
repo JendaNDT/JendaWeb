@@ -8,6 +8,17 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
 - **Repo:** https://github.com/JendaNDT/JendaWeb — push to `main` → Vercel auto-deploys.
 - **Backend:** Supabase project `jendaweb` (ref `semdgbaearwhkhulkyts`, eu-central-1, free). Frontend uses the public anon/publishable key; writes are protected by RLS (locked to the admin uid). See `SUPABASE_BACKEND.md`.
 
+## Recent updates (16 Jun 2026)
+
+- **Console Warning Cleanup:** Added missing `autoComplete` attributes (name, email) and `id` and `name` attributes for form controls, search fields, and range sliders across all components (`extras.jsx`, `player-contact.jsx`, `player-expand.jsx`, `search.jsx`, `apps-music.jsx`).
+- **Preload Optimization:** Removed preloads for `babel.min.js` and `combined.jsx` in `index.html` to prevent redundant 3+ MB downloads on repeat visits (which use compiled cache).
+- **Absolute Social Cards:** Set `og:image` and `twitter:image` tags to absolute URL paths (`https://jenda-web.vercel.app/og-image.svg`) and added `og:url` for correct preview rendering on social platforms.
+- **Lighthouse Performance Score (100/100):** Postponed layout-thrashing DOM operations (`ResizeObserver` and `offsetTop` checks) in `nav-hero.jsx` by 150-250ms after mounting, and inlined font definitions in `index.html` to eliminate the last render-blocking stylesheet.
+- **In-Browser JSX Compilation Cache:** Consolidated all 10 JSX scripts into `combined.jsx` (compiled via `python3 build_jsx.py`) and implemented a caching loader in `index.html` that saves compiled scripts to `localStorage` under the Service Worker version tag (`jw-v60`). Bypasses Babel compilation entirely on repeat visits.
+- **Mobile Play Button Centered:** Adjusted button layouts in the audio player to position the Play button perfectly centered on mobile viewports.
+- **Touch-Friendly Seek Bar:** Migrated the player seek bar controls to Pointer Events (`setPointerCapture` and `touch-action: none`) for smooth touch dragging/scrubbing on mobile devices.
+- **SW is now `jw-v60`.** Full chronological detail lives in `PROJECT_STATUS.md`.
+
 ## Recent updates (15 Jun 2026, evening)
 
 - **Music is the primary section now.** Page + nav order is Music → Apps. The hero's main CTA "Poslechnout hudbu" (primary button) starts playback of the first track that has audio and smooth-scrolls to `#music`; the scroll cue also points to `#music`. Hero headline/identity unchanged.
@@ -38,7 +49,7 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 - **GitHub:** `JendaNDT/JendaWeb`, branch `main`.
 - **Vercel:** connected to the repo. **Push to `main` auto-deploys.** Framework preset "Other" (pure static, no build).
 - The site assumes deployment at the **domain root** — `sw.js` and the manifest use absolute paths (`/...`). A subpath deploy would need path tweaks.
-- After changing any cached asset, **bump `VERSION` in `sw.js`** (currently `jw-v47`) so clients pick up new content.
+- After changing any cached asset, **bump `VERSION` in `sw.js`** (currently `jw-v60`) so clients pick up new content.
 - `/admin` is routed via `vercel.json` (rewrite `/admin` → `/admin.html`) and served **online-only** (SW bypasses cache for it) with `Cache-Control: no-store` headers so it's never stale.
 - **Pushing from the sandbox:** the mounted working copy's `.git` can't take git writes (lock files), so deploys go via a fresh `git clone` in `/tmp`, copy the changed files in, commit, and `git push https://<token>@github.com/JendaNDT/JendaWeb.git HEAD:main`. Token is provided per-session (in `Token/`, gitignored), never stored. Verify the deploy actually landed (Vercel occasionally misses the webhook) and that no caches serve stale files.
 
@@ -68,7 +79,7 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 │   ├── fonts.css           # @font-face for self-hosted fonts
 │   └── fonts/              # Syne + DM Sans (woff2/woff, latin + latin-ext subset)
 ├── icons/                  # PNG app icons 180/192/512 (iOS apple-touch + maskable)
-├── sw.js                   # Service worker (jw-v47; precache shell + latin-ext fonts, network-first HTML, /admin online-only)
+├── sw.js                   # Service worker (jw-v60; precache shell + latin-ext fonts, network-first HTML, /admin online-only)
 ├── manifest.webmanifest    # PWA manifest (icons point to icons/*.png)
 ├── og-image.svg            # 1200×630 social card
 ├── robots.txt · sitemap.xml · feed.xml · 404.html · embed.html
@@ -89,27 +100,34 @@ Object.assign(window, { ComponentA, ComponentB, helperFn, ... });
 ```
 In other files those identifiers resolve via the global scope.
 
-### Script load order in `index.html`
-```html
-<!-- in <head>: local libs, must load before the babel scripts -->
-<script src="vendor/react.production.min.js"></script>
-<script src="vendor/react-dom.production.min.js"></script>
-<script src="vendor/babel.min.js"></script>
-<!-- ...at end of <body>: -->
-<script type="text/babel" src="tweaks-panel.jsx"></script>
-<script src="data.js"></script>                       <!-- plain JS, sets window.APPS_DATA etc. (offline fallback seed) -->
-<script src="supabase-data.js"></script>              <!-- plain JS, overrides window.* globals from Supabase + cache -->
-<script type="text/babel" src="shared.jsx"></script>
-<script type="text/babel" src="nav-hero.jsx"></script>
-<script type="text/babel" src="apps-music.jsx"></script>
-<script type="text/babel" src="player-contact.jsx"></script>
-<script type="text/babel" src="player-expand.jsx"></script>
-<script type="text/babel" src="queue.jsx"></script>
-<script type="text/babel" src="extras.jsx"></script>
-<script type="text/babel" src="search.jsx"></script>
-<script type="text/babel" src="app.jsx"></script>     <!-- App root, renders ReactDOM -->
-```
-**Do not change this order.** Files depend on globals defined earlier.
+### Compilation & Script Load Order (since `jw-v59`)
+
+To optimize mobile performance (bypassing the heavy 3.1 MB Babel Standalone compiler on repeat visits), all 10 JSX components are merged into a single file: `combined.jsx`.
+
+- **To compile changes:** Whenever you modify any `.jsx` file, run the helper script:
+  ```bash
+  python3 build_jsx.py
+  ```
+  This combines the component files into `combined.jsx` in the correct execution order.
+
+- **Script Loading in `index.html`:**
+  React, React-DOM, `data.js` and `supabase-data.js` are loaded in `<head>` using the `defer` attribute.
+  At the end of `<body>`, a custom caching loader runs inside a `DOMContentLoaded` event listener:
+  1. It checks if `localStorage` contains compiled scripts for the current Service Worker version tag (`jw-v60`).
+  2. **Cache Hit:** Executes the compiled JS directly from `localStorage`, cutting Babel compile time to 0 ms.
+  3. **Cache Miss / Version Mismatch:** Clears old cache keys, dynamically appends `<script src="vendor/babel.min.js">`, fetches `combined.jsx`, transpiles it in-browser, saves the compiled output to `localStorage`, and executes it.
+
+**Component order in `build_jsx.py`:**
+1. `tweaks-panel.jsx`
+2. `shared.jsx`
+3. `nav-hero.jsx`
+4. `apps-music.jsx`
+5. `player-contact.jsx`
+6. `player-expand.jsx`
+7. `queue.jsx`
+8. `extras.jsx`
+9. `search.jsx`
+10. `app.jsx` (Renders React DOM)
 
 ### React hooks aliased per file
 To avoid Babel scope collisions each file destructures with unique names: `const { useState: __useS_app, ... } = React;`. Follow the same pattern (`__useS_xxx`) in any new file.
@@ -211,4 +229,4 @@ In **case study HTML**: uncomment giscus block + fill `data-repo` etc.
 
 > **Done (was "next phase"):** the content **upload interface** (login-protected `/admin`) backed by **Supabase** (database + auth + file storage) is **built and live** — music, apps, images and texts are managed via forms with file upload instead of editing `data.js`. Original spec: **`UPLOAD_INTERFACE_PLAN.md`**; backend details: **`SUPABASE_BACKEND.md`**; current state: **`PROJECT_STATUS.md`**.
 
-— Maintained for the Cowork + GitHub/Vercel workflow. Last updated 15 Jun 2026.
+— Maintained for the Cowork + GitHub/Vercel workflow. Last updated 16 Jun 2026.

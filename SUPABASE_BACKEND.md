@@ -1,6 +1,6 @@
 # Supabase Backend — JendaWeb
 
-*Všech 5 fází hotové a NASAZENÉ (15. 06. 2026): schéma + RLS + storage + seed + web čte z DB + `/admin` login + plný CRUD/upload. Pozdější přírůstky: `albums.cover_url`, `site_config.strings`, `tracks.plays` + RPC `increment_play` a `storage_usage`. (Plán: `UPLOAD_INTERFACE_PLAN.md` · stav: `PROJECT_STATUS.md`.)*
+*Všech 5 fází hotové a NASAZENÉ (poslední aktualizace 16. 06. 2026, SW `jw-v60`): schéma + RLS + storage + seed + web čte z DB + `/admin` login + plný CRUD/upload. Pozdější přírůstky: `albums.cover_url`, `site_config.strings`, `tracks.plays` + RPC `increment_play` a `storage_usage`. (Plán: `UPLOAD_INTERFACE_PLAN.md` · stav: `PROJECT_STATUS.md`.)*
 
 ## Projekt
 - **Název:** jendaweb
