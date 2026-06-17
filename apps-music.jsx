@@ -305,7 +305,7 @@ function MusicSection({ lang, onPlay, currentTrack, playing }) {
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:1200, margin:'0 auto' }}>
         <SectionLabel color="a2" num="02">{tx(lang,'music_title')}</SectionLabel>
         <p style={{ color:'var(--muted)', fontSize:16, marginBottom:52 }}>
-          200+ {tx(lang,'music_sub')}
+          {tx(lang,'music_sub')}
         </p>
 
         <SubLabel>{tx(lang,'music_albums')}</SubLabel>
