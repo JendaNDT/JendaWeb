@@ -1342,7 +1342,14 @@ const { useState: __useS, useEffect: __useE, useMemo: __useM, useCallback: __use
         border:`1px solid ${app.color}40`,
         display:'flex', alignItems:'center', justifyContent:'center',
         fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:20, color:app.color,
-      }}>{app.name[0]}</div>
+        overflow:'hidden'
+      }}>
+        {app.icon_url ? (
+          <img src={app.icon_url} alt={app.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+        ) : (
+          app.name[0]
+        )}
+      </div>
       <div style={{ flex:1 }}>
         <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:5 }}>
           <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:15 }}>{app.name}</span>
@@ -1595,7 +1602,14 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
               border: `1px solid ${app.color}40`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 22, color: app.color,
-            }}>{app.name[0]}</div>
+              overflow: 'hidden'
+            }}>
+              {app.icon_url ? (
+                <img src={app.icon_url} alt={app.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                app.name[0]
+              )}
+            </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 20, margin: 0, color: 'var(--text)' }}>{app.name}</h2>
