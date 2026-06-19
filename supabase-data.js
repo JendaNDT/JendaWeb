@@ -20,7 +20,7 @@
     return rows.map(function (a) {
       return { id: a.id, name: a.name, platform: a.platform, color: a.color,
                cs: a.cs, en: a.en, link: a.link || '#', case_study_url: a.case_study_url || null,
-               screenshots: a.screenshots || [], likes: a.likes || 0 };
+               screenshots: a.screenshots || [], likes: a.likes || 0, icon_url: a.icon_url || null };
     });
   }
   function mapAlbums(rows) {
