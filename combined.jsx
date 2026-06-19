@@ -3629,7 +3629,7 @@ function StatsSection({ lang }) {
   const log = window.BUILD_LOG || [];
 
   const albumsCount = (window.ALBUMS || []).length;
-  const appsCount = (window.APPS_DATA || []).length;
+  const appsCount = (window.APPS_DATA || []).filter(x => x.link && x.link !== '#').length;
   const tracksCount = (window.TRACKS_DATA || []).length;
   const studiesCount = Object.keys(window.CASE_STUDIES || {}).length;
 
