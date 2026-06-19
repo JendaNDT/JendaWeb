@@ -30,6 +30,7 @@ Identity sekvence `apps`/`tracks` nastaveny za seed (apps→20, tracks→15), no
 ## Storage buckety
 - **`audio`** (veřejné čtení) — mp3/wav. Admin nahrává s cestou `tracks/{timestamp}_{název}` (XHR + progress).
 - **`images`** (veřejné čtení) — ikony aplikací + obálky alb, cesta `apps/{timestamp}_{název}`.
+- **`binaries`** (veřejné čtení) — instalační soubory aplikací (APK, ZIP atd.). Admin nahrává s cestou `apps/{timestamp}_{název}`.
 - Zápis jen `authenticated` (přes admin JWT). Pozn.: staré soubory se při přepsání zatím nemažou (viz TODO v `PROJECT_STATUS.md`).
 
 ## RLS (zabezpečení)
@@ -40,7 +41,7 @@ Identity sekvence `apps`/`tracks` nastaveny za seed (apps→20, tracks→15), no
 
 ## Funkce / RPC (Postgres)
 - **`public.increment_play(track_id bigint)`** — `security definer`, `set search_path = public`, grant `anon` + `authenticated`. Zvýší `tracks.plays` o 1 pro dané `id`. Web ji volá **anonymně** (`POST /rest/v1/rpc/increment_play`, anon klíč) při spuštění skladby — jednou na skladbu za návštěvu. Bezpečné: jen inkrementuje počítadlo, RLS obchází řízeně přes definer.
-- **`public.storage_usage()`** — `security definer`, grant **jen `authenticated`**. Sečte velikost objektů v bucketech `audio` + `images` (z `storage.objects`) a vrátí řádky `{bucket, bytes, files}`. Admin „Přehled" z toho ukazuje využité úložiště proti ~1 GB free.
+- **`public.storage_usage()`** — `security definer`, grant **jen `authenticated`**. Sečte velikost objektů v bucketech (z `storage.objects` pro `audio`, `images` a `binaries`) a vrátí řádky `{bucket, bytes, files}`. Admin „Přehled" z toho ukazuje využité úložiště proti ~1 GB free.
 
 ## Pozdější přírůstky (po fázi 5, vše nasazené 15. 06. 2026)
 - **Plný CMS:** `albums.cover_url` (upload obálky) + `site_config.strings` (editovatelné hlavní texty CZ/EN, web je merguje do `window.STRINGS`). `CASE_STUDIES` web staví z `apps.case_study_url`.
@@ -65,3 +66,8 @@ Identity sekvence `apps`/`tracks` nastaveny za seed (apps→20, tracks→15), no
 **Fáze 4 — admin auth: HOTOVO a NASAZENO (15. 06. 2026, login ověřen).** `admin.html` + `admin.jsx` — login přes GoTrue (`POST /auth/v1/token?grant_type=password`, anon key, session v localStorage). Admin user `mcnegr@gmail.com` vytvořen (uid `5a7c34fb-4c84-4786-8c2e-7f5efdb0ccf6`, potvrzený). **RLS zápis zúžen na tento uid** (policies `*_admin_write`) → vyřešilo 6 advisor warningů. **Heslo Jenda změnil** z dočasného (15. 06. 2026). **Veřejná registrace vypnuta** (viz RLS sekce) → jediný účet je Jendův.
 
 **Fáze 5 — admin CRUD + upload: POSTAVENO (15. 06. 2026).** `admin.jsx` plný CRUD přes REST (admin JWT, `Prefer: return=representation`) + Storage upload (mp3→`audio`, ikony→`images`, XHR s progress barem) + změna hesla (`PUT /auth/v1/user`) + auto-refresh tokenu (`grant_type=refresh_token`). Zápis chrání RLS `*_admin_write` (jen admin uid) — ověřeno serverovým RLS testem (insert/update/delete pod admin JWT). Storage cesty: `tracks/{ts}_{name}`, `apps/{ts}_{name}`. Zatím bez editoru build-logu/comparison.
+
+## Aktualizace (19. 06. 2026)
+- **Nahrávání instalačních souborů:** Přidán veřejný (Public) bucket **`binaries`** v Supabase Storage.
+- **Pravidla (RLS) pro binaries:** V SQL Editoru nastaveny politiky pro přístup (veřejné čtení pro všechny přes `select`, zápis/úprava/mazání pro roli `authenticated` přes `insert/update/delete`).
+- **Nahrávání z adminu:** Úspěšně otestováno nahrávání souborů (APK, ZIP atd.) přímo přes `/admin` do cesty `apps/{timestamp}_{name}` v bucketu `binaries`. URL adresa se ukládá do sloupce `apps.link`.
