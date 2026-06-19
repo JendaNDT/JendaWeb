@@ -1254,8 +1254,9 @@ function AppCard({ app, lang }) {
   const [hov, setHov] = __useS(false);
   const isPWA = app.platform === 'PWA';
   const caseStudyUrl = window.CASE_STUDIES?.[app.id];
+  const isDownload = app.link && (app.link.includes('/storage/v1/object/public/binaries/') || /\.(apk|zip|dmg|exe|tar\.gz|ipa|pkg)(?:\?.*)?$/i.test(app.link));
   return (
-    <a href={app.link} style={{
+    <a href={app.link} download={isDownload ? '' : undefined} style={{
       background: hov ? 'rgba(255,255,255,0.065)' : 'var(--card)',
       border:`1px solid ${hov ? 'color-mix(in srgb, var(--border) 100%, ' + app.color + ' 30%)' : 'var(--border)'}`,
       borderRadius:'var(--r)', padding:'22px',

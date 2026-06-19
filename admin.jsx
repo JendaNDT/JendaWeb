@@ -383,7 +383,8 @@ function AppForm({ initial, onClose, onSaved, notify }) {
     cs: initial.cs || '', en: initial.en || '', link: initial.link || '', case_study_url: initial.case_study_url || '',
     icon_url: initial.icon_url || '', sort: initial.sort != null ? initial.sort : 0,
   } : { name: '', platform: 'PWA', color: '#f97316', cs: '', en: '', link: '', case_study_url: '', icon_url: '', sort: 0 });
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState(null); // Icon file
+  const [appFile, setAppFile] = useState(null); // Binary file
   const [busy, setBusy] = useState(false);
   const [prog, setProg] = useState(-1);
   const set = (k, v) => setF((o) => Object.assign({}, o, { [k]: v }));
@@ -395,10 +396,22 @@ function AppForm({ initial, onClose, onSaved, notify }) {
     setBusy(true);
     try {
       let icon_url = f.icon_url;
-      if (file) { setProg(0); icon_url = await uploadFile('images', 'apps', file, setProg); setProg(-1); }
+      if (file) {
+        setProg(0);
+        icon_url = await uploadFile('images', 'apps', file, (p) => setProg(Math.round(p * (appFile ? 0.5 : 1.0))));
+        if (appFile) setProg(50);
+      }
+      let link = f.link.trim() || '#';
+      if (appFile) {
+        const startProg = file ? 50 : 0;
+        const scale = file ? 0.5 : 1.0;
+        link = await uploadFile('binaries', 'apps', appFile, (p) => setProg(startProg + Math.round(p * scale)));
+      }
+      setProg(-1);
+
       const row = {
         name: f.name.trim(), platform: f.platform, color: f.color,
-        cs: f.cs.trim() || null, en: f.en.trim() || null, link: f.link.trim() || '#',
+        cs: f.cs.trim() || null, en: f.en.trim() || null, link: link,
         case_study_url: f.case_study_url.trim() || null, icon_url: icon_url || null, sort: Number(f.sort) || 0,
       };
       if (initial) await sbUpdate('apps', 'id', initial.id, row);
@@ -407,6 +420,9 @@ function AppForm({ initial, onClose, onSaved, notify }) {
     } catch (e) { notify(e.message || 'Chyba při ukládání', 'err'); }
     finally { setBusy(false); setProg(-1); }
   };
+
+  const hasUploadedBin = f.link && f.link.includes('/storage/v1/object/public/binaries/');
+  const uploadedBinName = hasUploadedBin ? decodeURIComponent(f.link.split('/').pop().replace(/^\d+_/, '')) : '';
 
   return (
     <Modal title={initial ? 'Upravit aplikaci' : 'Nová aplikace'} onClose={onClose}>
@@ -421,7 +437,18 @@ function AppForm({ initial, onClose, onSaved, notify }) {
       </div>
       <Field label="Popis CZ"><textarea value={f.cs} onChange={(e) => set('cs', e.target.value)} /></Field>
       <Field label="Popis EN"><textarea value={f.en} onChange={(e) => set('en', e.target.value)} /></Field>
-      <Field label="Odkaz (URL aplikace)"><input value={f.link} onChange={(e) => set('link', e.target.value)} placeholder="https://…" /></Field>
+      <Field label="Odkaz (URL aplikace, např. Google Play nebo externí web)"><input value={f.link} onChange={(e) => set('link', e.target.value)} placeholder="https://…" /></Field>
+      
+      <Field label={appFile ? 'Nový instalační soubor k nahrání' : (hasUploadedBin ? `Nahraný instalační soubor: ${uploadedBinName}` : 'Instalační soubor (nepovinné, nahraje se na jenda.cool)')}>
+        <FileDrop accept=".apk,.zip,.dmg,.exe,.tar.gz,.ipa,.pkg" file={appFile} onFile={setAppFile} label="Přetáhni instalační soubor, nebo klikni" />
+        {hasUploadedBin && !appFile && (
+          <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 12, color: 'var(--muted)' }}>Uložený soubor: <a href={f.link} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>{uploadedBinName}</a></span>
+            <button type="button" className="btn btn-ghost btn-sm" style={{ padding: '2px 8px', fontSize: 11 }} onClick={() => set('link', '#')}>Odebrat soubor</button>
+          </div>
+        )}
+      </Field>
+
       <Field label="Odkaz na case study (nepovinné)"><input value={f.case_study_url} onChange={(e) => set('case_study_url', e.target.value)} placeholder="case-studies/…html" /></Field>
       <Field label={'Ikona (obrázek)' + (f.icon_url ? ' — nahráno ✓' : '')}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -950,12 +977,14 @@ function OverviewTab({ data, goTab }) {
   const [storage, setStorage] = useState(null);
   useEffect(() => {
     sbReq('POST', 'rpc/storage_usage').then(function (rows) {
-      var bytes = 0, files = 0, audio = 0, images = 0;
+      var bytes = 0, files = 0, audio = 0, images = 0, binaries = 0;
       (rows || []).forEach(function (r) {
         var b = Number(r.bytes) || 0; bytes += b; files += Number(r.files) || 0;
-        if (r.bucket === 'audio') audio = b; if (r.bucket === 'images') images = b;
+        if (r.bucket === 'audio') audio = b;
+        if (r.bucket === 'images') images = b;
+        if (r.bucket === 'binaries') binaries = b;
       });
-      setStorage({ bytes: bytes, files: files, audio: audio, images: images });
+      setStorage({ bytes: bytes, files: files, audio: audio, images: images, binaries: binaries });
     }).catch(function () { setStorage({ err: true }); });
   }, []);
   const t = data.tracks, al = data.albums, ap = data.apps, so = data.socials;
@@ -989,7 +1018,7 @@ function OverviewTab({ data, goTab }) {
       <div className="sectionlabel">Úložiště (free ~1 GB)</div>
       <div className="stat" style={{ marginBottom: 20 }}>
         <div className="num">{storage ? (storage.err ? '—' : fmtBytes(storage.bytes)) : '…'}</div>
-        <div className="lbl">{storage && !storage.err ? (storage.files + ' souborů · mp3 ' + fmtBytes(storage.audio) + ' · obrázky ' + fmtBytes(storage.images)) : 'využité místo'}</div>
+        <div className="lbl">{storage && !storage.err ? (storage.files + ' souborů · mp3 ' + fmtBytes(storage.audio) + ' · obrázky ' + fmtBytes(storage.images) + (storage.binaries ? (' · soubory ' + fmtBytes(storage.binaries)) : '')) : 'využité místo'}</div>
         {storage && !storage.err && <div className="bar"><i style={{ width: Math.max(2, pct) + '%' }} /></div>}
         {storage && !storage.err && <div className="sub2" style={{ marginTop: 6 }}>{pct}% z ~1 GB</div>}
       </div>
