@@ -1,6 +1,6 @@
 # Supabase Backend — JendaWeb
 
-*Všech 5 fází hotové a NASAZENÉ (poslední aktualizace 16. 06. 2026, SW `jw-v62`): schéma + RLS + storage + seed + web čte z DB + `/admin` login + plný CRUD/upload. Pozdější přírůstky: `albums.cover_url`, `site_config.strings`, `tracks.plays` + RPC `increment_play` a `storage_usage`. (Plán: `UPLOAD_INTERFACE_PLAN.md` · stav: `PROJECT_STATUS.md`.)*
+*Všech 5 fází hotové a NASAZENÉ (poslední aktualizace 19. 06. 2026, SW `jw-v77`): schéma + RLS + storage + seed + web čte z DB + `/admin` login + plný CRUD/upload. Pozdější přírůstky: `albums.cover_url`, `site_config.strings`, `tracks.plays`, `tracks.likes`, `apps.likes` + RPC `increment_play`, `storage_usage`, `toggle_track_like`, `toggle_app_like`. (Plán: `UPLOAD_INTERFACE_PLAN.md` · stav: `PROJECT_STATUS.md`.)*
 
 ## Projekt
 - **Název:** jendaweb
@@ -19,8 +19,8 @@
 | Tabulka | Klíč | Řádků | Pozn. |
 |---|---|---|---|
 | `albums` | `id` text | 5 | id, title, genre, year, g1, g2, tracks, cs, en, **cover_url**, sort, created_at |
-| `apps` | `id` bigint | 20 | name, platform (`PWA`/`Android`), color, cs, en, link, icon_url, case_study_url, sort |
-| `tracks` | `id` bigint | 15 | title, album_id→albums, duration, audio_url, download_url, lyrics_cs, lyrics_en, **plays** (bigint, počty přehrání), sort (3 mají texty) |
+| `apps` | `id` bigint | 20 | name, platform (`PWA`/`Android`), color, cs, en, link, icon_url, case_study_url, **likes** (bigint, počet lajků), sort |
+| `tracks` | `id` bigint | 15 | title, album_id→albums, duration, audio_url, download_url, lyrics_cs, lyrics_en, **plays** (bigint, počty přehrání), **likes** (bigint, počet lajků), sort (3 mají texty) |
 | `socials` | `id` text | 5 | label, url, sort |
 | `site_config` | `key` text | 10 | value jsonb: contact_email, contact_endpoint, newsletter_endpoint, kofi_username, giscus_config, public_stats, build_log, comparison, case_studies, **strings** (editovatelné UI texty CZ/EN jako override) |
 | `site_strings` | `key` text | 0 | **NEPOUŽÍVÁ se** — editovatelné UI texty se nakonec ukládají do `site_config.strings` (override nad defaulty z `data.js`) |
@@ -42,6 +42,8 @@ Identity sekvence `apps`/`tracks` nastaveny za seed (apps→20, tracks→15), no
 ## Funkce / RPC (Postgres)
 - **`public.increment_play(track_id bigint)`** — `security definer`, `set search_path = public`, grant `anon` + `authenticated`. Zvýší `tracks.plays` o 1 pro dané `id`. Web ji volá **anonymně** (`POST /rest/v1/rpc/increment_play`, anon klíč) při spuštění skladby — jednou na skladbu za návštěvu. Bezpečné: jen inkrementuje počítadlo, RLS obchází řízeně přes definer.
 - **`public.storage_usage()`** — `security definer`, grant **jen `authenticated`**. Sečte velikost objektů v bucketech (z `storage.objects` pro `audio`, `images` a `binaries`) a vrátí řádky `{bucket, bytes, files}`. Admin „Přehled" z toho ukazuje využité úložiště proti ~1 GB free.
+- **`public.toggle_track_like(track_id bigint, is_like boolean)`** — `security definer`, `set search_path = public`, grant `anon` + `authenticated`. Zvýší nebo sníží `tracks.likes` o 1 pro danou skladbu. Volá se anonymně z webu.
+- **`public.toggle_app_like(app_id bigint, is_like boolean)`** — `security definer`, `set search_path = public`, grant `anon` + `authenticated`. Zvýší nebo sníží `apps.likes` o 1 pro danou aplikaci. Volá se anonymně z webu.
 
 ## Pozdější přírůstky (po fázi 5, vše nasazené 15. 06. 2026)
 - **Plný CMS:** `albums.cover_url` (upload obálky) + `site_config.strings` (editovatelné hlavní texty CZ/EN, web je merguje do `window.STRINGS`). `CASE_STUDIES` web staví z `apps.case_study_url`.
@@ -71,3 +73,6 @@ Identity sekvence `apps`/`tracks` nastaveny za seed (apps→20, tracks→15), no
 - **Nahrávání instalačních souborů:** Přidán veřejný (Public) bucket **`binaries`** v Supabase Storage.
 - **Pravidla (RLS) pro binaries:** V SQL Editoru nastaveny politiky pro přístup (veřejné čtení pro všechny přes `select`, zápis/úprava/mazání pro roli `authenticated` přes `insert/update/delete`).
 - **Nahrávání z adminu:** Úspěšně otestováno nahrávání souborů (APK, ZIP atd.) přímo přes `/admin` do cesty `apps/{timestamp}_{name}` v bucketu `binaries`. URL adresa se ukládá do sloupce `apps.link`.
+- **Hlasování (lajkování se srdíčky) pro hudbu a aplikace:**
+  - Vytvořeny sloupce `likes` (bigint DEFAULT 0) v tabulkách `tracks` a `apps`.
+  - Vytvořeny RPC funkce `toggle_track_like` a `toggle_app_like` pro bezpečné zvyšování/snižování počtu lajků na pozadí, obcházející přímé RLS aktualizace.

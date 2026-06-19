@@ -8,6 +8,16 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
 - **Repo:** https://github.com/JendaNDT/JendaWeb — push to `main` → Vercel auto-deploys.
 - **Backend:** Supabase project `jendaweb` (ref `semdgbaearwhkhulkyts`, eu-central-1, free). Frontend uses the public anon/publishable key; writes are protected by RLS (locked to the admin uid). See `SUPABASE_BACKEND.md`.
 
+## Recent updates (19 Jun 2026)
+
+- **Anonymous Likes/Voting System:** Integrated heart buttons for both apps and music tracks, with like counts stored in the database.
+  - **Supabase Backend:** Created new integer columns `likes` for `apps` and `tracks` tables, and safe PL/pgSQL RPC functions `toggle_track_like` and `toggle_app_like` to handle atomic increments/decrements.
+  - **Storage & Double-Voting Protection:** Client-side states are tracked via `localStorage` arrays (`jw_liked_tracks` and `jw_liked_apps`) to prevent double-voting from the same browser.
+  - **Interactive Hearts:** Hearts added in the main track listings (`TrackRow`), `AppDetailModal`, mini player (`AudioPlayer`), and full-screen visualizer (`ExpandMode`), with active states and counts synced in real-time across the app using custom events (`jw-track-like-toggled`).
+  - **CMS Dashboard Stats:** Overview tab in `/admin` displays total track likes, top-liked track, total app likes, and top-liked app. Track and App lists now display like counts inside their description rows (e.g. `· ❤️ 12`).
+- **Deník Buildu Stats Correction:** Corrected `appsCount` calculation inside `StatsSection` (in `extras.jsx`) to filter out apps without active runnable links (`x.link && x.link !== '#'` instead of total database count). This fixes the incorrect listing of 21 apps running when most are static concepts or case studies.
+- **SW is now `jw-v77`.** Matches SW version in `index.html`.
+
 ## Recent updates (16 Jun 2026)
 
 - **Full-screen player visualization (`GeoViz`):** New canvas component in `player-expand.jsx`, behind the expanded "now playing" content — a morphing geometric figure of dots + links (4 layers, ~3–6-fold symmetry) in theme colors (`--a1/--a2`), centered on the cover (`#jw-expand-cover`) and filling the screen. **Desktop:** reacts to the real spectrum via the shared `window.__jwAnalyser` (bass bloom, treble speeds rotation, beat → flash + ring, per-node frequency bin). **Mobile (no FFT, direct `<audio>`):** smooth time-driven motion (lives but doesn't read real frequencies, by design — see jw-v39). Respects `prefers-reduced-motion`, pauses on hidden tab. Always-on ambient layer, separate from the small `V` waveform. Shipped `jw-v61`.
@@ -51,7 +61,7 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 - **GitHub:** `JendaNDT/JendaWeb`, branch `main`.
 - **Vercel:** connected to the repo. **Push to `main` auto-deploys.** Framework preset "Other" (pure static, no build).
 - The site assumes deployment at the **domain root** — `sw.js` and the manifest use absolute paths (`/...`). A subpath deploy would need path tweaks.
-- After changing any cached asset, **bump `VERSION` in both `sw.js` and `index.html`** (currently `jw-v62`) so clients pick up new content. (`index.html` loads `combined.jsx?v=<VERSION>`, so the two must stay in sync.)
+- After changing any cached asset, **bump `VERSION` in both `sw.js` and `index.html`** (currently `jw-v77`) so clients pick up new content. (`index.html` loads `combined.jsx?v=<VERSION>`, so the two must stay in sync.)
 - `/admin` is routed via `vercel.json` (rewrite `/admin` → `/admin.html`) and served **online-only** (SW bypasses cache for it) with `Cache-Control: no-store` headers so it's never stale.
 - **Pushing from the sandbox:** the mounted working copy's `.git` can't take git writes (lock files), so deploys go via a fresh `git clone` in `/tmp`, copy the changed files in, commit, and `git push https://<token>@github.com/JendaNDT/JendaWeb.git HEAD:main`. Token is provided per-session (in `Token/`, gitignored), never stored. Verify the deploy actually landed (Vercel occasionally misses the webhook) and that no caches serve stale files.
 
@@ -81,7 +91,7 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 │   ├── fonts.css           # @font-face for self-hosted fonts
 │   └── fonts/              # Syne + DM Sans (woff2/woff, latin + latin-ext subset)
 ├── icons/                  # PNG app icons 180/192/512 (iOS apple-touch + maskable)
-├── sw.js                   # Service worker (jw-v62; precache shell + latin-ext fonts, network-first HTML, /admin online-only)
+├── sw.js                   # Service worker (jw-v77; precache shell + latin-ext fonts, network-first HTML, /admin online-only)
 ├── manifest.webmanifest    # PWA manifest (icons point to icons/*.png)
 ├── og-image.svg            # 1200×630 social card
 ├── robots.txt · sitemap.xml · feed.xml · 404.html · embed.html
@@ -115,7 +125,7 @@ To optimize mobile performance (bypassing the heavy 3.1 MB Babel Standalone comp
 - **Script Loading in `index.html`:**
   React, React-DOM, `data.js` and `supabase-data.js` are loaded in `<head>` using the `defer` attribute.
   At the end of `<body>`, a custom caching loader runs inside a `DOMContentLoaded` event listener:
-  1. It checks if `localStorage` contains compiled scripts for the current version tag (`jw-v62`; `VERSION` is defined in **both** `sw.js` and `index.html` and the two must match).
+  1. It checks if `localStorage` contains compiled scripts for the current version tag (`jw-v77`; `VERSION` is defined in **both** `sw.js` and `index.html` and the two must match).
   2. **Cache Hit:** Executes the compiled JS directly from `localStorage`, cutting Babel compile time to 0 ms.
   3. **Cache Miss / Version Mismatch:** Clears old cache keys, dynamically appends `<script src="vendor/babel.min.js">`, fetches **`combined.jsx?v=<VERSION>`** (version in the URL so a stale SW cache can't serve old content for a new version), transpiles it in-browser, saves the compiled output to `localStorage`, and executes it.
 
@@ -149,6 +159,8 @@ To avoid Babel scope collisions each file destructures with unique names: `const
 | `jw_plays`         | { trackId: count } — per-browser stats (global counts now live in `tracks.plays`) |
 | `jw_content_v1`    | cached Supabase content (set by `supabase-data.js`) |
 | `jw_admin_session` | admin auth session (only on `/admin`)   |
+| `jw_liked_tracks`  | array of liked track IDs                |
+| `jw_liked_apps`    | array of liked app IDs                  |
 
 ## URL hash routing
 
