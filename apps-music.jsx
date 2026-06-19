@@ -224,6 +224,21 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
   const caseStudyUrl = window.CASE_STUDIES?.[app.id] || app.case_study_url;
   const isDownload = app.link && (app.link.includes('/storage/v1/object/public/binaries/') || /\.(apk|zip|dmg|exe|tar\.gz|ipa|pkg)(?:\?.*)?$/i.test(app.link));
   
+  const [liked, setLiked] = __useS(() => window.isItemLiked(window.LIKES_APPS_KEY, app.id));
+  const [likeCount, setLikeCount] = __useS(app.likes || 0);
+
+  const handleLike = (e) => {
+    e.stopPropagation();
+    const nextLiked = window.toggleLikedItem(window.LIKES_APPS_KEY, app.id);
+    setLiked(nextLiked);
+    setLikeCount(prev => Math.max(0, prev + (nextLiked ? 1 : -1)));
+    window.apiToggleLike('app', app.id, nextLiked);
+    const globalApp = (window.APPS_DATA || []).find(a => a.id === app.id);
+    if (globalApp) {
+      globalApp.likes = Math.max(0, (globalApp.likes || 0) + (nextLiked ? 1 : -1));
+    }
+  };
+
   __useE(() => {
     const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handleEsc);
@@ -368,6 +383,32 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
             </button>
           )}
 
+          <button onClick={handleLike} style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            padding: '0 16px', height: 44, borderRadius: 10,
+            background: liked ? 'color-mix(in srgb, var(--a1) 14%, transparent)' : 'transparent',
+            color: liked ? 'var(--a1)' : 'var(--muted)',
+            border: `1px solid ${liked ? 'var(--a1)' : 'var(--border)'}`,
+            fontSize: 14, fontWeight: 600, transition: 'all 0.2s', cursor: 'pointer', outline: 'none'
+          }} title={lang === 'cs' ? 'Líbí se mi' : 'Like'}
+             onMouseEnter={(e) => {
+               if (!liked) {
+                 e.currentTarget.style.color = 'var(--text)';
+                 e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+               }
+             }}
+             onMouseLeave={(e) => {
+               if (!liked) {
+                 e.currentTarget.style.color = 'var(--muted)';
+                 e.currentTarget.style.background = 'transparent';
+               }
+             }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'transform 0.2s', transform: liked ? 'scale(1.15)' : 'none' }}>
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <span>{likeCount}</span>
+          </button>
+
           <button onClick={(e) => { e.stopPropagation(); onShare(); }} style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             width: 44, height: 44, borderRadius: 10,
@@ -448,6 +489,38 @@ function AlbumCard({ album, lang, onPlay, onFilter, selected, nowPlaying }) {
 
 function TrackRow({ track, album, idx, active, playing, onPlay }) {
   const [hov, setHov] = __useS(false);
+  const [liked, setLiked] = __useS(() => window.isItemLiked(window.LIKES_TRACKS_KEY, track.id));
+  const [likeCount, setLikeCount] = __useS(track.likes || 0);
+
+  __useE(() => {
+    setLiked(window.isItemLiked(window.LIKES_TRACKS_KEY, track.id));
+    setLikeCount(track.likes || 0);
+  }, [track.id, track.likes]);
+
+  __useE(() => {
+    const handleSync = (e) => {
+      if (e.detail && e.detail.trackId === track.id) {
+        setLiked(e.detail.liked);
+        setLikeCount(e.detail.likes);
+      }
+    };
+    window.addEventListener('jw-track-like-toggled', handleSync);
+    return () => window.removeEventListener('jw-track-like-toggled', handleSync);
+  }, [track.id]);
+
+  const handleLike = (e) => {
+    e.stopPropagation();
+    const nextLiked = window.toggleLikedItem(window.LIKES_TRACKS_KEY, track.id);
+    setLiked(nextLiked);
+    setLikeCount(prev => Math.max(0, prev + (nextLiked ? 1 : -1)));
+    window.apiToggleLike('track', track.id, nextLiked);
+    const globalTrack = (window.TRACKS_DATA || []).find(t => t.id === track.id);
+    if (globalTrack) {
+      globalTrack.likes = Math.max(0, (globalTrack.likes || 0) + (nextLiked ? 1 : -1));
+    }
+    try { window.dispatchEvent(new CustomEvent('jw-track-like-toggled', { detail: { trackId: track.id, liked: nextLiked, likes: globalTrack?.likes || 0 } })); } catch (e) {}
+  };
+
   return (
     <div style={{
       display:'flex', alignItems:'center', gap:14,
@@ -472,6 +545,20 @@ function TrackRow({ track, album, idx, active, playing, onPlay }) {
             <span style={{ fontSize:8 }}>▶</span>{track.plays >= 1000 ? (track.plays/1000).toFixed(1).replace('.0','')+'k' : track.plays}
           </span>
         )}
+        <button onClick={handleLike} style={{
+          background: 'none', border: 'none',
+          color: liked ? 'var(--a1)' : 'var(--muted)',
+          opacity: liked ? 1 : 0.6,
+          display: 'flex', alignItems: 'center', gap: 4,
+          cursor: 'pointer', padding: '4px 6px', borderRadius: 6,
+          fontSize: 12, transition: 'all 0.15s', outline: 'none'
+        }} onMouseEnter={(e) => { if (!liked) e.currentTarget.style.color = 'var(--text)'; }}
+           onMouseLeave={(e) => { if (!liked) e.currentTarget.style.color = 'var(--muted)'; }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2.5" style={{ transition: 'transform 0.15s', transform: liked ? 'scale(1.2)' : 'none' }}>
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          {likeCount > 0 && <span style={{ fontVariantNumeric: 'tabular-nums' }}>{likeCount}</span>}
+        </button>
         {track.downloadUrl && (
           <a href={track.downloadUrl} onClick={e => e.stopPropagation()} aria-label="Download" style={{ color:'var(--muted)', opacity:0.6, display:'flex' }}><DlIco /></a>
         )}

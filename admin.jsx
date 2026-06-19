@@ -891,7 +891,7 @@ function TracksTab({ data, reload, notify }) {
     <ItemRow key={t.id} drag={filtered ? null : drag}
       leading={t.audio_url ? <PlayBtn url={t.audio_url} /> : null}
       title={t.title}
-      sub={(albMap[t.album_id] || '—') + (t.duration ? ' · ' + t.duration : '')}
+      sub={(albMap[t.album_id] || '—') + (t.duration ? ' · ' + t.duration : '') + (t.likes ? ' · ❤️ ' + t.likes : '')}
       badge={!t.audio_url ? <span className="badge warn">bez audia</span> : null}
       webUrl={SITE + '/#track=' + t.id}
       onEdit={() => setEdit(t)} onDelete={() => del(t)} />
@@ -968,7 +968,7 @@ function AppsTab({ data, reload, notify }) {
   const filtered = onlyNoLink || !!qq;
   const row = (a, i, drag) => (
     <ItemRow key={a.id} drag={filtered ? null : drag}
-      title={a.name} sub={a.platform + (a.link && a.link !== '#' ? ' · ' + a.link : '')}
+      title={a.name} sub={a.platform + (a.link && a.link !== '#' ? ' · ' + a.link : '') + (a.likes ? ' · ❤️ ' + a.likes : '')}
       swatch={a.color}
       badge={noLink(a) ? <span className="badge warn">chybí odkaz</span> : null}
       webUrl={(a.link && a.link !== '#') ? a.link : SITE}
@@ -1082,10 +1082,14 @@ function OverviewTab({ data, goTab }) {
   const withLyrics = t.filter(function (x) { return x.lyrics_cs || x.lyrics_en; }).length;
   const totalPlays = t.reduce(function (s, x) { return s + (Number(x.plays) || 0); }, 0);
   const topTrack = t.reduce(function (best, x) { return (Number(x.plays) || 0) > (Number(best && best.plays) || 0) ? x : best; }, null);
+  const totalTrackLikes = t.reduce(function (s, x) { return s + (Number(x.likes) || 0); }, 0);
+  const topLikedTrack = t.reduce(function (best, x) { return (Number(x.likes) || 0) > (Number(best && best.likes) || 0) ? x : best; }, null);
   const pwa = ap.filter(function (x) { return x.platform === 'PWA'; }).length;
   const android = ap.length - pwa;
   const appNoLink = ap.filter(function (x) { return !x.link || x.link === '#'; }).length;
   const socNoLink = so.filter(function (x) { return !x.url || x.url === '#'; }).length;
+  const totalAppLikes = ap.reduce(function (s, x) { return s + (Number(x.likes) || 0); }, 0);
+  const topLikedApp = ap.reduce(function (best, x) { return (Number(x.likes) || 0) > (Number(best && best.likes) || 0) ? x : best; }, null);
   const FREE = 1024 * 1048576;
   const pct = storage && !storage.err ? Math.min(100, Math.round(storage.bytes / FREE * 100)) : 0;
   return (
@@ -1097,12 +1101,14 @@ function OverviewTab({ data, goTab }) {
         <StatCard num={al.length} lbl="alb" />
         <StatCard num={withLyrics} lbl="skladeb s textem" />
         <StatCard num={totalPlays.toLocaleString('cs')} lbl="přehrání celkem" sub={topTrack && totalPlays > 0 ? ('nejvíc: ' + topTrack.title + ' (' + topTrack.plays + '×)') : 'zatím žádná'} />
+        <StatCard num={totalTrackLikes.toLocaleString('cs')} lbl="lajků celkem" sub={topLikedTrack && totalTrackLikes > 0 ? ('nejvíc: ' + topLikedTrack.title + ' (' + topLikedTrack.likes + '❤️)') : 'zatím žádné'} />
       </div>
       <div className="sectionlabel">Aplikace & sítě</div>
       <div className="statgrid">
         <StatCard num={ap.length} lbl="aplikací" sub={pwa + '× PWA · ' + android + '× Android'} />
         <StatCard num={ap.length - appNoLink} lbl="appek s odkazem" sub={appNoLink ? (appNoLink + ' bez odkazu') : 'všechny s odkazem'} />
         <StatCard num={so.length} lbl="sociálních sítí" sub={socNoLink ? (socNoLink + ' bez odkazu') : 'všechny s odkazem'} />
+        <StatCard num={totalAppLikes.toLocaleString('cs')} lbl="lajků celkem" sub={topLikedApp && totalAppLikes > 0 ? ('nejvíc: ' + topLikedApp.name + ' (' + topLikedApp.likes + '❤️)') : 'zatím žádné'} />
       </div>
       <div className="sectionlabel">Úložiště (free ~1 GB)</div>
       <div className="stat" style={{ marginBottom: 20 }}>

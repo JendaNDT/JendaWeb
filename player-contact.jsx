@@ -45,6 +45,40 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
   const albums = window.ALBUMS || [];
   const album = albums.find(a => a.id === track?.album);
 
+  const [liked, setLiked] = __useS_pc(() => track ? window.isItemLiked(window.LIKES_TRACKS_KEY, track.id) : false);
+  const [likeCount, setLikeCount] = __useS_pc(() => track ? (track.likes || 0) : 0);
+
+  __useE_pc(() => {
+    if (!track) return;
+    setLiked(window.isItemLiked(window.LIKES_TRACKS_KEY, track.id));
+    setLikeCount(track.likes || 0);
+  }, [track?.id]);
+
+  __useE_pc(() => {
+    const handleSync = (e) => {
+      if (track && e.detail && e.detail.trackId === track.id) {
+        setLiked(e.detail.liked);
+        setLikeCount(e.detail.likes);
+      }
+    };
+    window.addEventListener('jw-track-like-toggled', handleSync);
+    return () => window.removeEventListener('jw-track-like-toggled', handleSync);
+  }, [track?.id]);
+
+  const handleLike = (e) => {
+    if (!track) return;
+    e.stopPropagation();
+    const nextLiked = window.toggleLikedItem(window.LIKES_TRACKS_KEY, track.id);
+    setLiked(nextLiked);
+    setLikeCount(prev => Math.max(0, prev + (nextLiked ? 1 : -1)));
+    window.apiToggleLike('track', track.id, nextLiked);
+    const globalTrack = (window.TRACKS_DATA || []).find(t => t.id === track.id);
+    if (globalTrack) {
+      globalTrack.likes = Math.max(0, (globalTrack.likes || 0) + (nextLiked ? 1 : -1));
+    }
+    try { window.dispatchEvent(new CustomEvent('jw-track-like-toggled', { detail: { trackId: track.id, liked: nextLiked, likes: globalTrack?.likes || 0 } })); } catch (err) {}
+  };
+
   const bars = __useM_pc(() => seededBars(track?.id || 1), [track?.id]);
   const progress = duration > 0 ? currentTime / duration : 0;
 
@@ -352,15 +386,34 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
       display:'grid', gridTemplateColumns:'1fr auto 1fr', alignItems:'center', gap:20,
       animation:'slideUp 0.35s ease',
     }}>
-      <div className="player-info" onClick={() => setExpanded(true)} style={{ display:'flex', alignItems:'center', gap:12, minWidth:0, cursor:'pointer' }} role="button" tabIndex={0} aria-label={`${track ? `${track.title} - ${album?.title || ''}. ` : ''}Expand player (E)`} title="Expand (E)"
-        onKeyDown={(e) => { if (e.key === 'Enter') setExpanded(true); }}>
-        <div className={restoring ? 'shimmer-fx' : ''} style={{ position:'relative', width:42, height:42, borderRadius:8, flexShrink:0, overflow:'hidden', backgroundImage: track ? `url("${trackArt(track, album)}")` : '', backgroundSize:'cover', display:'flex', alignItems:'center', justifyContent:'center' }}>
-          {isPlaying && <EqBars color="#fff" />}
+      <div style={{ display:'flex', alignItems:'center', gap:14, minWidth:0 }}>
+        <div className="player-info" onClick={() => setExpanded(true)} style={{ display:'flex', alignItems:'center', gap:12, minWidth:0, cursor:'pointer' }} role="button" tabIndex={0} aria-label={`${track ? `${track.title} - ${album?.title || ''}. ` : ''}Expand player (E)`} title="Expand (E)"
+          onKeyDown={(e) => { if (e.key === 'Enter') setExpanded(true); }}>
+          <div className={restoring ? 'shimmer-fx' : ''} style={{ position:'relative', width:42, height:42, borderRadius:8, flexShrink:0, overflow:'hidden', backgroundImage: track ? `url("${trackArt(track, album)}")` : '', backgroundSize:'cover', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            {isPlaying && <EqBars color="#fff" />}
+          </div>
+          <div style={{ minWidth:0 }}>
+            <div style={{ fontSize:14, fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{track?.title}</div>
+            <div style={{ fontSize:12, color:'var(--muted)' }}>{album?.title || ''}</div>
+          </div>
         </div>
-        <div style={{ minWidth:0 }}>
-          <div style={{ fontSize:14, fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{track?.title}</div>
-          <div style={{ fontSize:12, color:'var(--muted)' }}>{album?.title || ''}</div>
-        </div>
+        {track && (
+          <button onClick={handleLike} style={{
+            background: 'none', border: 'none',
+            color: liked ? 'var(--a1)' : 'var(--muted)',
+            opacity: liked ? 1 : 0.6,
+            display: 'flex', alignItems: 'center', gap: 4,
+            cursor: 'pointer', padding: '6px 8px', borderRadius: 8,
+            fontSize: 13, transition: 'all 0.15s', outline: 'none', flexShrink: 0
+          }} title={lang === 'cs' ? 'Líbí se mi' : 'Like'}
+             onMouseEnter={(e) => { if (!liked) e.currentTarget.style.color = 'var(--text)'; }}
+             onMouseLeave={(e) => { if (!liked) e.currentTarget.style.color = 'var(--muted)'; }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" style={{ transition: 'transform 0.15s', transform: liked ? 'scale(1.2)' : 'none' }}>
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            {likeCount > 0 && <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{likeCount}</span>}
+          </button>
+        )}
       </div>
 
       <div className="player-controls" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
@@ -474,6 +527,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
     {expanded && (
       <ExpandMode
         track={track} album={album}
+        liked={liked} likeCount={likeCount} onLike={handleLike}
         currentTime={currentTime} duration={duration} progress={progress}
         bars={bars} fft={fft}
         seekFromEvent={seekFromEvent} onSeekTo={seekTo}

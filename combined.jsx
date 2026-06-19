@@ -610,6 +610,47 @@ const slugify = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[
 // ── Storage keys ────────────────────────────────────────────────────────
 const PLAYER_STORAGE_KEY = 'jw_player_state';
 const VOL_STORAGE_KEY    = 'jw_player_volume';
+const LIKES_TRACKS_KEY   = 'jw_liked_tracks';
+const LIKES_APPS_KEY     = 'jw_liked_apps';
+
+const getLikedItems = (key) => {
+  try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) { return []; }
+};
+
+const isItemLiked = (key, id) => getLikedItems(key).includes(id);
+
+const toggleLikedItem = (key, id) => {
+  try {
+    const list = getLikedItems(key);
+    const idx = list.indexOf(id);
+    const isLike = idx === -1;
+    let next;
+    if (isLike) next = list.concat(id);
+    else next = list.filter(x => x !== id);
+    localStorage.setItem(key, JSON.stringify(next));
+    return isLike;
+  } catch (e) { return false; }
+};
+
+const apiToggleLike = async (type, id, isLike) => {
+  const supa = window.__jwSupa;
+  if (!supa) return;
+  const functionName = type === 'track' ? 'toggle_track_like' : 'toggle_app_like';
+  const argName = type === 'track' ? 'track_id' : 'app_id';
+  try {
+    await fetch(`${supa.url}/rest/v1/rpc/${functionName}`, {
+      method: 'POST',
+      headers: {
+        'apikey': supa.key,
+        'Authorization': `Bearer ${supa.key}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ [argName]: id, is_like: isLike })
+    });
+  } catch (e) {
+    console.error('[jw] Like failed:', e);
+  }
+};
 
 // ── useInView ───────────────────────────────────────────────────────────
 function useInView() {
@@ -867,6 +908,8 @@ function SectionDivider() {
 Object.assign(window, {
   THEMES, applyTheme, resolveMode, applyMode, tx,
   PLAYER_STORAGE_KEY, VOL_STORAGE_KEY,
+  LIKES_TRACKS_KEY, LIKES_APPS_KEY,
+  getLikedItems, isItemLiked, toggleLikedItem, apiToggleLike,
   useInView,
   PlayIco, PauseIco, NextIco, PrevIco, DlIco, CloseIco, VolIco, MuteIco,
   ShuffleIco, RepeatIco, RepeatOneIco, ShareIco, SearchIco,
@@ -1490,6 +1533,21 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
   const caseStudyUrl = window.CASE_STUDIES?.[app.id] || app.case_study_url;
   const isDownload = app.link && (app.link.includes('/storage/v1/object/public/binaries/') || /\.(apk|zip|dmg|exe|tar\.gz|ipa|pkg)(?:\?.*)?$/i.test(app.link));
   
+  const [liked, setLiked] = __useS(() => window.isItemLiked(window.LIKES_APPS_KEY, app.id));
+  const [likeCount, setLikeCount] = __useS(app.likes || 0);
+
+  const handleLike = (e) => {
+    e.stopPropagation();
+    const nextLiked = window.toggleLikedItem(window.LIKES_APPS_KEY, app.id);
+    setLiked(nextLiked);
+    setLikeCount(prev => Math.max(0, prev + (nextLiked ? 1 : -1)));
+    window.apiToggleLike('app', app.id, nextLiked);
+    const globalApp = (window.APPS_DATA || []).find(a => a.id === app.id);
+    if (globalApp) {
+      globalApp.likes = Math.max(0, (globalApp.likes || 0) + (nextLiked ? 1 : -1));
+    }
+  };
+
   __useE(() => {
     const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handleEsc);
@@ -1634,6 +1692,32 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
             </button>
           )}
 
+          <button onClick={handleLike} style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            padding: '0 16px', height: 44, borderRadius: 10,
+            background: liked ? 'color-mix(in srgb, var(--a1) 14%, transparent)' : 'transparent',
+            color: liked ? 'var(--a1)' : 'var(--muted)',
+            border: `1px solid ${liked ? 'var(--a1)' : 'var(--border)'}`,
+            fontSize: 14, fontWeight: 600, transition: 'all 0.2s', cursor: 'pointer', outline: 'none'
+          }} title={lang === 'cs' ? 'Líbí se mi' : 'Like'}
+             onMouseEnter={(e) => {
+               if (!liked) {
+                 e.currentTarget.style.color = 'var(--text)';
+                 e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+               }
+             }}
+             onMouseLeave={(e) => {
+               if (!liked) {
+                 e.currentTarget.style.color = 'var(--muted)';
+                 e.currentTarget.style.background = 'transparent';
+               }
+             }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'transform 0.2s', transform: liked ? 'scale(1.15)' : 'none' }}>
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <span>{likeCount}</span>
+          </button>
+
           <button onClick={(e) => { e.stopPropagation(); onShare(); }} style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             width: 44, height: 44, borderRadius: 10,
@@ -1714,6 +1798,38 @@ function AlbumCard({ album, lang, onPlay, onFilter, selected, nowPlaying }) {
 
 function TrackRow({ track, album, idx, active, playing, onPlay }) {
   const [hov, setHov] = __useS(false);
+  const [liked, setLiked] = __useS(() => window.isItemLiked(window.LIKES_TRACKS_KEY, track.id));
+  const [likeCount, setLikeCount] = __useS(track.likes || 0);
+
+  __useE(() => {
+    setLiked(window.isItemLiked(window.LIKES_TRACKS_KEY, track.id));
+    setLikeCount(track.likes || 0);
+  }, [track.id, track.likes]);
+
+  __useE(() => {
+    const handleSync = (e) => {
+      if (e.detail && e.detail.trackId === track.id) {
+        setLiked(e.detail.liked);
+        setLikeCount(e.detail.likes);
+      }
+    };
+    window.addEventListener('jw-track-like-toggled', handleSync);
+    return () => window.removeEventListener('jw-track-like-toggled', handleSync);
+  }, [track.id]);
+
+  const handleLike = (e) => {
+    e.stopPropagation();
+    const nextLiked = window.toggleLikedItem(window.LIKES_TRACKS_KEY, track.id);
+    setLiked(nextLiked);
+    setLikeCount(prev => Math.max(0, prev + (nextLiked ? 1 : -1)));
+    window.apiToggleLike('track', track.id, nextLiked);
+    const globalTrack = (window.TRACKS_DATA || []).find(t => t.id === track.id);
+    if (globalTrack) {
+      globalTrack.likes = Math.max(0, (globalTrack.likes || 0) + (nextLiked ? 1 : -1));
+    }
+    try { window.dispatchEvent(new CustomEvent('jw-track-like-toggled', { detail: { trackId: track.id, liked: nextLiked, likes: globalTrack?.likes || 0 } })); } catch (e) {}
+  };
+
   return (
     <div style={{
       display:'flex', alignItems:'center', gap:14,
@@ -1738,6 +1854,20 @@ function TrackRow({ track, album, idx, active, playing, onPlay }) {
             <span style={{ fontSize:8 }}>▶</span>{track.plays >= 1000 ? (track.plays/1000).toFixed(1).replace('.0','')+'k' : track.plays}
           </span>
         )}
+        <button onClick={handleLike} style={{
+          background: 'none', border: 'none',
+          color: liked ? 'var(--a1)' : 'var(--muted)',
+          opacity: liked ? 1 : 0.6,
+          display: 'flex', alignItems: 'center', gap: 4,
+          cursor: 'pointer', padding: '4px 6px', borderRadius: 6,
+          fontSize: 12, transition: 'all 0.15s', outline: 'none'
+        }} onMouseEnter={(e) => { if (!liked) e.currentTarget.style.color = 'var(--text)'; }}
+           onMouseLeave={(e) => { if (!liked) e.currentTarget.style.color = 'var(--muted)'; }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2.5" style={{ transition: 'transform 0.15s', transform: liked ? 'scale(1.2)' : 'none' }}>
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          {likeCount > 0 && <span style={{ fontVariantNumeric: 'tabular-nums' }}>{likeCount}</span>}
+        </button>
         {track.downloadUrl && (
           <a href={track.downloadUrl} onClick={e => e.stopPropagation()} aria-label="Download" style={{ color:'var(--muted)', opacity:0.6, display:'flex' }}><DlIco /></a>
         )}
@@ -1878,6 +2008,40 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
   const restoredRef = __useR_pc(false);
   const albums = window.ALBUMS || [];
   const album = albums.find(a => a.id === track?.album);
+
+  const [liked, setLiked] = __useS_pc(() => track ? window.isItemLiked(window.LIKES_TRACKS_KEY, track.id) : false);
+  const [likeCount, setLikeCount] = __useS_pc(() => track ? (track.likes || 0) : 0);
+
+  __useE_pc(() => {
+    if (!track) return;
+    setLiked(window.isItemLiked(window.LIKES_TRACKS_KEY, track.id));
+    setLikeCount(track.likes || 0);
+  }, [track?.id]);
+
+  __useE_pc(() => {
+    const handleSync = (e) => {
+      if (track && e.detail && e.detail.trackId === track.id) {
+        setLiked(e.detail.liked);
+        setLikeCount(e.detail.likes);
+      }
+    };
+    window.addEventListener('jw-track-like-toggled', handleSync);
+    return () => window.removeEventListener('jw-track-like-toggled', handleSync);
+  }, [track?.id]);
+
+  const handleLike = (e) => {
+    if (!track) return;
+    e.stopPropagation();
+    const nextLiked = window.toggleLikedItem(window.LIKES_TRACKS_KEY, track.id);
+    setLiked(nextLiked);
+    setLikeCount(prev => Math.max(0, prev + (nextLiked ? 1 : -1)));
+    window.apiToggleLike('track', track.id, nextLiked);
+    const globalTrack = (window.TRACKS_DATA || []).find(t => t.id === track.id);
+    if (globalTrack) {
+      globalTrack.likes = Math.max(0, (globalTrack.likes || 0) + (nextLiked ? 1 : -1));
+    }
+    try { window.dispatchEvent(new CustomEvent('jw-track-like-toggled', { detail: { trackId: track.id, liked: nextLiked, likes: globalTrack?.likes || 0 } })); } catch (err) {}
+  };
 
   const bars = __useM_pc(() => seededBars(track?.id || 1), [track?.id]);
   const progress = duration > 0 ? currentTime / duration : 0;
@@ -2186,15 +2350,34 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
       display:'grid', gridTemplateColumns:'1fr auto 1fr', alignItems:'center', gap:20,
       animation:'slideUp 0.35s ease',
     }}>
-      <div className="player-info" onClick={() => setExpanded(true)} style={{ display:'flex', alignItems:'center', gap:12, minWidth:0, cursor:'pointer' }} role="button" tabIndex={0} aria-label={`${track ? `${track.title} - ${album?.title || ''}. ` : ''}Expand player (E)`} title="Expand (E)"
-        onKeyDown={(e) => { if (e.key === 'Enter') setExpanded(true); }}>
-        <div className={restoring ? 'shimmer-fx' : ''} style={{ position:'relative', width:42, height:42, borderRadius:8, flexShrink:0, overflow:'hidden', backgroundImage: track ? `url("${trackArt(track, album)}")` : '', backgroundSize:'cover', display:'flex', alignItems:'center', justifyContent:'center' }}>
-          {isPlaying && <EqBars color="#fff" />}
+      <div style={{ display:'flex', alignItems:'center', gap:14, minWidth:0 }}>
+        <div className="player-info" onClick={() => setExpanded(true)} style={{ display:'flex', alignItems:'center', gap:12, minWidth:0, cursor:'pointer' }} role="button" tabIndex={0} aria-label={`${track ? `${track.title} - ${album?.title || ''}. ` : ''}Expand player (E)`} title="Expand (E)"
+          onKeyDown={(e) => { if (e.key === 'Enter') setExpanded(true); }}>
+          <div className={restoring ? 'shimmer-fx' : ''} style={{ position:'relative', width:42, height:42, borderRadius:8, flexShrink:0, overflow:'hidden', backgroundImage: track ? `url("${trackArt(track, album)}")` : '', backgroundSize:'cover', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            {isPlaying && <EqBars color="#fff" />}
+          </div>
+          <div style={{ minWidth:0 }}>
+            <div style={{ fontSize:14, fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{track?.title}</div>
+            <div style={{ fontSize:12, color:'var(--muted)' }}>{album?.title || ''}</div>
+          </div>
         </div>
-        <div style={{ minWidth:0 }}>
-          <div style={{ fontSize:14, fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{track?.title}</div>
-          <div style={{ fontSize:12, color:'var(--muted)' }}>{album?.title || ''}</div>
-        </div>
+        {track && (
+          <button onClick={handleLike} style={{
+            background: 'none', border: 'none',
+            color: liked ? 'var(--a1)' : 'var(--muted)',
+            opacity: liked ? 1 : 0.6,
+            display: 'flex', alignItems: 'center', gap: 4,
+            cursor: 'pointer', padding: '6px 8px', borderRadius: 8,
+            fontSize: 13, transition: 'all 0.15s', outline: 'none', flexShrink: 0
+          }} title={lang === 'cs' ? 'Líbí se mi' : 'Like'}
+             onMouseEnter={(e) => { if (!liked) e.currentTarget.style.color = 'var(--text)'; }}
+             onMouseLeave={(e) => { if (!liked) e.currentTarget.style.color = 'var(--muted)'; }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" style={{ transition: 'transform 0.15s', transform: liked ? 'scale(1.2)' : 'none' }}>
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            {likeCount > 0 && <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{likeCount}</span>}
+          </button>
+        )}
       </div>
 
       <div className="player-controls" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
@@ -2308,6 +2491,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
     {expanded && (
       <ExpandMode
         track={track} album={album}
+        liked={liked} likeCount={likeCount} onLike={handleLike}
         currentTime={currentTime} duration={duration} progress={progress}
         bars={bars} fft={fft}
         seekFromEvent={seekFromEvent} onSeekTo={seekTo}
@@ -2742,6 +2926,7 @@ function GeoViz({ analyser, isPlaying }) {
 
 function ExpandMode({
   track, album,
+  liked, likeCount, onLike,
   currentTime, duration, progress, bars, fft, seekFromEvent, onSeekTo, hovBar, setHovBar,
   isPlaying, setIsPlaying, onPrev, onNext, onClose,
   shuffle, setShuffle, repeat, setRepeat,
@@ -3010,8 +3195,22 @@ function ExpandMode({
             fontWeight:800, letterSpacing:'-0.03em', lineHeight:1.05,
             marginBottom:8, textWrap:'balance',
           }}>{track.title}</h2>
-          <div style={{ fontSize:'clamp(14px, 2vw, 17px)', color:'rgba(255,255,255,0.72)' }}>
-            {album?.title}{album?.year && ` · ${album.year}`}
+          <div style={{ fontSize:'clamp(14px, 2vw, 17px)', color:'rgba(255,255,255,0.72)', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
+            <span>{album?.title}{album?.year && ` · ${album.year}`}</span>
+            <button onClick={onLike} style={{
+              background: 'none', border: 'none',
+              color: liked ? 'var(--a1)' : 'rgba(255,255,255,0.6)',
+              display: 'flex', alignItems: 'center', gap: 4,
+              cursor: 'pointer', padding: '4px 8px', borderRadius: 8,
+              fontSize: 13, transition: 'all 0.15s', outline: 'none'
+            }} title={lang === 'cs' ? 'Líbí se mi' : 'Like'}
+               onMouseEnter={(e) => { if (!liked) e.currentTarget.style.color = '#fff'; }}
+               onMouseLeave={(e) => { if (!liked) e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" style={{ transition: 'transform 0.15s', transform: liked ? 'scale(1.2)' : 'none' }}>
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              {likeCount > 0 && <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{likeCount}</span>}
+            </button>
           </div>
         </div>
 

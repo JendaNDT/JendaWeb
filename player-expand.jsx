@@ -154,6 +154,7 @@ function GeoViz({ analyser, isPlaying }) {
 
 function ExpandMode({
   track, album,
+  liked, likeCount, onLike,
   currentTime, duration, progress, bars, fft, seekFromEvent, onSeekTo, hovBar, setHovBar,
   isPlaying, setIsPlaying, onPrev, onNext, onClose,
   shuffle, setShuffle, repeat, setRepeat,
@@ -422,8 +423,22 @@ function ExpandMode({
             fontWeight:800, letterSpacing:'-0.03em', lineHeight:1.05,
             marginBottom:8, textWrap:'balance',
           }}>{track.title}</h2>
-          <div style={{ fontSize:'clamp(14px, 2vw, 17px)', color:'rgba(255,255,255,0.72)' }}>
-            {album?.title}{album?.year && ` · ${album.year}`}
+          <div style={{ fontSize:'clamp(14px, 2vw, 17px)', color:'rgba(255,255,255,0.72)', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
+            <span>{album?.title}{album?.year && ` · ${album.year}`}</span>
+            <button onClick={onLike} style={{
+              background: 'none', border: 'none',
+              color: liked ? 'var(--a1)' : 'rgba(255,255,255,0.6)',
+              display: 'flex', alignItems: 'center', gap: 4,
+              cursor: 'pointer', padding: '4px 8px', borderRadius: 8,
+              fontSize: 13, transition: 'all 0.15s', outline: 'none'
+            }} title={lang === 'cs' ? 'Líbí se mi' : 'Like'}
+               onMouseEnter={(e) => { if (!liked) e.currentTarget.style.color = '#fff'; }}
+               onMouseLeave={(e) => { if (!liked) e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" style={{ transition: 'transform 0.15s', transform: liked ? 'scale(1.2)' : 'none' }}>
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              {likeCount > 0 && <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{likeCount}</span>}
+            </button>
           </div>
         </div>
 

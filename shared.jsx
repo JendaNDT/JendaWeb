@@ -61,6 +61,47 @@ const slugify = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[
 // ── Storage keys ────────────────────────────────────────────────────────
 const PLAYER_STORAGE_KEY = 'jw_player_state';
 const VOL_STORAGE_KEY    = 'jw_player_volume';
+const LIKES_TRACKS_KEY   = 'jw_liked_tracks';
+const LIKES_APPS_KEY     = 'jw_liked_apps';
+
+const getLikedItems = (key) => {
+  try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) { return []; }
+};
+
+const isItemLiked = (key, id) => getLikedItems(key).includes(id);
+
+const toggleLikedItem = (key, id) => {
+  try {
+    const list = getLikedItems(key);
+    const idx = list.indexOf(id);
+    const isLike = idx === -1;
+    let next;
+    if (isLike) next = list.concat(id);
+    else next = list.filter(x => x !== id);
+    localStorage.setItem(key, JSON.stringify(next));
+    return isLike;
+  } catch (e) { return false; }
+};
+
+const apiToggleLike = async (type, id, isLike) => {
+  const supa = window.__jwSupa;
+  if (!supa) return;
+  const functionName = type === 'track' ? 'toggle_track_like' : 'toggle_app_like';
+  const argName = type === 'track' ? 'track_id' : 'app_id';
+  try {
+    await fetch(`${supa.url}/rest/v1/rpc/${functionName}`, {
+      method: 'POST',
+      headers: {
+        'apikey': supa.key,
+        'Authorization': `Bearer ${supa.key}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ [argName]: id, is_like: isLike })
+    });
+  } catch (e) {
+    console.error('[jw] Like failed:', e);
+  }
+};
 
 // ── useInView ───────────────────────────────────────────────────────────
 function useInView() {
@@ -318,6 +359,8 @@ function SectionDivider() {
 Object.assign(window, {
   THEMES, applyTheme, resolveMode, applyMode, tx,
   PLAYER_STORAGE_KEY, VOL_STORAGE_KEY,
+  LIKES_TRACKS_KEY, LIKES_APPS_KEY,
+  getLikedItems, isItemLiked, toggleLikedItem, apiToggleLike,
   useInView,
   PlayIco, PauseIco, NextIco, PrevIco, DlIco, CloseIco, VolIco, MuteIco,
   ShuffleIco, RepeatIco, RepeatOneIco, ShareIco, SearchIco,

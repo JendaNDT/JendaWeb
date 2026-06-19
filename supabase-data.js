@@ -20,7 +20,7 @@
     return rows.map(function (a) {
       return { id: a.id, name: a.name, platform: a.platform, color: a.color,
                cs: a.cs, en: a.en, link: a.link || '#', case_study_url: a.case_study_url || null,
-               screenshots: a.screenshots || [] };
+               screenshots: a.screenshots || [], likes: a.likes || 0 };
     });
   }
   function mapAlbums(rows) {
@@ -35,6 +35,7 @@
       return { id: t.id, title: t.title, album: t.album_id, duration: t.duration,
                audioUrl: t.audio_url, downloadUrl: t.download_url, plays: t.plays || 0,
                cover: t.cover_url || null,
+               likes: t.likes || 0,
                lyrics: hasLyrics ? { cs: t.lyrics_cs, en: t.lyrics_en } : null };
     });
   }
