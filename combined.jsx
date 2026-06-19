@@ -604,6 +604,8 @@ const tx = (lang, key) => {
   };
   return fallbacks[lang]?.[key] ?? key;
 };
+const slugify = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
 
 // ── Storage keys ────────────────────────────────────────────────────────
 const PLAYER_STORAGE_KEY = 'jw_player_state';
@@ -1263,19 +1265,13 @@ Object.assign(window, { Nav, Hero, BackgroundFX });
 // FILE: apps-music.jsx
 // ==========================================
 // apps-music.jsx — Apps + Music sections
-const { useState: __useS, useEffect: __useE, useMemo: __useM, useCallback: __useC, useRef: __useR } = React;
-
-function AppCard({ app, lang, mode = 'live' }) {
+const { useState: __useS, useEffect: __useE, useMemo: __useM, useCallback: __useC, useRef: __useR } = React;function AppCard({ app, lang, mode = 'live' }) {
   const [hov, setHov] = __useS(false);
   const isPWA = app.platform === 'PWA';
-  const caseStudyUrl = window.CASE_STUDIES?.[app.id];
-  const isDownload = app.link && (app.link.includes('/storage/v1/object/public/binaries/') || /\.(apk|zip|dmg|exe|tar\.gz|ipa|pkg)(?:\?.*)?$/i.test(app.link));
-  
-  const mainHref = mode === 'study' && caseStudyUrl ? caseStudyUrl : app.link;
-  const cardIsDownload = mode === 'live' && isDownload;
+  const caseStudyUrl = window.CASE_STUDIES?.[app.id] || app.case_study_url;
   
   return (
-    <a href={mainHref} download={cardIsDownload ? '' : undefined} style={{
+    <a href={'#app=' + slugify(app.name)} style={{
       background: hov ? 'rgba(255,255,255,0.065)' : 'var(--card)',
       border:`1px solid ${hov ? 'color-mix(in srgb, var(--border) 100%, ' + app.color + ' 30%)' : 'var(--border)'}`,
       borderRadius:'var(--r)', padding:'22px',
@@ -1284,6 +1280,7 @@ function AppCard({ app, lang, mode = 'live' }) {
       boxShadow: hov ? `0 14px 44px ${app.color}1a` : 'none',
       display:'flex', flexDirection:'column', gap:14,
       color:'inherit', textDecoration:'none', position:'relative',
+      height: '100%',
     }}
     onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}>
       {mode === 'live' && caseStudyUrl && (
@@ -1318,64 +1315,14 @@ function AppCard({ app, lang, mode = 'live' }) {
           {lang === 'cs' ? app.cs : app.en}
         </p>
       </div>
-      <div style={{ display:'flex', gap:8 }}>
-        {mode === 'live' && caseStudyUrl && (
-          <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.location.href = caseStudyUrl; }} style={{
-            display:'flex', alignItems:'center', justifyContent:'center', gap:5,
-            padding:'9px 14px', borderRadius:8, flex:'0 0 auto',
-            background: 'transparent', color:'var(--a2)',
-            border:'1px solid color-mix(in srgb, var(--a2) 40%, transparent)',
-            fontSize:12, fontWeight:600, transition:'all 0.2s', fontFamily:'inherit',
-            cursor:'pointer',
-          }}>
-            {tx(lang,'apps_read_study')} →
-          </button>
-        )}
-        {mode === 'study' && app.link && app.link !== '#' && (
-          <button onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            if (isDownload) {
-              const a = document.createElement('a');
-              a.href = app.link;
-              a.download = '';
-              document.body.appendChild(a);
-              a.click();
-              a.remove();
-            } else {
-              window.open(app.link, '_blank');
-            }
-          }} style={{
-            display:'flex', alignItems:'center', justifyContent:'center', gap:5,
-            padding:'9px 14px', borderRadius:8, flex:'0 0 auto',
-            background: 'transparent', color:app.color,
-            border:`1px solid color-mix(in srgb, ${app.color} 40%, transparent)`,
-            fontSize:12, fontWeight:600, transition:'all 0.2s', fontFamily:'inherit',
-            cursor:'pointer',
-          }}>
-            <DlIco />
-            {isPWA ? tx(lang, 'apps_open') : tx(lang, 'apps_dl')}
-          </button>
-        )}
-        <span style={{
-          display:'flex', alignItems:'center', justifyContent:'center', gap:7, flex:1,
-          padding:'9px 0', borderRadius:8,
-          background: hov ? app.color : 'transparent',
-          color: hov ? '#fff' : app.color,
-          border:`1px solid ${app.color}55`,
-          fontSize:13, fontWeight:600, transition:'all 0.2s',
-        }}>
-          {mode === 'study' ? (
-            <>
-              {tx(lang, 'apps_read_study')} →
-            </>
-          ) : (
-            <>
-              <DlIco />
-              {isPWA ? tx(lang, 'apps_open') : tx(lang, 'apps_dl')}
-            </>
-          )}
-        </span>
+      <div style={{
+        display:'flex', alignItems:'center', justifyContent:'space-between',
+        fontSize:12, fontWeight:600, color: app.color, marginTop: 'auto',
+        borderTop: '1px solid var(--border)', paddingTop: 12, opacity: hov ? 1 : 0.8,
+        transition: 'opacity 0.2s'
+      }}>
+        <span>{lang === 'cs' ? 'Zobrazit detail' : 'View detail'}</span>
+        <span>→</span>
       </div>
     </a>
   );
@@ -1535,6 +1482,174 @@ function AppsSection({ lang }) {
         )}
       </div>
     </section>
+  );
+}
+
+function AppDetailModal({ app, lang, onClose, onShare }) {
+  const isPWA = app.platform === 'PWA';
+  const caseStudyUrl = window.CASE_STUDIES?.[app.id] || app.case_study_url;
+  const isDownload = app.link && (app.link.includes('/storage/v1/object/public/binaries/') || /\.(apk|zip|dmg|exe|tar\.gz|ipa|pkg)(?:\?.*)?$/i.test(app.link));
+  
+  __useE(() => {
+    const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [onClose]);
+
+  __useE(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  const handleLaunch = (e) => {
+    e.stopPropagation();
+    if (isDownload) {
+      const a = document.createElement('a');
+      a.href = app.link;
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } else {
+      window.open(app.link, '_blank');
+    }
+  };
+
+  return (
+    <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }} style={{
+      position: 'fixed', inset: 0, zIndex: 300,
+      background: 'rgba(5, 3, 2, 0.75)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+      animation: 'jwFade 0.2s ease-out'
+    }}>
+      <div style={{
+        background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20,
+        width: '100%', maxWidth: 540, maxHeight: '90vh', overflowY: 'auto',
+        display: 'flex', flexDirection: 'column', gap: 20, padding: 24,
+        position: 'relative', boxShadow: `0 20px 60px ${app.color}15`,
+        animation: 'overlayPop 0.25s var(--ease-out)'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: 14 }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: 14, flexShrink: 0,
+              background: `linear-gradient(135deg, ${app.color}28, ${app.color}50)`,
+              border: `1px solid ${app.color}40`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 22, color: app.color,
+            }}>{app.name[0]}</div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 20, margin: 0, color: 'var(--text)' }}>{app.name}</h2>
+                <span style={{
+                  fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 20,
+                  textTransform: 'uppercase', letterSpacing: '0.06em',
+                  background: isPWA ? 'color-mix(in srgb, var(--a1) 14%, transparent)' : 'rgba(34,197,94,0.15)',
+                  color: isPWA ? 'var(--a1)' : '#4ade80',
+                  border: `1px solid ${isPWA ? 'color-mix(in srgb, var(--a1) 35%, transparent)' : 'rgba(34,197,94,0.3)'}`,
+                }}>{app.platform}</span>
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
+                {isPWA ? (lang === 'cs' ? 'Webová PWA aplikace' : 'Web PWA App') : (lang === 'cs' ? 'Nativní Android aplikace' : 'Native Android App')}
+              </div>
+            </div>
+          </div>
+          <button onClick={onClose} aria-label={lang === 'cs' ? 'Zavřít' : 'Close'} style={{
+            background: 'none', border: 'none', color: 'var(--muted)', fontSize: 20,
+            cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'color 0.2s', outline: 'none'
+          }} onMouseEnter={(e) => e.target.style.color = 'var(--text)'} onMouseLeave={(e) => e.target.style.color = 'var(--muted)'}>✕</button>
+        </div>
+
+        {app.screenshots && app.screenshots.length > 0 && (
+          <div style={{ position: 'relative', width: '100%' }}>
+            <div className="ss-carousel" style={{
+              display: 'flex', gap: 12, overflowX: 'auto',
+              scrollSnapType: 'x mandatory', webkitOverflowScrolling: 'touch',
+              borderRadius: 14, padding: '4px 0',
+              scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.1) transparent'
+            }}>
+              {app.screenshots.map((src, idx) => (
+                <div key={idx} style={{
+                  scrollSnapAlign: 'center', flex: '0 0 100%',
+                  display: 'flex', justifyContent: 'center', alignItems: 'center',
+                  background: '#070504', borderRadius: 10, overflow: 'hidden',
+                  border: '1px solid var(--border)', height: 260
+                }}>
+                  <img src={src} alt={`${app.name} screen ${idx + 1}`} style={{
+                    width: '100%', height: '100%', objectFit: 'contain'
+                  }} />
+                </div>
+              ))}
+            </div>
+            {app.screenshots.length > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 8 }}>
+                {app.screenshots.map((_, idx) => (
+                  <span key={idx} style={{
+                    width: 6, height: 6, borderRadius: '50%',
+                    background: app.color, opacity: 0.4
+                  }} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div style={{ flex: 1 }}>
+          <p style={{
+            fontSize: 14, color: 'var(--text)', lineHeight: 1.6, margin: 0,
+            textWrap: 'pretty', whiteSpace: 'pre-line'
+          }}>
+            {lang === 'cs' ? app.cs : app.en}
+          </p>
+        </div>
+
+        <div style={{
+          display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10,
+          borderTop: '1px solid var(--border)', paddingTop: 18
+        }}>
+          {app.link && app.link !== '#' && (
+            <button onClick={handleLaunch} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              padding: '11px 22px', borderRadius: 10, flex: '1 0 160px',
+              background: app.color, color: '#fff', border: 'none',
+              fontSize: 14, fontWeight: 700, transition: 'transform 0.2s, filter 0.2s',
+              cursor: 'pointer', boxShadow: `0 4px 14px ${app.color}40`, outline: 'none'
+            }} onMouseEnter={(e) => e.target.style.filter = 'brightness(1.1)'} onMouseLeave={(e) => e.target.style.filter = ''}>
+              <DlIco />
+              {isPWA ? tx(lang, 'apps_open') : tx(lang, 'apps_dl')}
+            </button>
+          )}
+
+          {caseStudyUrl && (
+            <button onClick={(e) => { e.stopPropagation(); window.location.href = caseStudyUrl; }} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              padding: '11px 20px', borderRadius: 10, flex: app.link && app.link !== '#' ? '0 1 auto' : '1 0 160px',
+              background: 'transparent', color: 'var(--text)',
+              border: '1px solid var(--border)',
+              fontSize: 14, fontWeight: 600, transition: 'all 0.2s',
+              cursor: 'pointer', outline: 'none'
+            }} onMouseEnter={(e) => { e.target.style.background = 'rgba(255,255,255,0.05)'; }} onMouseLeave={(e) => { e.target.style.background = 'transparent'; }}>
+              {tx(lang, 'apps_read_study')} →
+            </button>
+          )}
+
+          <button onClick={(e) => { e.stopPropagation(); onShare(); }} style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: 44, height: 44, borderRadius: 10,
+            background: 'transparent', color: 'var(--muted)',
+            border: '1px solid var(--border)',
+            fontSize: 16, transition: 'all 0.2s', cursor: 'pointer', outline: 'none'
+          }} title={lang === 'cs' ? 'Sdílet aplikaci' : 'Share app'}
+             onMouseEnter={(e) => { e.target.style.color = 'var(--text)'; e.target.style.background = 'rgba(255,255,255,0.05)'; }}
+             onMouseLeave={(e) => { e.target.style.color = 'var(--muted)'; e.target.style.background = 'transparent'; }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -3903,6 +4018,7 @@ function App() {
   const [playing, setPlaying] = __useS_app(false);
   const [initialPos, setInitialPos] = __useS_app(0);
   const [restoring, setRestoring] = __useS_app(false);
+  const [selectedApp, setSelectedApp] = __useS_app(null);
   const [showShortcuts, setShowShortcuts] = __useS_app(false);
   const [showSearch, setShowSearch] = __useS_app(false);
   const [shuffle, setShuffle] = __useS_app(() => {
@@ -4016,15 +4132,29 @@ function App() {
     if (currentIdx > 0) { setPlayerTrack(playlist[currentIdx - 1]); setPlaying(true); setInitialPos(0); }
   }, [currentIdx, playlist]);
 
-  // Handle URL hash for sharing: #track=<id> / #album=<id> / &t=<seconds>
+  // Handle URL hash for sharing: #track=<id> / #album=<id> / &t=<seconds> / #app=<slug>
   __useE_app(() => {
     const applyHash = () => {
       const h = window.location.hash || '';
       const trackMatch = h.match(/track=(\d+)/);
       const albumMatch = h.match(/album=([\w-]+)/);
       const tMatch = h.match(/t=(\d+(?:\.\d+)?)/);
+      const appMatch = h.match(/app=([\w-]+)/);
       const startAt = tMatch ? parseFloat(tMatch[1]) : 0;
       const tracks = window.TRACKS_DATA || [];
+      const apps = window.APPS_DATA || [];
+      
+      if (appMatch) {
+        const a = apps.find(x => String(x.id) === appMatch[1] || slugify(x.name) === appMatch[1]);
+        if (a) {
+          setSelectedApp(a);
+        } else {
+          setSelectedApp(null);
+        }
+      } else {
+        setSelectedApp(null);
+      }
+
       if (trackMatch) {
         const t = tracks.find(x => x.id === Number(trackMatch[1]));
         if (t) { setPlayerTrack(t); setPlaylist(tracks); setPlaying(false); setInitialPos(startAt); }
@@ -4040,7 +4170,7 @@ function App() {
 
   const handleShare = __useC_app(async (withTime) => {
     if (!playerTrack) return;
-    const audio = document.querySelector('audio') || null; // not always present; we read from raw <audio>
+    const audio = document.querySelector('audio') || null;
     const t = withTime && audio ? Math.floor(audio.currentTime) : 0;
     const url = `${location.origin}${location.pathname}#track=${playerTrack.id}${t > 1 ? `&t=${t}` : ''}`;
     const album = (window.ALBUMS || []).find(a => a.id === playerTrack.album);
@@ -4051,10 +4181,32 @@ function App() {
     } catch {}
   }, [playerTrack]);
 
+  const handleShareApp = __useC_app(async (app) => {
+    const url = `${location.origin}${location.pathname}#app=${slugify(app.name)}`;
+    const shareData = {
+      title: app.name,
+      text: lang === 'cs' ? app.cs : app.en,
+      url
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(url);
+        setToast(lang === 'cs' ? 'Odkaz zkopírován do schránky' : 'Link copied to clipboard');
+        setTimeout(() => setToast(null), 2200);
+      }
+    } catch (e) {}
+  }, [lang]);
+
   const handleClose = __useC_app(() => {
     setPlayerTrack(null); setPlaying(false);
     try { localStorage.removeItem(PLAYER_STORAGE_KEY); } catch {}
     if (location.hash.match(/track=|album=/)) history.replaceState(null, '', location.pathname);
+  }, []);
+  const handleCloseAppModal = __useC_app(() => {
+    setSelectedApp(null);
+    if (location.hash.match(/app=/)) history.replaceState(null, '', location.pathname);
   }, []);
 
   return (
@@ -4105,6 +4257,15 @@ function App() {
         style={{ bottom: playerTrack ? 145 : 24 }} onClick={() => setShowShortcuts(true)}>?</button>
 
       <InstallPrompt lang={lang} hasPlayer={!!playerTrack} />
+
+      {selectedApp && (
+        <AppDetailModal
+          app={selectedApp}
+          lang={lang}
+          onClose={handleCloseAppModal}
+          onShare={() => handleShareApp(selectedApp)}
+        />
+      )}
 
       {showShortcuts && <ShortcutsOverlay lang={lang} onClose={() => setShowShortcuts(false)} />}
       {showSearch    && <SearchOverlay    lang={lang} onClose={() => setShowSearch(false)} onPlay={handlePlay} />}

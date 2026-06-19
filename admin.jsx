@@ -382,14 +382,43 @@ function AppForm({ initial, onClose, onSaved, notify }) {
     name: initial.name || '', platform: initial.platform || 'PWA', color: initial.color || '#f97316',
     cs: initial.cs || '', en: initial.en || '', link: initial.link || '', case_study_url: initial.case_study_url || '',
     icon_url: initial.icon_url || '', sort: initial.sort != null ? initial.sort : 0,
-  } : { name: '', platform: 'PWA', color: '#f97316', cs: '', en: '', link: '', case_study_url: '', icon_url: '', sort: 0 });
+    screenshots: initial.screenshots || [],
+  } : { name: '', platform: 'PWA', color: '#f97316', cs: '', en: '', link: '', case_study_url: '', icon_url: '', sort: 0, screenshots: [] });
   const [file, setFile] = useState(null); // Icon file
   const [appFile, setAppFile] = useState(null); // Binary file
+  const [newScreenshots, setNewScreenshots] = useState([]); // Array of { file, preview }
   const [busy, setBusy] = useState(false);
   const [prog, setProg] = useState(-1);
   const set = (k, v) => setF((o) => Object.assign({}, o, { [k]: v }));
   const [preview, setPreview] = useState(initial && initial.icon_url ? initial.icon_url : '');
   const onPickIcon = (fl) => { setFile(fl); try { setPreview(URL.createObjectURL(fl)); } catch (e) {} };
+
+  useEffect(() => {
+    return () => {
+      newScreenshots.forEach(s => { if (s.preview) URL.revokeObjectURL(s.preview); });
+    };
+  }, [newScreenshots]);
+
+  const addNewScreenshots = (filesList) => {
+    const files = Array.from(filesList);
+    const added = files.map(fl => ({
+      file: fl,
+      preview: URL.createObjectURL(fl)
+    }));
+    setNewScreenshots(o => o.concat(added));
+  };
+
+  const removeNewScreenshot = (idx) => {
+    setNewScreenshots(o => {
+      const target = o[idx];
+      if (target && target.preview) URL.revokeObjectURL(target.preview);
+      return o.filter((_, i) => i !== idx);
+    });
+  };
+
+  const removeScreenshot = (idx) => {
+    set('screenshots', f.screenshots.filter((_, i) => i !== idx));
+  };
 
   const submit = async () => {
     if (!f.name.trim()) { notify('Zadej název aplikace', 'err'); return; }
@@ -398,21 +427,37 @@ function AppForm({ initial, onClose, onSaved, notify }) {
       let icon_url = f.icon_url;
       if (file) {
         setProg(0);
-        icon_url = await uploadFile('images', 'apps', file, (p) => setProg(Math.round(p * (appFile ? 0.5 : 1.0))));
-        if (appFile) setProg(50);
+        icon_url = await uploadFile('images', 'apps', file, (p) => setProg(Math.round(p * (appFile ? 0.3 : 0.5))));
       }
       let link = f.link.trim() || '#';
       if (appFile) {
-        const startProg = file ? 50 : 0;
-        const scale = file ? 0.5 : 1.0;
-        link = await uploadFile('binaries', 'apps', appFile, (p) => setProg(startProg + Math.round(p * scale)));
+        const startProg = file ? 30 : 0;
+        link = await uploadFile('binaries', 'apps', appFile, (p) => setProg(startProg + Math.round(p * (file ? 0.3 : 0.5))));
       }
+
+      // Upload screenshots
+      let screenshots = f.screenshots.slice();
+      if (newScreenshots.length > 0) {
+        const startProg = (file ? 30 : 0) + (appFile ? 30 : 0);
+        const remainingScale = 100 - startProg;
+        for (let i = 0; i < newScreenshots.length; i++) {
+          const item = newScreenshots[i];
+          const uploadProgressHandler = (p) => {
+            const overallP = startProg + Math.round(((i + p / 100) / newScreenshots.length) * remainingScale);
+            setProg(overallP);
+          };
+          const uploadedUrl = await uploadFile('images', 'apps', item.file, uploadProgressHandler);
+          screenshots.push(uploadedUrl);
+        }
+      }
+
       setProg(-1);
 
       const row = {
         name: f.name.trim(), platform: f.platform, color: f.color,
         cs: f.cs.trim() || null, en: f.en.trim() || null, link: link,
         case_study_url: f.case_study_url.trim() || null, icon_url: icon_url || null, sort: Number(f.sort) || 0,
+        screenshots: screenshots,
       };
       if (initial) await sbUpdate('apps', 'id', initial.id, row);
       else await sbInsert('apps', row);
@@ -450,6 +495,47 @@ function AppForm({ initial, onClose, onSaved, notify }) {
       </Field>
 
       <Field label="Odkaz na case study (nepovinné)"><input value={f.case_study_url} onChange={(e) => set('case_study_url', e.target.value)} placeholder="case-studies/…html" /></Field>
+      
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', marginBottom: 6 }}>Náhledy obrazovek (screenshoty)</div>
+        
+        {((f.screenshots && f.screenshots.length > 0) || (newScreenshots.length > 0)) && (
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
+            {f.screenshots && f.screenshots.map((url, idx) => (
+              <div key={'old-ss-' + idx} style={{ position: 'relative', width: 80, height: 60, borderRadius: 6, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <button type="button" onClick={() => removeScreenshot(idx)} style={{
+                  position: 'absolute', top: 2, right: 2, background: 'rgba(0,0,0,0.7)', color: '#fff',
+                  border: 'none', borderRadius: '50%', width: 18, height: 18, fontSize: 10,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
+                }}>✕</button>
+              </div>
+            ))}
+            {newScreenshots.map((item, idx) => (
+              <div key={'new-ss-' + idx} style={{ position: 'relative', width: 80, height: 60, borderRadius: 6, overflow: 'hidden', border: '1px dashed var(--a1)' }}>
+                <img src={item.preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }} />
+                <span style={{ position: 'absolute', bottom: 2, left: 2, fontSize: 8, background: 'var(--a1)', color: '#fff', padding: '1px 3px', borderRadius: 3 }}>NOVÝ</span>
+                <button type="button" onClick={() => removeNewScreenshot(idx)} style={{
+                  position: 'absolute', top: 2, right: 2, background: 'rgba(0,0,0,0.7)', color: '#fff',
+                  border: 'none', borderRadius: '50%', width: 18, height: 18, fontSize: 10,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
+                }}>✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        <FileDrop accept="image/*" file={null} onFile={(fl) => addNewScreenshots([fl])} label="Přetáhni screenshot, nebo klikni" />
+        <input type="file" accept="image/*" multiple style={{ display: 'none' }} id="screenshot-multiple-input"
+          onChange={(e) => { if (e.target.files.length) addNewScreenshots(e.target.files); }} />
+        <div style={{ textAlign: 'right', marginTop: 4 }}>
+          <button type="button" className="btn btn-ghost btn-sm" style={{ padding: '2px 8px', fontSize: 11 }}
+            onClick={() => document.getElementById('screenshot-multiple-input').click()}>
+            + Přidat více souborů naráz
+          </button>
+        </div>
+      </div>
+
       <Field label={'Ikona (obrázek)' + (f.icon_url ? ' — nahráno ✓' : '')}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           {preview && <img className="thumb" src={preview} alt="" />}

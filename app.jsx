@@ -111,6 +111,7 @@ function App() {
   const [playing, setPlaying] = __useS_app(false);
   const [initialPos, setInitialPos] = __useS_app(0);
   const [restoring, setRestoring] = __useS_app(false);
+  const [selectedApp, setSelectedApp] = __useS_app(null);
   const [showShortcuts, setShowShortcuts] = __useS_app(false);
   const [showSearch, setShowSearch] = __useS_app(false);
   const [shuffle, setShuffle] = __useS_app(() => {
@@ -224,15 +225,29 @@ function App() {
     if (currentIdx > 0) { setPlayerTrack(playlist[currentIdx - 1]); setPlaying(true); setInitialPos(0); }
   }, [currentIdx, playlist]);
 
-  // Handle URL hash for sharing: #track=<id> / #album=<id> / &t=<seconds>
+  // Handle URL hash for sharing: #track=<id> / #album=<id> / &t=<seconds> / #app=<slug>
   __useE_app(() => {
     const applyHash = () => {
       const h = window.location.hash || '';
       const trackMatch = h.match(/track=(\d+)/);
       const albumMatch = h.match(/album=([\w-]+)/);
       const tMatch = h.match(/t=(\d+(?:\.\d+)?)/);
+      const appMatch = h.match(/app=([\w-]+)/);
       const startAt = tMatch ? parseFloat(tMatch[1]) : 0;
       const tracks = window.TRACKS_DATA || [];
+      const apps = window.APPS_DATA || [];
+      
+      if (appMatch) {
+        const a = apps.find(x => String(x.id) === appMatch[1] || slugify(x.name) === appMatch[1]);
+        if (a) {
+          setSelectedApp(a);
+        } else {
+          setSelectedApp(null);
+        }
+      } else {
+        setSelectedApp(null);
+      }
+
       if (trackMatch) {
         const t = tracks.find(x => x.id === Number(trackMatch[1]));
         if (t) { setPlayerTrack(t); setPlaylist(tracks); setPlaying(false); setInitialPos(startAt); }
@@ -248,7 +263,7 @@ function App() {
 
   const handleShare = __useC_app(async (withTime) => {
     if (!playerTrack) return;
-    const audio = document.querySelector('audio') || null; // not always present; we read from raw <audio>
+    const audio = document.querySelector('audio') || null;
     const t = withTime && audio ? Math.floor(audio.currentTime) : 0;
     const url = `${location.origin}${location.pathname}#track=${playerTrack.id}${t > 1 ? `&t=${t}` : ''}`;
     const album = (window.ALBUMS || []).find(a => a.id === playerTrack.album);
@@ -259,10 +274,32 @@ function App() {
     } catch {}
   }, [playerTrack]);
 
+  const handleShareApp = __useC_app(async (app) => {
+    const url = `${location.origin}${location.pathname}#app=${slugify(app.name)}`;
+    const shareData = {
+      title: app.name,
+      text: lang === 'cs' ? app.cs : app.en,
+      url
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(url);
+        setToast(lang === 'cs' ? 'Odkaz zkopírován do schránky' : 'Link copied to clipboard');
+        setTimeout(() => setToast(null), 2200);
+      }
+    } catch (e) {}
+  }, [lang]);
+
   const handleClose = __useC_app(() => {
     setPlayerTrack(null); setPlaying(false);
     try { localStorage.removeItem(PLAYER_STORAGE_KEY); } catch {}
     if (location.hash.match(/track=|album=/)) history.replaceState(null, '', location.pathname);
+  }, []);
+  const handleCloseAppModal = __useC_app(() => {
+    setSelectedApp(null);
+    if (location.hash.match(/app=/)) history.replaceState(null, '', location.pathname);
   }, []);
 
   return (
@@ -313,6 +350,15 @@ function App() {
         style={{ bottom: playerTrack ? 145 : 24 }} onClick={() => setShowShortcuts(true)}>?</button>
 
       <InstallPrompt lang={lang} hasPlayer={!!playerTrack} />
+
+      {selectedApp && (
+        <AppDetailModal
+          app={selectedApp}
+          lang={lang}
+          onClose={handleCloseAppModal}
+          onShare={() => handleShareApp(selectedApp)}
+        />
+      )}
 
       {showShortcuts && <ShortcutsOverlay lang={lang} onClose={() => setShowShortcuts(false)} />}
       {showSearch    && <SearchOverlay    lang={lang} onClose={() => setShowSearch(false)} onPlay={handlePlay} />}
