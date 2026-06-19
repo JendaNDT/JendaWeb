@@ -538,6 +538,9 @@ const STRING_KEYS = [
   ['compare_title', 'Srovnání – nadpis'],
   ['compare_desc', 'Srovnání – popis'],
   ['donate_desc', 'Ko-fi – popis'],
+  ['apps_live_title', 'Aplikace – nadpis aktivních'],
+  ['apps_studies_title', 'Aplikace – nadpis případových studií'],
+  ['apps_read_study', 'Aplikace – tlačítko studie'],
   ['footer', 'Patička'],
 ];
 function StringsEditor({ config, onClose, onSaved, notify }) {

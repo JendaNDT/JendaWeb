@@ -38,8 +38,23 @@ function applyMode(modePref) {
   return actual;
 }
 
-// ── Translation ─────────────────────────────────────────────────────────
-const tx = (lang, key) => (window.STRINGS?.[lang]?.[key]) ?? key;
+const tx = (lang, key) => {
+  const custom = window.STRINGS?.[lang]?.[key];
+  if (custom !== undefined && custom !== null) return custom;
+  const fallbacks = {
+    cs: {
+      apps_live_title: 'Spustitelné aplikace & PWA',
+      apps_studies_title: 'Případové studie & Koncepty',
+      apps_read_study: 'Číst studii'
+    },
+    en: {
+      apps_live_title: 'Runnable Apps & PWAs',
+      apps_studies_title: 'Case Studies & Concepts',
+      apps_read_study: 'Read study'
+    }
+  };
+  return fallbacks[lang]?.[key] ?? key;
+};
 
 // ── Storage keys ────────────────────────────────────────────────────────
 const PLAYER_STORAGE_KEY = 'jw_player_state';
