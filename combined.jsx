@@ -1250,13 +1250,17 @@ Object.assign(window, { Nav, Hero, BackgroundFX });
 // apps-music.jsx — Apps + Music sections
 const { useState: __useS, useEffect: __useE, useMemo: __useM, useCallback: __useC, useRef: __useR } = React;
 
-function AppCard({ app, lang }) {
+function AppCard({ app, lang, mode = 'live' }) {
   const [hov, setHov] = __useS(false);
   const isPWA = app.platform === 'PWA';
   const caseStudyUrl = window.CASE_STUDIES?.[app.id];
   const isDownload = app.link && (app.link.includes('/storage/v1/object/public/binaries/') || /\.(apk|zip|dmg|exe|tar\.gz|ipa|pkg)(?:\?.*)?$/i.test(app.link));
+  
+  const mainHref = mode === 'study' && caseStudyUrl ? caseStudyUrl : app.link;
+  const cardIsDownload = mode === 'live' && isDownload;
+  
   return (
-    <a href={app.link} download={isDownload ? '' : undefined} style={{
+    <a href={mainHref} download={cardIsDownload ? '' : undefined} style={{
       background: hov ? 'rgba(255,255,255,0.065)' : 'var(--card)',
       border:`1px solid ${hov ? 'color-mix(in srgb, var(--border) 100%, ' + app.color + ' 30%)' : 'var(--border)'}`,
       borderRadius:'var(--r)', padding:'22px',
@@ -1267,7 +1271,7 @@ function AppCard({ app, lang }) {
       color:'inherit', textDecoration:'none', position:'relative',
     }}
     onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}>
-      {caseStudyUrl && (
+      {mode === 'live' && caseStudyUrl && (
         <span style={{
           position:'absolute', top:14, right:14,
           fontSize:9, fontWeight:700, padding:'3px 8px', borderRadius:20,
@@ -1300,15 +1304,42 @@ function AppCard({ app, lang }) {
         </p>
       </div>
       <div style={{ display:'flex', gap:8 }}>
-        {caseStudyUrl && (
+        {mode === 'live' && caseStudyUrl && (
           <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.location.href = caseStudyUrl; }} style={{
             display:'flex', alignItems:'center', justifyContent:'center', gap:5,
             padding:'9px 14px', borderRadius:8, flex:'0 0 auto',
             background: 'transparent', color:'var(--a2)',
             border:'1px solid color-mix(in srgb, var(--a2) 40%, transparent)',
             fontSize:12, fontWeight:600, transition:'all 0.2s', fontFamily:'inherit',
+            cursor:'pointer',
           }}>
-            {tx(lang,'cs_label')} →
+            {tx(lang,'apps_read_study')} →
+          </button>
+        )}
+        {mode === 'study' && app.link && app.link !== '#' && (
+          <button onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            if (isDownload) {
+              const a = document.createElement('a');
+              a.href = app.link;
+              a.download = '';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+            } else {
+              window.open(app.link, '_blank');
+            }
+          }} style={{
+            display:'flex', alignItems:'center', justifyContent:'center', gap:5,
+            padding:'9px 14px', borderRadius:8, flex:'0 0 auto',
+            background: 'transparent', color:app.color,
+            border:`1px solid color-mix(in srgb, ${app.color} 40%, transparent)`,
+            fontSize:12, fontWeight:600, transition:'all 0.2s', fontFamily:'inherit',
+            cursor:'pointer',
+          }}>
+            <DlIco />
+            {isPWA ? tx(lang, 'apps_open') : tx(lang, 'apps_dl')}
           </button>
         )}
         <span style={{
@@ -1319,8 +1350,16 @@ function AppCard({ app, lang }) {
           border:`1px solid ${app.color}55`,
           fontSize:13, fontWeight:600, transition:'all 0.2s',
         }}>
-          <DlIco />
-          {isPWA ? tx(lang, 'apps_open') : tx(lang, 'apps_dl')}
+          {mode === 'study' ? (
+            <>
+              {tx(lang, 'apps_read_study')} →
+            </>
+          ) : (
+            <>
+              <DlIco />
+              {isPWA ? tx(lang, 'apps_open') : tx(lang, 'apps_dl')}
+            </>
+          )}
         </span>
       </div>
     </a>
@@ -1332,6 +1371,7 @@ function AppsSection({ lang }) {
   const [query, setQuery] = __useS('');
   const [ref, vis] = useInView();
   const apps = window.APPS_DATA || [];
+  
   const filtered = __useM(() => {
     const q = query.trim().toLowerCase();
     return apps.filter(a => {
@@ -1340,6 +1380,18 @@ function AppsSection({ lang }) {
       return a.name.toLowerCase().includes(q) || a.cs.toLowerCase().includes(q) || a.en.toLowerCase().includes(q);
     });
   }, [filter, query, apps]);
+
+  const { liveApps, studyApps } = __useM(() => {
+    const live = [];
+    const study = [];
+    filtered.forEach(a => {
+      const isLive = a.link && a.link !== '#';
+      const isStudy = !!(window.CASE_STUDIES?.[a.id] || a.case_study_url);
+      if (isLive) live.push(a);
+      if (isStudy) study.push(a);
+    });
+    return { liveApps: live, studyApps: study };
+  }, [filtered]);
 
   const pills = [
     { k:'all',     lbl: tx(lang,'apps_all') },
@@ -1423,12 +1475,47 @@ function AppsSection({ lang }) {
             )}
           </div>
         ) : (
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(230px,1fr))', gap:18 }}>
-            {filtered.map((app, i) => (
-              <div key={app.id} className="card-animate" style={{ animationDelay:`${Math.min(i,8)*35}ms` }}>
-                <AppCard app={app} lang={lang} />
+          <div style={{ display:'flex', flexDirection:'column', gap:44 }}>
+            {liveApps.length > 0 && (
+              <div>
+                <h3 style={{
+                  fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:18,
+                  marginBottom:18, color:'var(--text)', display:'flex', alignItems:'center', gap:8
+                }}>
+                  <span style={{ width:8, height:8, borderRadius:'50%', background:'var(--a1)' }}></span>
+                  {tx(lang, 'apps_live_title')}
+                  <span style={{ fontSize:12, fontWeight:500, color:'var(--muted)', opacity:0.75 }}>({liveApps.length})</span>
+                </h3>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(230px,1fr))', gap:18 }}>
+                  {liveApps.map((app, i) => (
+                    <div key={'live-' + app.id} className="card-animate" style={{ animationDelay:`${Math.min(i,8)*35}ms` }}>
+                      <AppCard app={app} lang={lang} mode="live" />
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            )}
+
+            {studyApps.length > 0 && (
+              <div>
+                <h3 style={{
+                  fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:18,
+                  marginBottom:18, color:'var(--text)', display:'flex', alignItems:'center', gap:8,
+                  marginTop: liveApps.length > 0 ? 10 : 0
+                }}>
+                  <span style={{ width:8, height:8, borderRadius:'50%', background:'var(--a2)' }}></span>
+                  {tx(lang, 'apps_studies_title')}
+                  <span style={{ fontSize:12, fontWeight:500, color:'var(--muted)', opacity:0.75 }}>({studyApps.length})</span>
+                </h3>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(230px,1fr))', gap:18 }}>
+                  {studyApps.map((app, i) => (
+                    <div key={'study-' + app.id} className="card-animate" style={{ animationDelay:`${Math.min(i,8)*35}ms` }}>
+                      <AppCard app={app} lang={lang} mode="study" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
