@@ -84,7 +84,122 @@ const sbUpdate = (table, col, id, patch) => sbReq('PATCH', table + '?' + col + '
 const sbDelete = (table, col, id) => sbReq('DELETE', table + '?' + col + '=eq.' + encodeURIComponent(id));
 
 function safeName(n) { return String(n || 'file').replace(/[^a-zA-Z0-9._-]/g, '_'); }
+async function uploadFileToGithub(file, onProgress) {
+  while (true) {
+    let token = localStorage.getItem('jw_github_token');
+    if (!token) {
+      token = prompt('Zadej svůj klasický GitHub token pro nahrávání souborů nad 50 MB (bude uložen pouze lokálně ve tvém prohlížeči):');
+      if (!token) throw new Error('Pro nahrání souboru nad 50 MB je vyžadován GitHub token.');
+      token = token.trim();
+      localStorage.setItem('jw_github_token', token);
+    }
+
+    const owner = 'JendaNDT';
+    const repo = 'JendaWeb';
+    const tag = 'binaries';
+
+    async function ghReq(method, url, body, isUpload = false) {
+      const headers = {
+        'Authorization': 'token ' + token,
+        'Accept': 'application/vnd.github.v3+json'
+      };
+      if (!isUpload && body) {
+        headers['Content-Type'] = 'application/json';
+      }
+      const res = await fetch(url, {
+        method,
+        headers,
+        body: isUpload ? body : (body ? JSON.stringify(body) : undefined)
+      });
+      if (!res.ok) {
+        if (res.status === 401) {
+          localStorage.removeItem('jw_github_token');
+          throw { status: 401, message: 'Unauthorized' };
+        }
+        const errText = await res.text();
+        throw new Error(`Chyba GitHub API (${res.status}): ${errText}`);
+      }
+      return res.json();
+    }
+
+    try {
+      // 1. Získat nebo vytvořit Release pro binárky
+      let release = null;
+      try {
+        release = await ghReq('GET', `https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`);
+      } catch (e) {
+        if (e.status === 401) throw e;
+        if (e.message && e.message.includes('404')) {
+          release = await ghReq('POST', `https://api.github.com/repos/${owner}/${repo}/releases`, {
+            tag_name: tag,
+            name: 'App Binaries',
+            body: 'Binaries and installation files for portfolio apps.',
+            draft: false,
+            prerelease: false
+          });
+        } else {
+          throw e;
+        }
+      }
+
+      // 2. Nahrát soubor přes XHR pro podporu progress baru
+      const filename = Date.now() + '_' + safeName(file.name);
+      const uploadUrl = `https://uploads.github.com/repos/${owner}/${repo}/releases/${release.id}/assets?name=${encodeURIComponent(filename)}`;
+
+      const downloadUrl = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', uploadUrl);
+        xhr.setRequestHeader('Authorization', 'token ' + token);
+        xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+        xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+
+        if (xhr.upload && onProgress) {
+          xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+              onProgress(Math.round((e.loaded / e.total) * 100));
+            }
+          };
+        }
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const data = JSON.parse(xhr.responseText);
+              resolve(data.browser_download_url);
+            } catch (err) {
+              reject(new Error('Chyba při čtení odpovědi z GitHubu: ' + err.message));
+            }
+          } else {
+            if (xhr.status === 401) {
+              localStorage.removeItem('jw_github_token');
+              reject({ status: 401, message: 'Unauthorized' });
+            } else {
+              reject(new Error(`Nahrávání na GitHub selhalo (${xhr.status}): ${xhr.responseText}`));
+            }
+          }
+        };
+
+        xhr.onerror = () => reject(new Error('Chyba sítě při nahrávání na GitHub.'));
+        xhr.send(file);
+      });
+
+      return downloadUrl;
+
+    } catch (e) {
+      if (e.status === 401) {
+        localStorage.removeItem('jw_github_token');
+        alert('Neplatný nebo vypršelý GitHub token. Zadejte jej prosím znovu.');
+        continue;
+      }
+      throw e;
+    }
+  }
+}
+
 function uploadFile(bucket, folder, file, onProgress) {
+  if (file.size > 50 * 1024 * 1024) {
+    return uploadFileToGithub(file, onProgress);
+  }
   return new Promise((resolve, reject) => {
     ensureToken().then((s) => {
       if (!s) { reject(new Error('Nepřihlášeno')); return; }
