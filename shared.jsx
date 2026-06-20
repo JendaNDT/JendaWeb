@@ -322,8 +322,10 @@ function useCountUp(target, duration = 1400) {
   const [val, setVal] = useState(0);
   const startedRef = useRef(false);
   const elRef = useRef(null);
+  const rafRef = useRef(0);
   useEffect(() => {
     const el = elRef.current; if (!el) return;
+    let obs = null;
     const startAnim = () => {
       if (startedRef.current) return;
       startedRef.current = true;
@@ -332,19 +334,22 @@ function useCountUp(target, duration = 1400) {
         const t = Math.min(1, (now - start) / duration);
         const eased = 1 - Math.pow(1 - t, 4); // easeOutQuart
         setVal(target * eased);
-        if (t < 1) requestAnimationFrame(tick);
+        if (t < 1) rafRef.current = requestAnimationFrame(tick);
       };
-      requestAnimationFrame(tick);
+      rafRef.current = requestAnimationFrame(tick);
     };
     const r = el.getBoundingClientRect();
-    if (r.top < (window.innerHeight || 0) && r.bottom > 0) { startAnim(); return; }
-    const obs = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
+    if (r.top < (window.innerHeight || 0) && r.bottom > 0) {
       startAnim();
-      obs.disconnect();
-    }, { threshold: 0.15 });
-    obs.observe(el);
-    return () => obs.disconnect();
+    } else {
+      obs = new IntersectionObserver(([e]) => {
+        if (!e.isIntersecting) return;
+        startAnim();
+        if (obs) obs.disconnect();
+      }, { threshold: 0.15 });
+      obs.observe(el);
+    }
+    return () => { if (obs) obs.disconnect(); cancelAnimationFrame(rafRef.current); };
   }, [target, duration]);
   return [elRef, val];
 }

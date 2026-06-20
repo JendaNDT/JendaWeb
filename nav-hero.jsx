@@ -214,12 +214,18 @@ function Nav({ lang, setLang, mode, setMode }) {
       }
       setActive(cur);
     };
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => { fn(); ticking = false; });
+    };
     // Defer the initial check to avoid forced reflow during React mount
     const handle = setTimeout(fn, 150);
-    window.addEventListener('scroll', fn, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       clearTimeout(handle);
-      window.removeEventListener('scroll', fn);
+      window.removeEventListener('scroll', onScroll);
     };
   }, []);
 

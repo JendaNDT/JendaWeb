@@ -871,8 +871,10 @@ function useCountUp(target, duration = 1400) {
   const [val, setVal] = useState(0);
   const startedRef = useRef(false);
   const elRef = useRef(null);
+  const rafRef = useRef(0);
   useEffect(() => {
     const el = elRef.current; if (!el) return;
+    let obs = null;
     const startAnim = () => {
       if (startedRef.current) return;
       startedRef.current = true;
@@ -881,19 +883,22 @@ function useCountUp(target, duration = 1400) {
         const t = Math.min(1, (now - start) / duration);
         const eased = 1 - Math.pow(1 - t, 4); // easeOutQuart
         setVal(target * eased);
-        if (t < 1) requestAnimationFrame(tick);
+        if (t < 1) rafRef.current = requestAnimationFrame(tick);
       };
-      requestAnimationFrame(tick);
+      rafRef.current = requestAnimationFrame(tick);
     };
     const r = el.getBoundingClientRect();
-    if (r.top < (window.innerHeight || 0) && r.bottom > 0) { startAnim(); return; }
-    const obs = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
+    if (r.top < (window.innerHeight || 0) && r.bottom > 0) {
       startAnim();
-      obs.disconnect();
-    }, { threshold: 0.15 });
-    obs.observe(el);
-    return () => obs.disconnect();
+    } else {
+      obs = new IntersectionObserver(([e]) => {
+        if (!e.isIntersecting) return;
+        startAnim();
+        if (obs) obs.disconnect();
+      }, { threshold: 0.15 });
+      obs.observe(el);
+    }
+    return () => { if (obs) obs.disconnect(); cancelAnimationFrame(rafRef.current); };
   }, [target, duration]);
   return [elRef, val];
 }
@@ -1137,12 +1142,18 @@ function Nav({ lang, setLang, mode, setMode }) {
       }
       setActive(cur);
     };
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => { fn(); ticking = false; });
+    };
     // Defer the initial check to avoid forced reflow during React mount
     const handle = setTimeout(fn, 150);
-    window.addEventListener('scroll', fn, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       clearTimeout(handle);
-      window.removeEventListener('scroll', fn);
+      window.removeEventListener('scroll', onScroll);
     };
   }, []);
 
@@ -1758,7 +1769,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
             color: liked ? 'var(--a1)' : 'var(--muted)',
             border: `1px solid ${liked ? 'var(--a1)' : 'var(--border)'}`,
             fontSize: 14, fontWeight: 600, transition: 'all 0.2s', cursor: 'pointer', outline: 'none'
-          }} title={lang === 'cs' ? 'Líbí se mi' : 'Like'}
+          }} aria-label={lang === 'cs' ? 'Líbí se mi' : 'Like'} title={lang === 'cs' ? 'Líbí se mi' : 'Like'}
              onMouseEnter={(e) => {
                if (!liked) {
                  e.currentTarget.style.color = 'var(--text)';
@@ -1783,7 +1794,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
             background: 'transparent', color: 'var(--muted)',
             border: '1px solid var(--border)',
             fontSize: 16, transition: 'all 0.2s', cursor: 'pointer', outline: 'none'
-          }} title={lang === 'cs' ? 'Sdílet aplikaci' : 'Share app'}
+          }} aria-label={lang === 'cs' ? 'Sdílet aplikaci' : 'Share app'} title={lang === 'cs' ? 'Sdílet aplikaci' : 'Share app'}
              onMouseEnter={(e) => { e.target.style.color = 'var(--text)'; e.target.style.background = 'rgba(255,255,255,0.05)'; }}
              onMouseLeave={(e) => { e.target.style.color = 'var(--muted)'; e.target.style.background = 'transparent'; }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

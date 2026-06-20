@@ -573,11 +573,10 @@ function AppForm({ initial, onClose, onSaved, notify }) {
   const [preview, setPreview] = useState(initial && initial.icon_url ? initial.icon_url : '');
   const onPickIcon = (fl) => { setFile(fl); try { setPreview(URL.createObjectURL(fl)); } catch (e) {} };
 
-  useEffect(() => {
-    return () => {
-      newScreenshots.forEach(s => { if (s.preview) URL.revokeObjectURL(s.preview); });
-    };
-  }, [newScreenshots]);
+  const screenshotPreviewsRef = useRef([]);
+  useEffect(() => { screenshotPreviewsRef.current = newScreenshots.map(s => s.preview).filter(Boolean); }, [newScreenshots]);
+  // Revoke previews only on unmount (revoking on every change would kill still-displayed previews).
+  useEffect(() => () => { screenshotPreviewsRef.current.forEach(u => { try { URL.revokeObjectURL(u); } catch (e) {} }); }, []);
 
   const addNewScreenshots = (filesList) => {
     const files = Array.from(filesList);

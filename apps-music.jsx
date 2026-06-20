@@ -449,7 +449,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
             color: liked ? 'var(--a1)' : 'var(--muted)',
             border: `1px solid ${liked ? 'var(--a1)' : 'var(--border)'}`,
             fontSize: 14, fontWeight: 600, transition: 'all 0.2s', cursor: 'pointer', outline: 'none'
-          }} title={lang === 'cs' ? 'Líbí se mi' : 'Like'}
+          }} aria-label={lang === 'cs' ? 'Líbí se mi' : 'Like'} title={lang === 'cs' ? 'Líbí se mi' : 'Like'}
              onMouseEnter={(e) => {
                if (!liked) {
                  e.currentTarget.style.color = 'var(--text)';
@@ -474,7 +474,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
             background: 'transparent', color: 'var(--muted)',
             border: '1px solid var(--border)',
             fontSize: 16, transition: 'all 0.2s', cursor: 'pointer', outline: 'none'
-          }} title={lang === 'cs' ? 'Sdílet aplikaci' : 'Share app'}
+          }} aria-label={lang === 'cs' ? 'Sdílet aplikaci' : 'Share app'} title={lang === 'cs' ? 'Sdílet aplikaci' : 'Share app'}
              onMouseEnter={(e) => { e.target.style.color = 'var(--text)'; e.target.style.background = 'rgba(255,255,255,0.05)'; }}
              onMouseLeave={(e) => { e.target.style.color = 'var(--muted)'; e.target.style.background = 'transparent'; }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
