@@ -84,107 +84,181 @@ const sbUpdate = (table, col, id, patch) => sbReq('PATCH', table + '?' + col + '
 const sbDelete = (table, col, id) => sbReq('DELETE', table + '?' + col + '=eq.' + encodeURIComponent(id));
 
 function safeName(n) { return String(n || 'file').replace(/[^a-zA-Z0-9._-]/g, '_'); }
-async function uploadFileToGithub(file, onProgress) {
-  while (true) {
-    let token = localStorage.getItem('jw_github_token');
-    if (!token) {
-      token = prompt('Zadej svůj klasický GitHub token pro nahrávání souborů nad 30 MB (bude uložen pouze lokálně ve tvém prohlížeči):');
-      if (!token) throw new Error('Pro nahrání souboru nad 30 MB je vyžadován GitHub token.');
-      token = token.trim();
-      localStorage.setItem('jw_github_token', token);
-    }
+async function uploadFileToGithub(file, onProgress) { return ghUploadChunked(file, onProgress); }
 
-    const owner = 'JendaNDT';
-    const repo = 'JendaWeb';
-    const filename = Date.now() + '_' + safeName(file.name);
-    
-    const chunkSize = 20 * 1024 * 1024; // 20 MB chunks
-    const totalChunks = Math.ceil(file.size / chunkSize);
-    const chunkUrls = [];
+/* ---------------- GitHub upload velkých souborů (> 30 MB, nad limit Supabase free 50 MB) ----------------
+   Soubor se rozseká na 20MB části; každá se commitne přes GitHub Contents API (api.github.com má CORS).
+   Web je při stažení zase slepí (viz apps-music.jsx). Zpevněno (20.06.2026): retry s exponenciálním
+   backoffem na rate-limit (403/429/5xx/síť), úklid částí při selhání, ověření tokenu předem,
+   pravdivé hlášení „už je živé" až po nasazení. */
+const GH_OWNER = 'JendaNDT';
+const GH_REPO = 'JendaWeb';
+const GH_API = 'https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO;
+const GH_TOKEN_KEY = 'jw_github_token';
+const GH_TOKEN_OK_KEY = 'jw_github_token_ok';
+const GH_CHUNK = 20 * 1024 * 1024; // 20 MB (pod limitem Contents API i po base64 expanzi)
 
-    // Pomocná funkce pro převedení blobu na base64
-    function readChunkAsBase64(blob) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const arr = reader.result.split(',');
-          resolve(arr[1] || '');
-        };
-        reader.onerror = () => reject(new Error('Chyba při čtení části souboru.'));
-        reader.readAsDataURL(blob);
-      });
-    }
+function ghSleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+function ghIsConnected() { return !!localStorage.getItem(GH_TOKEN_KEY) && localStorage.getItem(GH_TOKEN_OK_KEY) === '1'; }
+function ghForget() { localStorage.removeItem(GH_TOKEN_KEY); localStorage.removeItem(GH_TOKEN_OK_KEY); }
 
-    try {
-      for (let i = 0; i < totalChunks; i++) {
-        if (i > 0) {
-          // Čekání 1.5 sekundy pro zabránění překročení limitů GitHubu (secondary rate limit)
-          await new Promise(resolve => setTimeout(resolve, 1500));
-        }
-        const start = i * chunkSize;
-        const end = Math.min(start + chunkSize, file.size);
-        const chunkBlob = file.slice(start, end);
-        const chunkBase64 = await readChunkAsBase64(chunkBlob);
+// Ověří token: musí umět číst repo a mít právo zápisu (push).
+async function ghValidateToken(token) {
+  try {
+    const r = await fetch(GH_API, { headers: { Authorization: 'token ' + token, Accept: 'application/vnd.github+json' } });
+    if (!r.ok) return false;
+    const j = await r.json();
+    return !!(j && j.permissions && (j.permissions.push || j.permissions.maintain || j.permissions.admin));
+  } catch (e) { return false; }
+}
 
-        // Pokud je jen jeden chunk, název bude normální, jinak s příponou .partX
-        const chunkFilename = totalChunks === 1 ? filename : `${filename}.part${i}`;
-        const chunkPath = `binaries/${chunkFilename}`;
-        const chunkUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${chunkPath}`;
-
-        const body = {
-          message: `Upload binary part ${i + 1}/${totalChunks}: ${chunkFilename}`,
-          content: chunkBase64,
-          branch: 'main'
-        };
-
-        const partDownloadUrl = await new Promise((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          xhr.open('PUT', chunkUrl);
-          xhr.setRequestHeader('Authorization', 'token ' + token);
-          xhr.setRequestHeader('Content-Type', 'application/json');
-          xhr.setRequestHeader('Accept', 'application/vnd.github+json');
-
-          if (xhr.upload && onProgress) {
-            xhr.upload.onprogress = (e) => {
-              if (e.lengthComputable) {
-                const chunkProgress = (e.loaded / e.total) * 100;
-                const overallProgress = Math.round(((i + chunkProgress / 100) / totalChunks) * 100);
-                onProgress(overallProgress);
-              }
-            };
-          }
-
-          xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              resolve(`/binaries/${chunkFilename}`);
-            } else {
-              if (xhr.status === 401) {
-                localStorage.removeItem('jw_github_token');
-                reject({ status: 401, message: 'Unauthorized' });
-              } else {
-                reject(new Error(`Nahrávání na GitHub selhalo (${xhr.status}): ${xhr.responseText}`));
-              }
-            }
-          };
-
-          xhr.onerror = () => reject(new Error('Chyba sítě při nahrávání na GitHub.'));
-          xhr.send(JSON.stringify(body));
-        });
-
-        chunkUrls.push(partDownloadUrl);
-      }
-
-      return chunkUrls.length === 1 ? chunkUrls[0] : JSON.stringify(chunkUrls);
-
-    } catch (e) {
-      if (e.status === 401) {
-        localStorage.removeItem('jw_github_token');
-        alert('Neplatný nebo vypršelý GitHub token. Zadejte jej prosím znovu.');
-        continue;
-      }
-      throw e;
-    }
+// Vrátí platný token; když chybí/neplatný, jednou se zeptá a ověří. Pak se už neptá (uložené + flag).
+async function ensureGithubToken(force) {
+  const token = localStorage.getItem(GH_TOKEN_KEY);
+  if (token && !force) {
+    if (localStorage.getItem(GH_TOKEN_OK_KEY) === '1') return token;
+    if (await ghValidateToken(token)) { localStorage.setItem(GH_TOKEN_OK_KEY, '1'); return token; }
+    localStorage.removeItem(GH_TOKEN_OK_KEY);
   }
+  while (true) {
+    const entered = prompt('Vlož GitHub token (klasický, se zaškrtnutým oprávněním „repo") pro nahrávání souborů nad 30 MB.\nUloží se jen v tomto prohlížeči.');
+    if (entered === null) throw new Error('Nahrávání zrušeno — velký soubor vyžaduje GitHub token.');
+    const t = entered.trim();
+    if (!t) continue;
+    if (await ghValidateToken(t)) { localStorage.setItem(GH_TOKEN_KEY, t); localStorage.setItem(GH_TOKEN_OK_KEY, '1'); return t; }
+    alert('Token je neplatný nebo nemá právo zápisu do repa JendaWeb.\nPotřebuje klasický token se scope „repo". Zkus to znovu.');
+  }
+}
+
+function ghReadChunkBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => { const arr = String(reader.result).split(','); resolve(arr[1] || ''); };
+    reader.onerror = () => reject(new Error('Chyba při čtení části souboru.'));
+    reader.readAsDataURL(blob);
+  });
+}
+
+// Jeden PUT pokus přes XHR (kvůli progresu). Resolve i při chybě → o retry rozhoduje volající.
+function ghPutOnce(path, bodyObj, token, onFrac) {
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', GH_API + '/contents/' + path);
+    xhr.setRequestHeader('Authorization', 'token ' + token);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Accept', 'application/vnd.github+json');
+    if (xhr.upload && onFrac) { xhr.upload.onprogress = (e) => { if (e.lengthComputable) onFrac(e.loaded / e.total); }; }
+    xhr.onload = () => resolve({ status: xhr.status, text: xhr.responseText, header: (h) => xhr.getResponseHeader(h) });
+    xhr.onerror = () => resolve({ status: 0, text: 'network', header: () => null });
+    xhr.send(JSON.stringify(bodyObj));
+  });
+}
+
+// Kolik ms počkat před dalším pokusem (respektuje Retry-After / X-RateLimit-Reset, jinak exp. backoff + jitter).
+function ghRetryDelay(res, attempt) {
+  const ra = res.header && res.header('Retry-After');
+  if (ra) { const s = parseInt(ra, 10); if (!isNaN(s)) return Math.min(60000, (s + 1) * 1000); }
+  const remaining = res.header && res.header('X-RateLimit-Remaining');
+  const reset = res.header && res.header('X-RateLimit-Reset');
+  if (remaining === '0' && reset) { const ms = parseInt(reset, 10) * 1000 - Date.now(); if (ms > 0) return Math.min(60000, ms + 1500); }
+  return Math.min(60000, Math.round(1000 * Math.pow(2, attempt) + Math.random() * 1000));
+}
+
+async function ghGetSha(path, token) {
+  try {
+    const r = await fetch(GH_API + '/contents/' + path + '?ref=main', { headers: { Authorization: 'token ' + token, Accept: 'application/vnd.github+json' } });
+    if (r.ok) { const j = await r.json(); return j && j.sha ? j.sha : null; }
+  } catch (e) {}
+  return null;
+}
+
+async function ghDeleteFile(path, token) {
+  try {
+    const sha = await ghGetSha(path, token);
+    if (!sha) return;
+    await fetch(GH_API + '/contents/' + path, {
+      method: 'DELETE',
+      headers: { Authorization: 'token ' + token, 'Content-Type': 'application/json', Accept: 'application/vnd.github+json' },
+      body: JSON.stringify({ message: 'cleanup neúplného uploadu: ' + path, sha: sha, branch: 'main' }),
+    });
+  } catch (e) {}
+}
+
+// Nahraje jednu část s retry/backoffem. Vrací true, nebo hodí {auth:true} / Error.
+async function ghPutChunk(path, contentB64, message, token, onFrac) {
+  let sha = null;
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const body = { message: message, content: contentB64, branch: 'main' };
+    if (sha) body.sha = sha;
+    const res = await ghPutOnce(path, body, token, onFrac);
+    if (res.status >= 200 && res.status < 300) return true;
+    if (res.status === 401) { localStorage.removeItem(GH_TOKEN_OK_KEY); throw { auth: true }; }
+    if (res.status === 422 || res.status === 409) { sha = await ghGetSha(path, token); await ghSleep(ghRetryDelay(res, attempt)); continue; }
+    if (res.status === 403 || res.status === 429 || res.status === 0 || res.status >= 500) { await ghSleep(ghRetryDelay(res, attempt)); continue; }
+    throw new Error('GitHub odmítl část (' + res.status + '): ' + String(res.text || '').slice(0, 200));
+  }
+  throw new Error('Nahrání části opakovaně selhalo (nejspíš GitHub rate-limit). Zkus to za pár minut.');
+}
+
+async function ghUploadChunked(file, onProgress) {
+  const token = await ensureGithubToken();
+  const filename = Date.now() + '_' + safeName(file.name);
+  const totalChunks = Math.max(1, Math.ceil(file.size / GH_CHUNK));
+  const uploaded = []; // cesty v repu (pro úklid při selhání)
+  const partUrls = []; // veřejné cesty na webu
+  try {
+    for (let i = 0; i < totalChunks; i++) {
+      if (i > 0) await ghSleep(1200); // jemná pauza mezi commity (anti rate-limit)
+      const start = i * GH_CHUNK, end = Math.min(start + GH_CHUNK, file.size);
+      const b64 = await ghReadChunkBase64(file.slice(start, end));
+      const chunkName = totalChunks === 1 ? filename : filename + '.part' + i;
+      const path = 'binaries/' + chunkName;
+      await ghPutChunk(path, b64, 'Upload binary part ' + (i + 1) + '/' + totalChunks + ': ' + chunkName, token, (frac) => {
+        if (onProgress) onProgress(Math.round(((i + frac) / totalChunks) * 100));
+      });
+      uploaded.push(path);
+      partUrls.push('/binaries/' + chunkName);
+    }
+  } catch (e) {
+    for (const p of uploaded) { await ghDeleteFile(p, token); } // úklid odpadků
+    if (e && e.auth) { await ensureGithubToken(true); return ghUploadChunked(file, onProgress); }
+    throw (e instanceof Error ? e : new Error('Nahrávání na GitHub selhalo.'));
+  }
+  if (onProgress) onProgress(100);
+  return partUrls.length === 1 ? partUrls[0] : JSON.stringify(partUrls);
+}
+
+// Z uloženého odkazu (single path / JSON pole částí / Supabase URL / externí .apk) odvodit první URL + jméno.
+function binFirstUrl(link) {
+  if (!link || link === '#') return '';
+  try { if (link.charAt(0) === '[' && link.charAt(link.length - 1) === ']') { const a = JSON.parse(link); return a[0] || ''; } } catch (e) {}
+  return link;
+}
+function binNameFromLink(link) {
+  const first = binFirstUrl(link);
+  if (!first) return '';
+  try { return decodeURIComponent(String(first).split('/').pop() || '').replace(/^\d+_/, '').replace(/\.part\d+$/i, ''); } catch (e) { return ''; }
+}
+function isBinaryLink(link) {
+  return !!(link && link !== '#' && (
+    link.indexOf('/storage/v1/object/public/binaries/') !== -1 ||
+    link.indexOf('/binaries/') === 0 ||
+    (link.charAt(0) === '[' && link.indexOf('/binaries/') !== -1) ||
+    /\.(apk|zip|dmg|exe|tar\.gz|ipa|pkg)(?:\?.*)?$/i.test(link)
+  ));
+}
+
+// Nenásilně počká, až je první část živá na webu (po nasazení Vercelu). Vrací true/false.
+async function ghWaitLive(link) {
+  const first = binFirstUrl(link);
+  if (!first) return false;
+  const url = (first.charAt(0) === '/' ? location.origin : '') + first;
+  const deadline = Date.now() + 180000;
+  while (Date.now() < deadline) {
+    try { const r = await fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 'cb=' + Date.now(), { method: 'HEAD', cache: 'no-store' }); if (r.ok) return true; } catch (e) {}
+    await ghSleep(5000);
+  }
+  return false;
 }
 
 function uploadFile(bucket, folder, file, onProgress) {
@@ -528,6 +602,7 @@ function AppForm({ initial, onClose, onSaved, notify }) {
 
   const submit = async () => {
     if (!f.name.trim()) { notify('Zadej název aplikace', 'err'); return; }
+    const bigUpload = !!(appFile && appFile.size > 30 * 1024 * 1024);
     setBusy(true);
     try {
       let icon_url = f.icon_url;
@@ -567,13 +642,18 @@ function AppForm({ initial, onClose, onSaved, notify }) {
       };
       if (initial) await sbUpdate('apps', 'id', initial.id, row);
       else await sbInsert('apps', row);
-      notify('Aplikace uložena', 'ok'); onSaved();
+      onSaved();
+      if (bigUpload) {
+        notify('Uloženo ✓ — velký soubor se na web nasazuje (~1–2 min).', 'ok');
+        ghWaitLive(link).then((live) => { if (live) notify('Soubor je na webu živý ✓', 'ok'); });
+      } else { notify('Aplikace uložena', 'ok'); }
     } catch (e) { notify(e.message || 'Chyba při ukládání', 'err'); }
     finally { setBusy(false); setProg(-1); }
   };
 
-  const hasUploadedBin = f.link && f.link.includes('/storage/v1/object/public/binaries/');
-  const uploadedBinName = hasUploadedBin ? decodeURIComponent(f.link.split('/').pop().replace(/^\d+_/, '')) : '';
+  const hasUploadedBin = isBinaryLink(f.link);
+  const uploadedBinName = hasUploadedBin ? (binNameFromLink(f.link) || 'soubor') : '';
+  const uploadedBinHref = hasUploadedBin ? binFirstUrl(f.link) : '#';
 
   return (
     <Modal title={initial ? 'Upravit aplikaci' : 'Nová aplikace'} onClose={onClose}>
@@ -594,7 +674,7 @@ function AppForm({ initial, onClose, onSaved, notify }) {
         <FileDrop accept=".apk,.zip,.dmg,.exe,.tar.gz,.ipa,.pkg" file={appFile} onFile={setAppFile} label="Přetáhni instalační soubor, nebo klikni" />
         {hasUploadedBin && !appFile && (
           <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 12, color: 'var(--muted)' }}>Uložený soubor: <a href={f.link} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>{uploadedBinName}</a></span>
+            <span style={{ fontSize: 12, color: 'var(--muted)' }}>Uložený soubor: <a href={uploadedBinHref} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>{uploadedBinName}</a></span>
             <button type="button" className="btn btn-ghost btn-sm" style={{ padding: '2px 8px', fontSize: 11 }} onClick={() => set('link', '#')}>Odebrat soubor</button>
           </div>
         )}
@@ -1264,6 +1344,7 @@ function AdminApp({ session, onLogout }) {
   const [err, setErr] = useState('');
   const [toast, setToast] = useState(null);
   const [pw, setPw] = useState(false);
+  const [ghTick, setGhTick] = useState(0);
   const notify = useCallback((msg, type) => { setToast({ msg, type: type || 'ok' }); }, []);
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), 2600); return () => clearTimeout(t); }, [toast]);
 
@@ -1283,6 +1364,14 @@ function AdminApp({ session, onLogout }) {
   }, []);
   useEffect(() => { load(); }, [load]);
 
+  const ghConnected = ghIsConnected(); void ghTick;
+  const doGithub = async () => {
+    if (ghIsConnected()) {
+      if (window.confirm('Odpojit GitHub? Token se smaže z tohoto prohlížeče. Pro příští velký soubor ho zadáš znovu.')) { ghForget(); setGhTick((t) => t + 1); notify('GitHub odpojen', 'ok'); }
+      return;
+    }
+    try { await ensureGithubToken(true); setGhTick((t) => t + 1); notify('GitHub propojen ✓', 'ok'); } catch (e) {}
+  };
   const email = (session.user && session.user.email) || 'admin';
   return (
     <div style={Object.assign({}, wrap, { maxWidth: 1080, marginTop: 26, paddingBottom: 60 })}>
@@ -1293,6 +1382,7 @@ function AdminApp({ session, onLogout }) {
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button className="btn btn-ghost btn-sm" onClick={() => downloadBackup(data)} disabled={!data} title="Stáhnout zálohu obsahu (JSON)">⬇ Záloha</button>
+          <button className="btn btn-ghost btn-sm" onClick={doGithub} title="GitHub token pro nahrávání souborů nad 30 MB (uloží se jen v tomto prohlížeči)">{ghConnected ? 'GitHub ✓' : 'Připojit GitHub'}</button>
           <button className="btn btn-ghost btn-sm" onClick={() => setPw(true)}>Změnit heslo</button>
           <button className="btn btn-ghost btn-sm" onClick={onLogout}>Odhlásit</button>
         </div>
