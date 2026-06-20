@@ -1,6 +1,6 @@
 # Supabase Backend — JendaWeb
 
-*Všech 5 fází hotové a NASAZENÉ (poslední aktualizace 20. 06. 2026, SW `jw-v81`): schéma + RLS + storage + seed + web čte z DB + `/admin` login + plný CRUD/upload. (Revize A/B/C 20. 06. 2026 byla čistě frontend/SEO/bezpečnostní hlavičky — žádná změna DB schématu.) Pozdější přírůstky: `albums.cover_url`, `site_config.strings`, `tracks.plays`, `tracks.likes`, `apps.likes` + RPC `increment_play`, `storage_usage`, `toggle_track_like`, `toggle_app_like`. (Plán: `UPLOAD_INTERFACE_PLAN.md` · stav: `PROJECT_STATUS.md`.)*
+*Všech 5 fází hotové a NASAZENÉ (poslední aktualizace 20. 06. 2026, SW `jw-v81`): schéma + RLS + storage + seed + web čte z DB + `/admin` login + plný CRUD/upload. (Revize A/B/C 20. 06. 2026 byla čistě frontend/SEO/bezpečnostní hlavičky — žádná změna DB schématu; stejně tak oprava dvojího file-dialogu v adminu z 20. 06. 2026 (admin.jsx?v=19) je čistě frontend, žádná DB změna.) Pozdější přírůstky: `albums.cover_url`, `site_config.strings`, `tracks.plays`, `tracks.likes`, `apps.likes` + RPC `increment_play`, `storage_usage`, `toggle_track_like`, `toggle_app_like`. (Plán: `UPLOAD_INTERFACE_PLAN.md` · stav: `PROJECT_STATUS.md`.)*
 
 ## Projekt
 - **Název:** jendaweb
