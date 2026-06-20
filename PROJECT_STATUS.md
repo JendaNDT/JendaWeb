@@ -15,6 +15,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 **Vše hotové a NASAZENÉ** — backend (1–2), web čte z DB (3), `/admin` login (4), správa obsahu (5), plnohodnotný CMS, dashboard Přehled, návštěvnost (GoatCounter). Detaily níž a v `SUPABASE_BACKEND.md`.
 
 ## ✅ Hotovo
+- **Zpevněné nahrávání velkých APK (>50 MB) v adminu (20. 06. 2026, NASAZENO — `admin.jsx`, commit `b6fce46`, bez SW bumpu):** Upload velkých souborů (chunky 20 MB přes GitHub Contents API, web je při stažení slepí) přepracován, ať nedělá „neplechu": (1) **retry + exponenciální backoff** na GitHub rate-limit (403/429), 5xx i síťové výpadky — respektuje `Retry-After`/`X-RateLimit-Reset`; (2) **úklid částí při selhání** (smaže už nahrané `.partX` → žádné osamocené odpadky v repu); (3) **pravdivé „hotovo"** — po nahrání hlásí „nasazuje se" a přepne na „už je živé", až je soubor reálně stažitelný (čeká na Vercel), takže netvrdí hotovo předčasně; (4) **token UX** — GitHub token se jednou ověří (GET repo + push právo) a uloží, pak už neotravuje; v hlavičce adminu je tlačítko **„Připojit GitHub / GitHub ✓"** (+ odpojení). Ověřeno Babel transpilací + 21 Node testů (backoff, parsování názvů, detekce odkazu). `admin.jsx` je online-only (mimo SW) → nasazeno **bez SW bumpu**, jedním commitem přes Contents API. **Zamítnuté cesty (ověřeno, ať se k nim nevracíme):** čistě prohlížečové GitHub **Releases** nejdou (`uploads.github.com` neposílá CORS hlavičky — změřeno), Supabase free je natvrdo **50 MB/soubor** (nezvedne se). Kdyby se Releases v budoucnu chtělo, šlo by to přes malou **Supabase Edge funkci** (256 MB/150 s) jako server-proxy s tokenem na serveru.
 - **Nahrávání velkých nativních aplikací přes Git/Vercel (20. 06. 2026, NASAZENO, SW `jw-v78`):**
   - Vyřešeno hostování velkých instalačních souborů (nad 50 MB), které naráží na limit bezplatného tarifu Supabase (50 MB/soubor).
   - Aplikace **Vandrák** (APK 51 MB) byla uložena přímo do projektu jako statický soubor pod `/binaries/vandrak.apk` (Vercel podporuje až 100 MB na soubor).
@@ -132,7 +133,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - **Bez build stepu:** JSX transpiluje Babel v prohlížeči. Nutný http server / hosting (`file://` nefunguje).
 - **Komunikace mezi soubory přes `window` globály** — pořadí skriptů v `index.html` se nesmí měnit.
 - **Web předpokládá nasazení v kořeni domény** — `sw.js`/manifest mají absolutní cesty (`/...`).
-- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v77`). `index.html` načítá `combined.jsx?v=<VERSION>` — proto bumpni `VERSION` i v `index.html` (drží se shodně se `sw.js`).
+- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v79`). `index.html` načítá `combined.jsx?v=<VERSION>` — proto bumpni `VERSION` i v `index.html` (drží se shodně se `sw.js`).
 - **Nepoužívat `scrollIntoView`** — místo toho `window.scrollTo({...})`.
 - **`handoff/` je starší 4souborová záloha**, ne aktuální verze.
 
