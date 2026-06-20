@@ -14,7 +14,8 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
   - Saved the APK file directly to the project at `/binaries/vandrak.apk` and copied the icon to `/icons/vandrak.png`.
   - Added the app to the Supabase database using relative links (`/binaries/vandrak.apk` and `/icons/vandrak.png`), enabling users to download directly from the `jenda.cool` domain.
   - Added the new app entries to the offline fallback seed in `data.js`.
-- **SW is now `jw-v78`.** Matches SW version in `index.html`.
+- **Hardened large-file upload in `/admin` (`admin.jsx`):** The >30 MB upload path (chunked 20 MB via the GitHub Contents API, reassembled client-side in `apps-music.jsx`) was reworked for reliability — exponential-backoff retry on GitHub rate-limits (403/429), 5xx and network errors (honoring `Retry-After`/`X-RateLimit-Reset`); cleanup of already-committed `.partN` chunks when an upload fails (no orphan files left in the repo); a truthful success flow that reports "deploying…" then "live" only once the file is actually downloadable (waits for Vercel); and one-time GitHub-token validation with a **Připojit GitHub / GitHub ✓** control in the admin header (no more repeated prompts). Admin is online-only (not in the SW), so this shipped **without an SW bump**, via a single Contents-API commit (`b6fce46`). Ruled out (measured): pure-browser GitHub **Releases** upload is impossible (`uploads.github.com` sends no CORS headers); Supabase Free is hard-capped at 50 MB/file. A Supabase Edge Function proxy could do Releases if ever wanted.
+- **SW is now `jw-v79`.** Matches SW version in `index.html`.
 
 ## Recent updates (19 Jun 2026)
 
