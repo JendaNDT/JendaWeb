@@ -10,6 +10,7 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
 
 ## Recent updates (20 Jun 2026)
 
+- **Hidden admin entry + back-to-site link (`jw-v82`, `admin.jsx?v=20`, commit `d2547ba`):** The public site opens `/admin` via **5 quick clicks/taps on the "jenda.cool" logo** in the nav (within 1.2 s) → redirects to `/admin.html` (`onLogoTap` in `nav-hero.jsx`; works on mobile + desktop, undiscoverable by accident, and the admin is login-protected anyway). Reverse direction: the admin header gained an **"↗ Web"** link and the login screen a subtle **"↗ Zpět na web"** (`admin.jsx`). This is convenience, **not security** — hiding the entry gates nothing; the Supabase Auth login does. `combined.jsx` rebuilt, SW bumped `jw-v81 → jw-v82` (in `sw.js` + `index.html`). Verified via Babel transpile of `combined.jsx` + `admin.jsx`.
 - **Admin double file-dialog fix (`admin.jsx?v=19`, commit `e5198d0`):** In `/admin`, clicking a `FileDrop` upload area (app installer, icon, track audio/cover, album cover) opened the OS file picker **twice**. Root cause: `FileDrop` renders inside a `Field`, whose wrapper element is a `<label class="fld">`, and the hidden `<input type=file>` is that label's first labelable descendant (`label.control === input`) — so a real click fires the input **natively via label activation** *and* the div's `onClick` also calls `inp.current.click()` = two dialogs. Fix: `onClick={(e)=>{ e.preventDefault(); if(inp.current) inp.current.click(); }}` on both `.drop` handlers (`FileDrop` + `BulkUpload`); `preventDefault` cancels the label's native activation, leaving the single explicit open. Verified live via Claude-in-Chrome (pre-fix = 2 input click-events on a trusted click; post-fix = `defaultPrevented` + exactly 1). An earlier `stopPropagation` attempt (`v=18`, `211e58d`) targeted a non-existent click-bubbling cause and did not help. Admin is online-only → no SW bump.
 - **Large App Hosting via Git/Vercel:** Enabled hosting for large native Android applications (like Vandrák, 51 MB) that exceed the Supabase free tier file size limit (50 MB).
   - Saved the APK file directly to the project at `/binaries/vandrak.apk` and copied the icon to `/icons/vandrak.png`.
@@ -76,7 +77,7 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 - **GitHub:** `JendaNDT/JendaWeb`, branch `main`.
 - **Vercel:** connected to the repo. **Push to `main` auto-deploys.** Framework preset "Other" (pure static, no build).
 - The site assumes deployment at the **domain root** — `sw.js` and the manifest use absolute paths (`/...`). A subpath deploy would need path tweaks.
-- After changing any cached asset, **bump `VERSION` in both `sw.js` and `index.html`** (currently `jw-v81`) so clients pick up new content. (`index.html` loads `combined.jsx?v=<VERSION>`, so the two must stay in sync.)
+- After changing any cached asset, **bump `VERSION` in both `sw.js` and `index.html`** (currently `jw-v82`) so clients pick up new content. (`index.html` loads `combined.jsx?v=<VERSION>`, so the two must stay in sync.)
 - `/admin` is routed via `vercel.json` (rewrite `/admin` → `/admin.html`) and served **online-only** (SW bypasses cache for it) with `Cache-Control: no-store` headers so it's never stale.
 - **Pushing from the sandbox:** the mounted working copy's `.git` can't take git writes (lock files). **Fast path (used since 20 Jun 2026):** push directly via the GitHub REST API with the `ghp_` PAT in `Token/Token .rtf` — a single text file via the Contents API (`GET …/contents/<path>?ref=main` for its `sha` → `PUT` with base64 `content` + `sha`), or **many files in one commit** via the Git Data API (create blobs for binaries → `POST /git/trees` with `base_tree` → `POST /git/commits` → `PATCH /git/refs/heads/main`). No clone needed. (Older path: fresh `git clone` in `/tmp`, copy files, commit, `git push https://<token>@github.com/...`.) Token is gitignored, never committed. Always verify the deploy landed (Vercel occasionally misses the webhook; the PNG/asset URL can briefly 404 from CDN negative-cache — re-request with a cache-bust) and that no caches serve stale files.
 
@@ -106,7 +107,7 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 │   ├── fonts.css           # @font-face for self-hosted fonts
 │   └── fonts/              # Syne + DM Sans (woff2/woff, latin + latin-ext subset)
 ├── icons/                  # PNG app icons 180/192/512 (iOS apple-touch + maskable)
-├── sw.js                   # Service worker (jw-v81; precache shell + latin-ext fonts, network-first HTML, /admin online-only)
+├── sw.js                   # Service worker (jw-v82; precache shell + latin-ext fonts, network-first HTML, /admin online-only)
 ├── manifest.webmanifest    # PWA manifest (icons point to icons/*.png)
 ├── og-image.png            # 1200×630 social card (PNG — what og:image/twitter:image point to); og-image.svg kept as source
 ├── robots.txt · sitemap.xml · feed.xml · 404.html · embed.html
@@ -140,7 +141,7 @@ To optimize mobile performance (bypassing the heavy 3.1 MB Babel Standalone comp
 - **Script Loading in `index.html`:**
   React, React-DOM, `data.js` and `supabase-data.js` are loaded in `<head>` using the `defer` attribute.
   At the end of `<body>`, a custom caching loader runs inside a `DOMContentLoaded` event listener:
-  1. It checks if `localStorage` contains compiled scripts for the current version tag (`jw-v81`; `VERSION` is defined in **both** `sw.js` and `index.html` and the two must match).
+  1. It checks if `localStorage` contains compiled scripts for the current version tag (`jw-v82`; `VERSION` is defined in **both** `sw.js` and `index.html` and the two must match).
   2. **Cache Hit:** Executes the compiled JS directly from `localStorage`, cutting Babel compile time to 0 ms.
   3. **Cache Miss / Version Mismatch:** Clears old cache keys, dynamically appends `<script src="vendor/babel.min.js">`, fetches **`combined.jsx?v=<VERSION>`** (version in the URL so a stale SW cache can't serve old content for a new version), transpiles it in-browser, saves the compiled output to `localStorage`, and executes it.
 
@@ -236,6 +237,7 @@ The giscus comments block was an unfinished placeholder and has been **removed**
 - **Visualizer modes** — V cycles bars / radial / mirror.
 - **Play counts (global)** — each time a track starts, the player calls the Supabase `increment_play(track_id)` RPC (once per track per visit) which bumps `tracks.plays`. Shown as "▶ N×" on tracks, in the **Most Played** section, and "přehrání celkem" in admin Přehled. The old per-browser `localStorage.jw_plays` still updates but the site reads the global DB value (`window.TRACKS_DATA[].plays`).
 - **Most Played section** — reads global `tracks.plays` (via `window.TRACKS_DATA`), hidden if all zero.
+- **Hidden admin entry** — clicking the nav "jenda.cool" logo **5× within 1.2 s** navigates to `/admin` (`onLogoTap` in `nav-hero.jsx`); the admin header has a **"↗ Web"** link and the login screen a **"↗ Zpět na web"** link back. Obscurity only — the real gate is the Supabase Auth login.
 - **Audio-reactive + parallax background** — `BackgroundFX`, see the Background section above.
 - **Full-screen player visualization** — `GeoViz` (`player-expand.jsx`): morphing geometric dots+links behind the expanded player, centered on the cover, filling the screen. Desktop reacts to the real spectrum (`window.__jwAnalyser`); mobile is time-driven (no FFT). Always-on ambient layer, distinct from the `V` waveform modes. Like `BackgroundFX`, its rAF pauses in a hidden tab — verify the math via a Node check, not a background browser tab.
 
@@ -259,4 +261,4 @@ The giscus comments block was an unfinished placeholder and has been **removed**
 
 > **Done (was "next phase"):** the content **upload interface** (login-protected `/admin`) backed by **Supabase** (database + auth + file storage) is **built and live** — music, apps, images and texts are managed via forms with file upload instead of editing `data.js`. Original spec: **`UPLOAD_INTERFACE_PLAN.md`**; backend details: **`SUPABASE_BACKEND.md`**; current state: **`PROJECT_STATUS.md`**.
 
-— Maintained for the Cowork + GitHub/Vercel workflow. Last updated 20 Jun 2026 (SW `jw-v81`; admin `admin.jsx?v=19`).
+— Maintained for the Cowork + GitHub/Vercel workflow. Last updated 20 Jun 2026 (SW `jw-v82`; admin `admin.jsx?v=20`).
