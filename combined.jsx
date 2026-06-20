@@ -1538,7 +1538,7 @@ function AppsSection({ lang }) {
 function AppDetailModal({ app, lang, onClose, onShare }) {
   const isPWA = app.platform === 'PWA';
   const caseStudyUrl = window.CASE_STUDIES?.[app.id] || app.case_study_url;
-  const isDownload = app.link && (app.link.includes('/storage/v1/object/public/binaries/') || /\.(apk|zip|dmg|exe|tar\.gz|ipa|pkg)(?:\?.*)?$/i.test(app.link));
+  const isDownload = app.link && (app.link.includes('/storage/v1/object/public/binaries/') || app.link.startsWith('[') || /\.(apk|zip|dmg|exe|tar\.gz|ipa|pkg)(?:\?.*)?$/i.test(app.link));
   
   const [liked, setLiked] = __useS(() => window.isItemLiked(window.LIKES_APPS_KEY, app.id));
   const [likeCount, setLikeCount] = __useS(app.likes || 0);
@@ -1566,15 +1566,52 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
     return () => { document.body.style.overflow = ''; };
   }, []);
 
-  const handleLaunch = (e) => {
+  const handleLaunch = async (e) => {
     e.stopPropagation();
     if (isDownload) {
-      const a = document.createElement('a');
-      a.href = app.link;
-      a.download = '';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      let urls = [];
+      if (app.link.startsWith('[') && app.link.endsWith(']')) {
+        try {
+          urls = JSON.parse(app.link);
+        } catch (err) {
+          urls = [app.link];
+        }
+      } else {
+        urls = [app.link];
+      }
+
+      if (urls.length > 1) {
+        try {
+          const blobs = [];
+          for (const url of urls) {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`Chyba při stahování části: ${res.statusText}`);
+            blobs.push(await res.blob());
+          }
+          const combinedBlob = new Blob(blobs, { type: 'application/octet-stream' });
+          const blobUrl = URL.createObjectURL(combinedBlob);
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          let originalName = urls[0].split('/').pop();
+          originalName = originalName.replace(/^\d+_/g, '');
+          originalName = originalName.replace(/\.part\d+/g, '');
+          
+          a.download = originalName;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+        } catch (err) {
+          alert('Stažení aplikace selhalo: ' + err.message);
+        }
+      } else {
+        const a = document.createElement('a');
+        a.href = urls[0];
+        a.download = '';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
     } else {
       window.open(app.link, '_blank');
     }

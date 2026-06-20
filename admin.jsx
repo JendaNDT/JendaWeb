@@ -88,8 +88,8 @@ async function uploadFileToGithub(file, onProgress) {
   while (true) {
     let token = localStorage.getItem('jw_github_token');
     if (!token) {
-      token = prompt('Zadej svůj klasický GitHub token pro nahrávání souborů nad 50 MB (bude uložen pouze lokálně ve tvém prohlížeči):');
-      if (!token) throw new Error('Pro nahrání souboru nad 50 MB je vyžadován GitHub token.');
+      token = prompt('Zadej svůj klasický GitHub token pro nahrávání souborů nad 30 MB (bude uložen pouze lokálně ve tvém prohlížeči):');
+      if (!token) throw new Error('Pro nahrání souboru nad 30 MB je vyžadován GitHub token.');
       token = token.trim();
       localStorage.setItem('jw_github_token', token);
     }
@@ -97,60 +97,80 @@ async function uploadFileToGithub(file, onProgress) {
     const owner = 'JendaNDT';
     const repo = 'JendaWeb';
     const filename = Date.now() + '_' + safeName(file.name);
-    const path = `binaries/${filename}`;
-    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    
+    const chunkSize = 20 * 1024 * 1024; // 20 MB chunks
+    const totalChunks = Math.ceil(file.size / chunkSize);
+    const chunkUrls = [];
 
-    // Převedení souboru na Base64 pro GitHub API
-    const base64Content = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const arr = reader.result.split(',');
-        resolve(arr[1] || '');
-      };
-      reader.onerror = () => reject(new Error('Chyba při čtení souboru.'));
-      reader.readAsDataURL(file);
-    });
-
-    const body = {
-      message: `Upload binary: ${filename}`,
-      content: base64Content,
-      branch: 'main'
-    };
+    // Pomocná funkce pro převedení blobu na base64
+    function readChunkAsBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const arr = reader.result.split(',');
+          resolve(arr[1] || '');
+        };
+        reader.onerror = () => reject(new Error('Chyba při čtení části souboru.'));
+        reader.readAsDataURL(blob);
+      });
+    }
 
     try {
-      const downloadUrl = await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('PUT', url);
-        xhr.setRequestHeader('Authorization', 'token ' + token);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.setRequestHeader('Accept', 'application/vnd.github+json');
+      for (let i = 0; i < totalChunks; i++) {
+        const start = i * chunkSize;
+        const end = Math.min(start + chunkSize, file.size);
+        const chunkBlob = file.slice(start, end);
+        const chunkBase64 = await readChunkAsBase64(chunkBlob);
 
-        if (xhr.upload && onProgress) {
-          xhr.upload.onprogress = (e) => {
-            if (e.lengthComputable) {
-              onProgress(Math.round((e.loaded / e.total) * 100));
-            }
-          };
-        }
+        // Pokud je jen jeden chunk, název bude normální, jinak s příponou .partX
+        const chunkFilename = totalChunks === 1 ? filename : `${filename}.part${i}`;
+        const chunkPath = `binaries/${chunkFilename}`;
+        const chunkUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${chunkPath}`;
 
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve(`/binaries/${filename}`);
-          } else {
-            if (xhr.status === 401) {
-              localStorage.removeItem('jw_github_token');
-              reject({ status: 401, message: 'Unauthorized' });
-            } else {
-              reject(new Error(`Nahrávání na GitHub selhalo (${xhr.status}): ${xhr.responseText}`));
-            }
-          }
+        const body = {
+          message: `Upload binary part ${i + 1}/${totalChunks}: ${chunkFilename}`,
+          content: chunkBase64,
+          branch: 'main'
         };
 
-        xhr.onerror = () => reject(new Error('Chyba sítě při nahrávání na GitHub.'));
-        xhr.send(JSON.stringify(body));
-      });
+        const partDownloadUrl = await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('PUT', chunkUrl);
+          xhr.setRequestHeader('Authorization', 'token ' + token);
+          xhr.setRequestHeader('Content-Type', 'application/json');
+          xhr.setRequestHeader('Accept', 'application/vnd.github+json');
 
-      return downloadUrl;
+          if (xhr.upload && onProgress) {
+            xhr.upload.onprogress = (e) => {
+              if (e.lengthComputable) {
+                const chunkProgress = (e.loaded / e.total) * 100;
+                const overallProgress = Math.round(((i + chunkProgress / 100) / totalChunks) * 100);
+                onProgress(overallProgress);
+              }
+            };
+          }
+
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve(`/binaries/${chunkFilename}`);
+            } else {
+              if (xhr.status === 401) {
+                localStorage.removeItem('jw_github_token');
+                reject({ status: 401, message: 'Unauthorized' });
+              } else {
+                reject(new Error(`Nahrávání na GitHub selhalo (${xhr.status}): ${xhr.responseText}`));
+              }
+            }
+          };
+
+          xhr.onerror = () => reject(new Error('Chyba sítě při nahrávání na GitHub.'));
+          xhr.send(JSON.stringify(body));
+        });
+
+        chunkUrls.push(partDownloadUrl);
+      }
+
+      return chunkUrls.length === 1 ? chunkUrls[0] : JSON.stringify(chunkUrls);
 
     } catch (e) {
       if (e.status === 401) {
@@ -164,7 +184,7 @@ async function uploadFileToGithub(file, onProgress) {
 }
 
 function uploadFile(bucket, folder, file, onProgress) {
-  if (file.size > 50 * 1024 * 1024) {
+  if (file.size > 30 * 1024 * 1024) {
     return uploadFileToGithub(file, onProgress);
   }
   return new Promise((resolve, reject) => {
