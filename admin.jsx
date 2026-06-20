@@ -389,7 +389,7 @@ function FileDrop({ accept, file, onFile, label }) {
       onDragOver={(e) => { e.preventDefault(); setOver(true); }}
       onDragLeave={() => setOver(false)}
       onDrop={(e) => { e.preventDefault(); setOver(false); if (e.dataTransfer.files[0]) onFile(e.dataTransfer.files[0]); }}>
-      <input ref={inp} type="file" accept={accept} style={{ display: 'none' }}
+      <input ref={inp} type="file" accept={accept} style={{ display: 'none' }} onClick={(e) => e.stopPropagation()}
         onChange={(e) => { if (e.target.files[0]) onFile(e.target.files[0]); }} />
       {file ? ('📎 ' + file.name) : (label || 'Přetáhni sem soubor, nebo klikni')}
     </div>
@@ -1017,7 +1017,7 @@ function BulkUpload({ albums, notify, onClose, onDone }) {
       <div className="drop" onClick={() => inp.current && inp.current.click()}
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); add(e.dataTransfer.files); }}>
-        <input ref={inp} type="file" accept="audio/*" multiple style={{ display: 'none' }} onChange={(e) => add(e.target.files)} />
+        <input ref={inp} type="file" accept="audio/*" multiple style={{ display: 'none' }} onClick={(e) => e.stopPropagation()} onChange={(e) => add(e.target.files)} />
         Přetáhni sem víc mp3, nebo klikni (název skladby = název souboru)
       </div>
       {files.length > 0 && <div className="filelist">{files.map((f, i) => <div key={i}>{f.name}</div>)}</div>}
