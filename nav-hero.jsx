@@ -202,6 +202,21 @@ function BackgroundFX() {
 function Nav({ lang, setLang, mode, setMode }) {
   const [scrolled, setScrolled] = __useState_nh(false);
   const [active, setActive]     = __useState_nh('hero');
+
+  // Skrytý vstup do administrace: 5× rychle kliknout na logo (do 1,2 s) → /admin
+  const logoTaps  = __useRef_nh(0);
+  const logoTimer = __useRef_nh(null);
+  const onLogoTap = () => {
+    logoTaps.current += 1;
+    if (logoTimer.current) clearTimeout(logoTimer.current);
+    logoTimer.current = setTimeout(() => { logoTaps.current = 0; }, 1200);
+    if (logoTaps.current >= 5) {
+      logoTaps.current = 0;
+      clearTimeout(logoTimer.current);
+      window.location.href = 'admin.html';
+    }
+  };
+
   __useEffect_nh(() => {
     const ids = ['apps', 'music', 'contact'];
     const fn = () => {
@@ -263,7 +278,7 @@ function Nav({ lang, setLang, mode, setMode }) {
 
   return (
     <nav style={s.nav}>
-      <a href="#hero" style={s.logo}>jenda.cool</a>
+      <a href="#hero" style={s.logo} onClick={onLogoTap}>jenda.cool</a>
       <div className="nav-desktop" style={{ display:'flex', gap:36, alignItems:'center' }}>
         {links.map(l => {
           const on = active === l.href.slice(1);

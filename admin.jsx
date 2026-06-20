@@ -1380,6 +1380,7 @@ function AdminApp({ session, onLogout }) {
           <div style={{ color: 'var(--muted)', fontSize: 13 }}>{email}</div>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <a className="btn btn-ghost btn-sm" href="/" title="Otevřít veřejný web" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}>↗ Web</a>
           <button className="btn btn-ghost btn-sm" onClick={() => downloadBackup(data)} disabled={!data} title="Stáhnout zálohu obsahu (JSON)">⬇ Záloha</button>
           <button className="btn btn-ghost btn-sm" onClick={doGithub} title="GitHub token pro nahrávání souborů nad 30 MB (uloží se jen v tomto prohlížeči)">{ghConnected ? 'GitHub ✓' : 'Připojit GitHub'}</button>
           <button className="btn btn-ghost btn-sm" onClick={() => setPw(true)}>Změnit heslo</button>
@@ -1425,6 +1426,7 @@ function LoginView({ onLogin }) {
       <div style={{ textAlign: 'center', marginBottom: 26 }}>
         <div className="syne" style={{ fontSize: 30, fontWeight: 800, background: 'linear-gradient(120deg, var(--a1), var(--a2))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>JendaWeb</div>
         <div style={{ color: 'var(--muted)', fontSize: 14, marginTop: 4 }}>Administrace obsahu</div>
+        <a href="/" title="Otevřít veřejný web" style={{ color: 'var(--muted)', fontSize: 13, marginTop: 10, display: 'inline-block', textDecoration: 'none' }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--a1)'} onMouseLeave={(e) => e.currentTarget.style.color = 'var(--muted)'}>↗ Zpět na web</a>
       </div>
       <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 12, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', padding: 22 }}>
         <Field label="E-mail"><input type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ty@email.cz" /></Field>
