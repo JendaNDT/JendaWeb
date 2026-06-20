@@ -10,6 +10,7 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
 
 ## Recent updates (20 Jun 2026)
 
+- **Admin double file-dialog fix (`admin.jsx?v=19`, commit `e5198d0`):** In `/admin`, clicking a `FileDrop` upload area (app installer, icon, track audio/cover, album cover) opened the OS file picker **twice**. Root cause: `FileDrop` renders inside a `Field`, whose wrapper element is a `<label class="fld">`, and the hidden `<input type=file>` is that label's first labelable descendant (`label.control === input`) — so a real click fires the input **natively via label activation** *and* the div's `onClick` also calls `inp.current.click()` = two dialogs. Fix: `onClick={(e)=>{ e.preventDefault(); if(inp.current) inp.current.click(); }}` on both `.drop` handlers (`FileDrop` + `BulkUpload`); `preventDefault` cancels the label's native activation, leaving the single explicit open. Verified live via Claude-in-Chrome (pre-fix = 2 input click-events on a trusted click; post-fix = `defaultPrevented` + exactly 1). An earlier `stopPropagation` attempt (`v=18`, `211e58d`) targeted a non-existent click-bubbling cause and did not help. Admin is online-only → no SW bump.
 - **Large App Hosting via Git/Vercel:** Enabled hosting for large native Android applications (like Vandrák, 51 MB) that exceed the Supabase free tier file size limit (50 MB).
   - Saved the APK file directly to the project at `/binaries/vandrak.apk` and copied the icon to `/icons/vandrak.png`.
   - Added the app to the Supabase database using relative links (`/binaries/vandrak.apk` and `/icons/vandrak.png`), enabling users to download directly from the `jenda.cool` domain.
@@ -258,4 +259,4 @@ The giscus comments block was an unfinished placeholder and has been **removed**
 
 > **Done (was "next phase"):** the content **upload interface** (login-protected `/admin`) backed by **Supabase** (database + auth + file storage) is **built and live** — music, apps, images and texts are managed via forms with file upload instead of editing `data.js`. Original spec: **`UPLOAD_INTERFACE_PLAN.md`**; backend details: **`SUPABASE_BACKEND.md`**; current state: **`PROJECT_STATUS.md`**.
 
-— Maintained for the Cowork + GitHub/Vercel workflow. Last updated 20 Jun 2026 (SW `jw-v81`).
+— Maintained for the Cowork + GitHub/Vercel workflow. Last updated 20 Jun 2026 (SW `jw-v81`; admin `admin.jsx?v=19`).
