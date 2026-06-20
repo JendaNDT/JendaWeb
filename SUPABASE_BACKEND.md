@@ -1,6 +1,6 @@
 # Supabase Backend — JendaWeb
 
-*Všech 5 fází hotové a NASAZENÉ (poslední aktualizace 19. 06. 2026, SW `jw-v77`): schéma + RLS + storage + seed + web čte z DB + `/admin` login + plný CRUD/upload. Pozdější přírůstky: `albums.cover_url`, `site_config.strings`, `tracks.plays`, `tracks.likes`, `apps.likes` + RPC `increment_play`, `storage_usage`, `toggle_track_like`, `toggle_app_like`. (Plán: `UPLOAD_INTERFACE_PLAN.md` · stav: `PROJECT_STATUS.md`.)*
+*Všech 5 fází hotové a NASAZENÉ (poslední aktualizace 20. 06. 2026, SW `jw-v81`): schéma + RLS + storage + seed + web čte z DB + `/admin` login + plný CRUD/upload. (Revize A/B/C 20. 06. 2026 byla čistě frontend/SEO/bezpečnostní hlavičky — žádná změna DB schématu.) Pozdější přírůstky: `albums.cover_url`, `site_config.strings`, `tracks.plays`, `tracks.likes`, `apps.likes` + RPC `increment_play`, `storage_usage`, `toggle_track_like`, `toggle_app_like`. (Plán: `UPLOAD_INTERFACE_PLAN.md` · stav: `PROJECT_STATUS.md`.)*
 
 ## Projekt
 - **Název:** jendaweb
@@ -30,7 +30,7 @@ Identity sekvence `apps`/`tracks` nastaveny za seed (apps→20, tracks→15), no
 ## Storage buckety
 - **`audio`** (veřejné čtení) — mp3/wav. Admin nahrává s cestou `tracks/{timestamp}_{název}` (XHR + progress).
 - **`images`** (veřejné čtení) — ikony aplikací + obálky alb, cesta `apps/{timestamp}_{název}`.
-- **`binaries`** (veřejné čtení) — instalační soubory aplikací (APK, ZIP atd.). Admin nahrává s cestou `apps/{timestamp}_{název}`.
+- **`binaries`** (veřejné čtení) — instalační soubory aplikací (APK, ZIP atd.) **do 30 MB**. Admin nahrává s cestou `apps/{timestamp}_{název}`. ⚠️ Větší soubory (Free tarif = max 50 MB/soubor) jdou **mimo Supabase** — admin je chunkovaně commitne přes GitHub Contents API do `/binaries/` v repu a web je při stažení slepí (viz „Zpevněné nahrávání velkých APK" v `PROJECT_STATUS.md` / `HANDOFF.md`).
 - Zápis jen `authenticated` (přes admin JWT). Pozn.: staré soubory se při přepsání zatím nemažou (viz TODO v `PROJECT_STATUS.md`).
 
 ## RLS (zabezpečení)

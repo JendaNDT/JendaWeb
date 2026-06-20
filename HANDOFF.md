@@ -4,7 +4,7 @@ Personal portfolio site for "Jenda — Vibe Coder & AI Music". A React SPA built
 
 Content is now managed through a **Supabase-backed CMS** (login-protected `/admin`): the site reads apps/albums/tracks/socials/texts from the database with an offline localStorage cache (`data.js` is the fallback seed). A full-page **audio-reactive + parallax** particle background (`BackgroundFX`) runs behind all content, and the full-screen player has its own audio-reactive geometric visualization (`GeoViz`). Backend specifics live in **`SUPABASE_BACKEND.md`**; current state + decisions in **`PROJECT_STATUS.md`**.
 
-- **Live:** https://jenda-web.vercel.app · **Admin:** https://jenda-web.vercel.app/admin
+- **Live:** https://jenda.cool (primary custom domain; `jenda-web.vercel.app` 307-redirects to it) · **Admin:** https://jenda.cool/admin
 - **Repo:** https://github.com/JendaNDT/JendaWeb — push to `main` → Vercel auto-deploys.
 - **Backend:** Supabase project `jendaweb` (ref `semdgbaearwhkhulkyts`, eu-central-1, free). Frontend uses the public anon/publishable key; writes are protected by RLS (locked to the admin uid). See `SUPABASE_BACKEND.md`.
 
@@ -15,7 +15,12 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
   - Added the app to the Supabase database using relative links (`/binaries/vandrak.apk` and `/icons/vandrak.png`), enabling users to download directly from the `jenda.cool` domain.
   - Added the new app entries to the offline fallback seed in `data.js`.
 - **Hardened large-file upload in `/admin` (`admin.jsx`):** The >30 MB upload path (chunked 20 MB via the GitHub Contents API, reassembled client-side in `apps-music.jsx`) was reworked for reliability — exponential-backoff retry on GitHub rate-limits (403/429), 5xx and network errors (honoring `Retry-After`/`X-RateLimit-Reset`); cleanup of already-committed `.partN` chunks when an upload fails (no orphan files left in the repo); a truthful success flow that reports "deploying…" then "live" only once the file is actually downloadable (waits for Vercel); and one-time GitHub-token validation with a **Připojit GitHub / GitHub ✓** control in the admin header (no more repeated prompts). Admin is online-only (not in the SW), so this shipped **without an SW bump**, via a single Contents-API commit (`b6fce46`). Ruled out (measured): pure-browser GitHub **Releases** upload is impossible (`uploads.github.com` sends no CORS headers); Supabase Free is hard-capped at 50 MB/file. A Supabase Edge Function proxy could do Releases if ever wanted.
-- **SW is now `jw-v79`.** Matches SW version in `index.html`.
+- **Code review (5 parallel agents) + fixes, batches A/B/C** — full findings in `REVIZE_KODU_2026-06-20.md` (in outputs), summary in `PROJECT_STATUS.md`. Verdict: healthy — `combined.jsx` byte-identical to source, data contract clean, no secret keys in the repo.
+  - **Batch A (SEO):** `robots.txt` repointed `jenda.dev`→`jenda.cool`; `sitemap.xml` expanded from 3 to **all 20 case studies** (+ `lastmod`); social card converted **SVG→PNG** (`og-image.png`, 1200×630, rendered from the brand Syne/DM Sans fonts), `og:image`/`twitter:image` repointed to it.
+  - **Batch B (robustness):** `AudioPlayer` now closes its `AudioContext` on unmount (was leaking on desktop after ~6 open/close cycles, killing the visualizer); the `q` (queue) shortcut stale-closure fixed (`app.jsx` effect deps); `embed.html` escapes track/album titles (was raw `innerHTML`) + sanitizes gradient colors; **security headers** added in `vercel.json` (`X-Content-Type-Options: nosniff`, `Referrer-Policy` globally; **`X-Frame-Options: DENY` + CSP `frame-ancestors 'none'` for `/admin`** — anti-clickjacking; `embed.html` stays framable); the app download button guards against double-click (in-flight lock + "Stahuji…") and single-file download uses `target=_blank`.
+  - **Batch C (a11y / SEO / leaks):** all 20 case studies got `rel=canonical` + OG/Twitter tags; the unfinished giscus placeholder was removed from the 3 that had it; `index.html` got `rel=canonical`; `feed.xml` trimmed of empty albums; `aria-label` added to like/share buttons; `useCountUp` now cancels its `requestAnimationFrame`; the `Nav` scroll handler is rAF-throttled; admin screenshot object-URL revoke fixed (was revoking on every change).
+  - **Deliberately deferred** (risk / needs Jenda's input): seek-slider keyboard, light/dark persistence + anti-flash via the tweak system, full modal focus-trap, JSON-LD `sameAs` (needs his profile URLs), analytics choice (GoatCounter vs Vercel), dropping the unused `site_strings` table, splash screens in the SW precache.
+- **SW is now `jw-v81`.** Matches SW version in `index.html`. (This session's chain: `jw-v79` = admin-only upload hardening (no bump needed, admin is online-only) → `jw-v80` = batch B → `jw-v81` = batch C.)
 
 ## Recent updates (19 Jun 2026)
 
@@ -70,9 +75,9 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 - **GitHub:** `JendaNDT/JendaWeb`, branch `main`.
 - **Vercel:** connected to the repo. **Push to `main` auto-deploys.** Framework preset "Other" (pure static, no build).
 - The site assumes deployment at the **domain root** — `sw.js` and the manifest use absolute paths (`/...`). A subpath deploy would need path tweaks.
-- After changing any cached asset, **bump `VERSION` in both `sw.js` and `index.html`** (currently `jw-v77`) so clients pick up new content. (`index.html` loads `combined.jsx?v=<VERSION>`, so the two must stay in sync.)
+- After changing any cached asset, **bump `VERSION` in both `sw.js` and `index.html`** (currently `jw-v81`) so clients pick up new content. (`index.html` loads `combined.jsx?v=<VERSION>`, so the two must stay in sync.)
 - `/admin` is routed via `vercel.json` (rewrite `/admin` → `/admin.html`) and served **online-only** (SW bypasses cache for it) with `Cache-Control: no-store` headers so it's never stale.
-- **Pushing from the sandbox:** the mounted working copy's `.git` can't take git writes (lock files), so deploys go via a fresh `git clone` in `/tmp`, copy the changed files in, commit, and `git push https://<token>@github.com/JendaNDT/JendaWeb.git HEAD:main`. Token is provided per-session (in `Token/`, gitignored), never stored. Verify the deploy actually landed (Vercel occasionally misses the webhook) and that no caches serve stale files.
+- **Pushing from the sandbox:** the mounted working copy's `.git` can't take git writes (lock files). **Fast path (used since 20 Jun 2026):** push directly via the GitHub REST API with the `ghp_` PAT in `Token/Token .rtf` — a single text file via the Contents API (`GET …/contents/<path>?ref=main` for its `sha` → `PUT` with base64 `content` + `sha`), or **many files in one commit** via the Git Data API (create blobs for binaries → `POST /git/trees` with `base_tree` → `POST /git/commits` → `PATCH /git/refs/heads/main`). No clone needed. (Older path: fresh `git clone` in `/tmp`, copy files, commit, `git push https://<token>@github.com/...`.) Token is gitignored, never committed. Always verify the deploy landed (Vercel occasionally misses the webhook; the PNG/asset URL can briefly 404 from CDN negative-cache — re-request with a cache-bust) and that no caches serve stale files.
 
 ## File map
 
@@ -82,7 +87,7 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 ├── data.js                 # Content seed (apps, albums, tracks, socials, strings, stats, config) — OFFLINE FALLBACK
 ├── supabase-data.js        # Plain JS: fetches content from Supabase REST → overrides window.* globals + localStorage cache
 ├── admin.html · admin.jsx  # /admin: login (Supabase Auth) + full CRUD + mp3/image upload + dashboard + analytics
-├── vercel.json             # Rewrite /admin → /admin.html + no-store headers for admin/sw
+├── vercel.json             # Rewrite /admin → /admin.html; no-store for admin/sw; nosniff+Referrer-Policy global; X-Frame-Options DENY + CSP frame-ancestors for /admin
 ├── app.jsx                 # Root App, lang/mode state, hash routing, keyboard shortcuts, <BackgroundFX/>
 ├── shared.jsx              # Themes, hooks (useInView, useCountUp), icons, base components, art generators
 ├── nav-hero.jsx            # Nav + Hero + BackgroundFX (full-page audio-reactive + parallax particle canvas)
@@ -100,15 +105,15 @@ Everything needed to boot — React, ReactDOM, Babel, fonts — is **local, same
 │   ├── fonts.css           # @font-face for self-hosted fonts
 │   └── fonts/              # Syne + DM Sans (woff2/woff, latin + latin-ext subset)
 ├── icons/                  # PNG app icons 180/192/512 (iOS apple-touch + maskable)
-├── sw.js                   # Service worker (jw-v77; precache shell + latin-ext fonts, network-first HTML, /admin online-only)
+├── sw.js                   # Service worker (jw-v81; precache shell + latin-ext fonts, network-first HTML, /admin online-only)
 ├── manifest.webmanifest    # PWA manifest (icons point to icons/*.png)
-├── og-image.svg            # 1200×630 social card
+├── og-image.png            # 1200×630 social card (PNG — what og:image/twitter:image point to); og-image.svg kept as source
 ├── robots.txt · sitemap.xml · feed.xml · 404.html · embed.html
 ├── PROJECT_STATUS.md       # Living project status (vibecoding tracker) — READ FIRST
 ├── HANDOFF.md              # This file
 ├── SUPABASE_BACKEND.md     # Backend: project ref, keys, schema, RLS, storage, RPC functions
 ├── UPLOAD_INTERFACE_PLAN.md# Original admin/Supabase spec (now implemented)
-├── case-studies/           # meditapp / beatcraft / chordlens + shared style.css (+ GoatCounter)
+├── case-studies/           # 20 case studies (.html) + shared style.css; each has rel=canonical + OG/Twitter + GoatCounter
 ├── Token/                  # GitHub token drop (gitignored — never committed)
 └── handoff/                # ⚠️ Frozen backup of the OLD 4-file version — NOT current, do not use
 ```
@@ -134,7 +139,7 @@ To optimize mobile performance (bypassing the heavy 3.1 MB Babel Standalone comp
 - **Script Loading in `index.html`:**
   React, React-DOM, `data.js` and `supabase-data.js` are loaded in `<head>` using the `defer` attribute.
   At the end of `<body>`, a custom caching loader runs inside a `DOMContentLoaded` event listener:
-  1. It checks if `localStorage` contains compiled scripts for the current version tag (`jw-v78`; `VERSION` is defined in **both** `sw.js` and `index.html` and the two must match).
+  1. It checks if `localStorage` contains compiled scripts for the current version tag (`jw-v81`; `VERSION` is defined in **both** `sw.js` and `index.html` and the two must match).
   2. **Cache Hit:** Executes the compiled JS directly from `localStorage`, cutting Babel compile time to 0 ms.
   3. **Cache Miss / Version Mismatch:** Clears old cache keys, dynamically appends `<script src="vendor/babel.min.js">`, fetches **`combined.jsx?v=<VERSION>`** (version in the URL so a stale SW cache can't serve old content for a new version), transpiles it in-browser, saves the compiled output to `localStorage`, and executes it.
 
@@ -199,9 +204,9 @@ To avoid Babel scope collisions each file destructures with unique names: `const
 | `window.CASE_STUDIES` | Map of `appId -> case study URL` (3 entries) |
 | `window.PUBLIC_STATS` / `window.BUILD_LOG` | Replace placeholder numbers/entries |
 
-Analytics are already wired — **GoatCounter** (`data-goatcounter` script in `index.html` + the case-study pages), shown in the admin **Návštěvnost** tab. (This replaced the earlier Plausible plan.) Still TODO in `index.html`: set OG meta tags to absolute URLs (`https://jenda-web.vercel.app/...`).
+Analytics are already wired — **GoatCounter** (`data-goatcounter` script in `index.html` + the case-study pages), shown in the admin **Návštěvnost** tab. (This replaced the earlier Plausible plan.) **Note:** MEMORY mentions Vercel Web Analytics was enabled on the dashboard but its script is **not** on the site — pick one (GoatCounter vs Vercel) if you want Vercel's numbers to register. OG/canonical are done: `og:image`/`twitter:image` → `https://jenda.cool/og-image.png`, `rel=canonical` on the home page and all 20 case studies.
 In **`sw.js`** (and matching **`index.html`**): bump `VERSION` on any cached-asset change.
-In **case study HTML**: uncomment giscus block + fill `data-repo` etc.
+The giscus comments block was an unfinished placeholder and has been **removed** from the case studies — re-add + configure (`data-repo`, ids from giscus.app) only if you actually want comments.
 
 ## Theming
 
@@ -253,4 +258,4 @@ In **case study HTML**: uncomment giscus block + fill `data-repo` etc.
 
 > **Done (was "next phase"):** the content **upload interface** (login-protected `/admin`) backed by **Supabase** (database + auth + file storage) is **built and live** — music, apps, images and texts are managed via forms with file upload instead of editing `data.js`. Original spec: **`UPLOAD_INTERFACE_PLAN.md`**; backend details: **`SUPABASE_BACKEND.md`**; current state: **`PROJECT_STATUS.md`**.
 
-— Maintained for the Cowork + GitHub/Vercel workflow. Last updated 16 Jun 2026.
+— Maintained for the Cowork + GitHub/Vercel workflow. Last updated 20 Jun 2026 (SW `jw-v81`).

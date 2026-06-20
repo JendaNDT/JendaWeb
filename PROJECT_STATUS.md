@@ -10,6 +10,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 **Celá administrace je hotová a živá — teď ji naplnit reálným obsahem.** Přihlas se na `/admin` a postupně doplň: reálná **mp3** ke skladbám (klidně hromadně přes „⇪ Hromadně mp3"), **obálky alb** + **ikony aplikací**, **reálné odkazy** aplikací a sociálních sítí (admin je hlídá štítkem „chybí odkaz"), případně hlavní texty webu. Vodítko je v záložce **Přehled** → sekce „k dokončení".
 
 **Budoucí vylepšení (nepovinné):** mazání starých souborů ze Storage při přepsání; oranžové barvy v grafu návštěvnosti (přes vlastní tmavé karty místo GoatCounter embedu).
+**Odložené nálezy z revize (20. 06. 2026 — viz nejnovější Hotovo + `REVIZE_KODU_2026-06-20.md`):** volba analytiky (GoatCounter vs avizovaný Vercel — skript Vercelu na webu zatím není); `sameAs` v JSON-LD (chce tvoje profilové odkazy); klávesnice u seek slideru; persistence + anti-flash light/dark přes tweak systém; focus-trap v modálech; drop nepoužívané tabulky `site_strings`; splash do SW precache.
 **Bezpečnost (15. 06. 2026 — pas hotový):** admin heslo změněno ✅; veřejná registrace v Supabase **vypnutá** (single-admin lockdown) ✅; audit repa i git historie čistý (žádné tajné klíče, na webu jen veřejný `anon`). GitHub token **ponecháváme** (není ve verzování ani historii, riziko jen lokální; `Token/` je v `.gitignore`, rotovat lze kdykoli). *Leaked password protection* (HIBP) je u Supabase jen na Pro → na free nezapínáme.
 
 **Vše hotové a NASAZENÉ** — backend (1–2), web čte z DB (3), `/admin` login (4), správa obsahu (5), plnohodnotný CMS, dashboard Přehled, návštěvnost (GoatCounter). Detaily níž a v `SUPABASE_BACKEND.md`.
@@ -70,7 +71,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - **Hero vizuál — silnější audio-reaktivita (15. 06. 2026, NASAZENO, commit `f49f76c`, SW `jw-v35`):** pozadí teď reaguje na hudbu výrazně líp — **detekce beatu** z basů (na náraz problikne jas, „nadechne" se celé souhvězdí a vyšle rozbíhavý prstenec), **částice navázané na konkrétní frekvence** (pole viditelně „tančí" napříč spektrem) a **úderný náběh / pomalé doznívání** (envelope). Ověřeno deterministicky v Node: poloměr částice silent→loud ≈ 4×, jas ≈ 5× (pak doznívá), beat vystřelí přesně na nárazy (4/4 kopáky). Pozn.: animace běží jen když je hero na obrazovce a karta aktivní (na pozadí se pauzuje kvůli baterii — proto „živý" test reaktivity nelze přes background-kartu změřit, proto Node).
 - **Reálné počty přehrání + audio-reaktivní hero (15. 06. 2026, NASAZENO, commit `4188e89`, SW `jw-v34`):** (1) **Počty přehrání** napojené na Supabase — sloupec `tracks.plays` + RPC `increment_play` (security definer, grant `anon`); web zvýší počítadlo při spuštění skladby (jednou na skladbu za návštěvu, optimisticky hned + zápis do DB). Sekce **„Nejvíce poslouchané"** a štítek **„▶ N×"** u skladby teď ukazují reálná globální čísla; admin **Přehled** má kartu **„přehrání celkem"** (+ nejhranější). (2) **Audio-reaktivní hero vizuál** — generativní „souhvězdí" částic na `<canvas>` za nadpisem; když hraje hudba, reaguje na ni přes sdílený analyser přehrávače (`window.__jwAnalyser` — basy nafouknou/rozzáří částice, výšky přidají rychlost a propojení), v klidu samo jemně pluje. Respektuje `prefers-reduced-motion`, pauzuje mimo obrazovku i na skryté kartě, ladí barvy dle motivu webu. Ověřeno živě přes Claude-in-Chrome (klik na přehrát → `plays` v DB +1, testovací hodnota vrácena na 0, žádné chyby v konzoli).
 - **Nasazeno živě na Vercel** (`jenda-web.vercel.app`) přes GitHub auto-deploy — push do `main` = automatický deploy
-- **Offline soběstačnost:** React/ReactDOM/Babel + fonty Syne/DM Sans hostované lokálně (`vendor/`), service worker precachuje celý boot (aktuálně `jw-v38`). Web nepotřebuje žádné CDN.
+- **Offline soběstačnost:** React/ReactDOM/Babel + fonty Syne/DM Sans hostované lokálně (`vendor/`), service worker precachuje celý boot (aktuálně `jw-v81`). Web nepotřebuje žádné CDN.
 - **PNG ikony pro iOS** (`icons/` 180/192/512, „J" v Syne, full-bleed = maskable i apple-touch)
 - **Hudební přehrávač s plnou výbavou:** mini, fullscreen expand (E), fronta (Q), vizualizér (V), audio analyzér (D), A/B loop, rychlost, shuffle, repeat
 - **Cmd+K vyhledávání** + bohaté klávesové zkratky (`?`)
@@ -136,7 +137,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - **Bez build stepu:** JSX transpiluje Babel v prohlížeči. Nutný http server / hosting (`file://` nefunguje).
 - **Komunikace mezi soubory přes `window` globály** — pořadí skriptů v `index.html` se nesmí měnit.
 - **Web předpokládá nasazení v kořeni domény** — `sw.js`/manifest mají absolutní cesty (`/...`).
-- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v79`). `index.html` načítá `combined.jsx?v=<VERSION>` — proto bumpni `VERSION` i v `index.html` (drží se shodně se `sw.js`).
+- **Po změně cachovaného souboru bumpni `VERSION` v `sw.js`** (teď `jw-v81`). `index.html` načítá `combined.jsx?v=<VERSION>` — proto bumpni `VERSION` i v `index.html` (drží se shodně se `sw.js`).
 - **Nepoužívat `scrollIntoView`** — místo toho `window.scrollTo({...})`.
 - **`handoff/` je starší 4souborová záloha**, ne aktuální verze.
 
@@ -153,7 +154,7 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 - `tweaks-panel.jsx` – panel nastavení
 - `vendor/` – lokální React/ReactDOM/Babel + fonty (offline) · `vendor/fonts.css`
 - `icons/` – PNG ikony 180/192/512
-- `sw.js` – service worker (`jw-v62`) · `manifest.webmanifest`
+- `sw.js` – service worker (`jw-v81`) · `manifest.webmanifest`
 - `player-expand.jsx` → `GeoViz` – celoobrazovková geometrická audio-reaktivní vizualizace (canvas, za obsahem expand přehrávače; desktop = reálné spektrum, mobil = time-driven)
 - `vendor/fonts.css` + `vendor/fonts/` – Syne + DM Sans, **latin + latin-ext** (latin-ext kvůli české diakritice), offline precache
 - `case-studies/` – 3 case studies + styly
