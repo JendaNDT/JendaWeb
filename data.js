@@ -22,6 +22,8 @@ window.APPS_DATA = [
   { id:18, name:'StepSaga',    platform:'Android', color:'#22c55e', cs:'Krokoměr s RPG příběhem – každý krok posouvá děj', en:'Pedometer with RPG story – every step advances the plot', link:'#' },
   { id:19, name:'FocusWave',   platform:'PWA',     color:'#a78bfa', cs:'Pomodoro časovač s adaptivní ambientní hudbou', en:'Pomodoro timer with adaptive ambient music', link:'#' },
   { id:20, name:'LangBridge',  platform:'Android', color:'#38bdf8', cs:'Překladač s hlasovým vstupem optimalizovaný pro cestování', en:'Voice translator optimized for travel', link:'#' },
+  { id:21, name:'KeepMind',    platform:'Android', color:'#a915f9', cs:'Připomínky vázané na lidi a místa. Upozorní vás, když dorazíte do cíle.', en:'Location-based reminders tied to your contacts. Never miss a task on the go.', link:'https://semdgbaearwhkhulkyts.supabase.co/storage/v1/object/public/binaries/apps/1781897532900_app-release.apk', icon_url:'https://semdgbaearwhkhulkyts.supabase.co/storage/v1/object/public/images/apps/1781887221914_ic_launcher_abyss.png', screenshots:['https://semdgbaearwhkhulkyts.supabase.co/storage/v1/object/public/images/apps/1781897534427_Screenshot_1781896990.png','https://semdgbaearwhkhulkyts.supabase.co/storage/v1/object/public/images/apps/1781897534836_Screenshot_1781896983.png'] },
+  { id:22, name:'Vandrák',     platform:'Android', color:'#E83A4A', cs:'Plánování a vedení outdoorových vandrů po ČR s offline mapami a AI asistentem.', en:'Outdoor hike planning and tracking across the Czech Republic with offline maps and AI assistant.', link:'/binaries/vandrak.apk', icon_url:'/icons/vandrak.png' },
 ];
 
 window.ALBUMS = [

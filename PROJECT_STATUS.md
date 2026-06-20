@@ -1,5 +1,5 @@
 # JendaWeb – Project Status
-*Naposled aktualizováno: 19. 06. 2026*
+*Naposled aktualizováno: 20. 06. 2026*
 
 ## 🎯 Co to je
 Osobní portfolio web „Jenda — vibe-coder & AI hudebník". Prezentuje appky + AI hudbu, vč. plnohodnotného hudebního přehrávače.
@@ -15,6 +15,12 @@ Stack: React 18 + ReactDOM, Babel Standalone (JSX se transpiluje přímo v prohl
 **Vše hotové a NASAZENÉ** — backend (1–2), web čte z DB (3), `/admin` login (4), správa obsahu (5), plnohodnotný CMS, dashboard Přehled, návštěvnost (GoatCounter). Detaily níž a v `SUPABASE_BACKEND.md`.
 
 ## ✅ Hotovo
+- **Nahrávání velkých nativních aplikací přes Git/Vercel (20. 06. 2026, NASAZENO, SW `jw-v78`):**
+  - Vyřešeno hostování velkých instalačních souborů (nad 50 MB), které naráží na limit bezplatného tarifu Supabase (50 MB/soubor).
+  - Aplikace **Vandrák** (APK 51 MB) byla uložena přímo do projektu jako statický soubor pod `/binaries/vandrak.apk` (Vercel podporuje až 100 MB na soubor).
+  - Ikona aplikace byla nakopírována do `/icons/vandrak.png` pro zobrazení přímo na doméně `jenda.cool`.
+  - Aplikace byla úspěšně vložena do databáze Supabase s relativními odkazy (`/binaries/vandrak.apk` a `/icons/vandrak.png`), čímž se stahuje přímo z domény webu bez externích přesměrování.
+  - Informace o aplikaci byly přidány také do offline fallback semínka v `data.js`.
 - **Anonymní hlasování / lajky (19. 06. 2026, NASAZENO, SW `jw-v77`):** Implementováno plnohodnotné anonymní hlasování (lajkování se srdíčky) pro hudební skladby a aplikace.
   - **Databáze:** Přidány sloupce `likes` do tabulek `apps` a `tracks` a SQL funkce `toggle_track_like` / `toggle_app_like` pro bezpečné přičítání/odečítání.
   - **Ukládání:** Klientská část využívá `localStorage` (`jw_liked_tracks`, `jw_liked_apps`) k prevenci dvojího hlasování a asynchronní RPC volání.

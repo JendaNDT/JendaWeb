@@ -8,6 +8,14 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
 - **Repo:** https://github.com/JendaNDT/JendaWeb — push to `main` → Vercel auto-deploys.
 - **Backend:** Supabase project `jendaweb` (ref `semdgbaearwhkhulkyts`, eu-central-1, free). Frontend uses the public anon/publishable key; writes are protected by RLS (locked to the admin uid). See `SUPABASE_BACKEND.md`.
 
+## Recent updates (20 Jun 2026)
+
+- **Large App Hosting via Git/Vercel:** Enabled hosting for large native Android applications (like Vandrák, 51 MB) that exceed the Supabase free tier file size limit (50 MB).
+  - Saved the APK file directly to the project at `/binaries/vandrak.apk` and copied the icon to `/icons/vandrak.png`.
+  - Added the app to the Supabase database using relative links (`/binaries/vandrak.apk` and `/icons/vandrak.png`), enabling users to download directly from the `jenda.cool` domain.
+  - Added the new app entries to the offline fallback seed in `data.js`.
+- **SW is now `jw-v78`.** Matches SW version in `index.html`.
+
 ## Recent updates (19 Jun 2026)
 
 - **Anonymous Likes/Voting System:** Integrated heart buttons for both apps and music tracks, with like counts stored in the database.
@@ -125,7 +133,7 @@ To optimize mobile performance (bypassing the heavy 3.1 MB Babel Standalone comp
 - **Script Loading in `index.html`:**
   React, React-DOM, `data.js` and `supabase-data.js` are loaded in `<head>` using the `defer` attribute.
   At the end of `<body>`, a custom caching loader runs inside a `DOMContentLoaded` event listener:
-  1. It checks if `localStorage` contains compiled scripts for the current version tag (`jw-v77`; `VERSION` is defined in **both** `sw.js` and `index.html` and the two must match).
+  1. It checks if `localStorage` contains compiled scripts for the current version tag (`jw-v78`; `VERSION` is defined in **both** `sw.js` and `index.html` and the two must match).
   2. **Cache Hit:** Executes the compiled JS directly from `localStorage`, cutting Babel compile time to 0 ms.
   3. **Cache Miss / Version Mismatch:** Clears old cache keys, dynamically appends `<script src="vendor/babel.min.js">`, fetches **`combined.jsx?v=<VERSION>`** (version in the URL so a stale SW cache can't serve old content for a new version), transpiles it in-browser, saves the compiled output to `localStorage`, and executes it.
 
