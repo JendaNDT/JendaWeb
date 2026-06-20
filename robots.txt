@@ -1,6 +1,6 @@
-# robots.txt for jenda.dev
+# robots.txt for jenda.cool
 User-agent: *
 Allow: /
 Disallow: /case-studies/style.css
 
-Sitemap: https://jenda.dev/sitemap.xml
+Sitemap: https://jenda.cool/sitemap.xml
