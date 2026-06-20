@@ -233,6 +233,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
   
   const [liked, setLiked] = __useS(() => window.isItemLiked(window.LIKES_APPS_KEY, app.id));
   const [likeCount, setLikeCount] = __useS(app.likes || 0);
+  const [downloading, setDownloading] = __useS(false);
 
   const handleLike = (e) => {
     e.stopPropagation();
@@ -260,6 +261,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
   const handleLaunch = async (e) => {
     e.stopPropagation();
     if (isDownload) {
+      if (downloading) return;
       let urls = [];
       if (app.link.startsWith('[') && app.link.endsWith(']')) {
         try {
@@ -272,6 +274,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
       }
 
       if (urls.length > 1) {
+        setDownloading(true);
         try {
           const blobs = [];
           for (const url of urls) {
@@ -294,11 +297,15 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
           setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
         } catch (err) {
           alert('Stažení aplikace selhalo: ' + err.message);
+        } finally {
+          setDownloading(false);
         }
       } else {
         const a = document.createElement('a');
         a.href = urls[0];
         a.download = '';
+        a.target = '_blank';
+        a.rel = 'noopener';
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -409,15 +416,16 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
           borderTop: '1px solid var(--border)', paddingTop: 18
         }}>
           {app.link && app.link !== '#' && (
-            <button onClick={handleLaunch} style={{
+            <button onClick={handleLaunch} disabled={downloading} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               padding: '11px 22px', borderRadius: 10, flex: '1 0 160px',
               background: app.color, color: '#fff', border: 'none',
               fontSize: 14, fontWeight: 700, transition: 'transform 0.2s, filter 0.2s',
-              cursor: 'pointer', boxShadow: `0 4px 14px ${app.color}40`, outline: 'none'
+              cursor: downloading ? 'wait' : 'pointer', opacity: downloading ? 0.7 : 1,
+              boxShadow: `0 4px 14px ${app.color}40`, outline: 'none'
             }} onMouseEnter={(e) => e.target.style.filter = 'brightness(1.1)'} onMouseLeave={(e) => e.target.style.filter = ''}>
               <DlIco />
-              {isPWA ? tx(lang, 'apps_open') : tx(lang, 'apps_dl')}
+              {downloading ? (lang === 'cs' ? 'Stahuji…' : 'Downloading…') : (isPWA ? tx(lang, 'apps_open') : tx(lang, 'apps_dl'))}
             </button>
           )}
 

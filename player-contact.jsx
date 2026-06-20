@@ -86,7 +86,14 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
     audioRef.current = new Audio();
     audioRef.current.crossOrigin = 'anonymous';
     audioRef.current.volume = vol;
-    return () => { if (audioRef.current) audioRef.current.pause(); };
+    return () => {
+      try { if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; } } catch (e) {}
+      try { if (sourceRef.current) sourceRef.current.disconnect(); } catch (e) {}
+      try { if (analyserRef.current) analyserRef.current.disconnect(); } catch (e) {}
+      try { if (audioCtxRef.current) audioCtxRef.current.close(); } catch (e) {}
+      if (window.__jwAnalyser === analyserRef.current) window.__jwAnalyser = null;
+      audioCtxRef.current = null; analyserRef.current = null; sourceRef.current = null;
+    };
   }, []);
 
   // Web Audio FFT setup (lazy — only on first play; MediaElementSource can only be created once)

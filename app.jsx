@@ -192,7 +192,7 @@ function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [showShortcuts]);
+  }, [showShortcuts, playlist, playerTrack]);
 
   const handlePlay = __useC_app((track, pl) => {
     if (playerTrack) historyRef.current = [...historyRef.current, playerTrack].slice(-30);
