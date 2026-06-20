@@ -96,62 +96,34 @@ async function uploadFileToGithub(file, onProgress) {
 
     const owner = 'JendaNDT';
     const repo = 'JendaWeb';
-    const tag = 'binaries';
+    const filename = Date.now() + '_' + safeName(file.name);
+    const path = `binaries/${filename}`;
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
-    async function ghReq(method, url, body, isUpload = false) {
-      const headers = {
-        'Authorization': 'token ' + token,
-        'Accept': 'application/vnd.github.v3+json'
+    // Převedení souboru na Base64 pro GitHub API
+    const base64Content = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const arr = reader.result.split(',');
+        resolve(arr[1] || '');
       };
-      if (!isUpload && body) {
-        headers['Content-Type'] = 'application/json';
-      }
-      const res = await fetch(url, {
-        method,
-        headers,
-        body: isUpload ? body : (body ? JSON.stringify(body) : undefined)
-      });
-      if (!res.ok) {
-        if (res.status === 401) {
-          localStorage.removeItem('jw_github_token');
-          throw { status: 401, message: 'Unauthorized' };
-        }
-        const errText = await res.text();
-        throw new Error(`Chyba GitHub API (${res.status}): ${errText}`);
-      }
-      return res.json();
-    }
+      reader.onerror = () => reject(new Error('Chyba při čtení souboru.'));
+      reader.readAsDataURL(file);
+    });
+
+    const body = {
+      message: `Upload binary: ${filename}`,
+      content: base64Content,
+      branch: 'main'
+    };
 
     try {
-      // 1. Získat nebo vytvořit Release pro binárky
-      let release = null;
-      try {
-        release = await ghReq('GET', `https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`);
-      } catch (e) {
-        if (e.status === 401) throw e;
-        if (e.message && e.message.includes('404')) {
-          release = await ghReq('POST', `https://api.github.com/repos/${owner}/${repo}/releases`, {
-            tag_name: tag,
-            name: 'App Binaries',
-            body: 'Binaries and installation files for portfolio apps.',
-            draft: false,
-            prerelease: false
-          });
-        } else {
-          throw e;
-        }
-      }
-
-      // 2. Nahrát soubor přes XHR pro podporu progress baru
-      const filename = Date.now() + '_' + safeName(file.name);
-      const uploadUrl = `https://uploads.github.com/repos/${owner}/${repo}/releases/${release.id}/assets?name=${encodeURIComponent(filename)}`;
-
       const downloadUrl = await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', uploadUrl);
+        xhr.open('PUT', url);
         xhr.setRequestHeader('Authorization', 'token ' + token);
-        xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
-        xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('Accept', 'application/vnd.github+json');
 
         if (xhr.upload && onProgress) {
           xhr.upload.onprogress = (e) => {
@@ -163,12 +135,7 @@ async function uploadFileToGithub(file, onProgress) {
 
         xhr.onload = () => {
           if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const data = JSON.parse(xhr.responseText);
-              resolve(data.browser_download_url);
-            } catch (err) {
-              reject(new Error('Chyba při čtení odpovědi z GitHubu: ' + err.message));
-            }
+            resolve(`/binaries/${filename}`);
           } else {
             if (xhr.status === 401) {
               localStorage.removeItem('jw_github_token');
@@ -180,7 +147,7 @@ async function uploadFileToGithub(file, onProgress) {
         };
 
         xhr.onerror = () => reject(new Error('Chyba sítě při nahrávání na GitHub.'));
-        xhr.send(file);
+        xhr.send(JSON.stringify(body));
       });
 
       return downloadUrl;
