@@ -385,7 +385,7 @@ function FileDrop({ accept, file, onFile, label }) {
   const inp = useRef(null);
   return (
     <div className={'drop' + (over ? ' over' : '')}
-      onClick={() => inp.current && inp.current.click()}
+      onClick={(e) => { e.preventDefault(); if (inp.current) inp.current.click(); }}
       onDragOver={(e) => { e.preventDefault(); setOver(true); }}
       onDragLeave={() => setOver(false)}
       onDrop={(e) => { e.preventDefault(); setOver(false); if (e.dataTransfer.files[0]) onFile(e.dataTransfer.files[0]); }}>
@@ -1014,7 +1014,7 @@ function BulkUpload({ albums, notify, onClose, onDone }) {
           {albums.map((a) => <option key={a.id} value={a.id}>{a.title}</option>)}
         </select>
       </Field>
-      <div className="drop" onClick={() => inp.current && inp.current.click()}
+      <div className="drop" onClick={(e) => { e.preventDefault(); if (inp.current) inp.current.click(); }}
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); add(e.dataTransfer.files); }}>
         <input ref={inp} type="file" accept="audio/*" multiple style={{ display: 'none' }} onClick={(e) => e.stopPropagation()} onChange={(e) => add(e.target.files)} />
