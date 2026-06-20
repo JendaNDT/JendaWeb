@@ -117,6 +117,10 @@ async function uploadFileToGithub(file, onProgress) {
 
     try {
       for (let i = 0; i < totalChunks; i++) {
+        if (i > 0) {
+          // Čekání 1.5 sekundy pro zabránění překročení limitů GitHubu (secondary rate limit)
+          await new Promise(resolve => setTimeout(resolve, 1500));
+        }
         const start = i * chunkSize;
         const end = Math.min(start + chunkSize, file.size);
         const chunkBlob = file.slice(start, end);
