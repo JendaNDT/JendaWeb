@@ -1298,7 +1298,13 @@ function Hero({ lang, onPlay }) {
 
         <div style={{ display:'flex', gap:56, justifyContent:'center', marginTop:80, flexWrap:'wrap' }}>
           {[
-            { num:(window.APPS_DATA||[]).length,   suffix:'', lbl: tx(lang,'stat_apps'),   href:'#apps' },
+            (() => {
+              const count = (window.APPS_DATA || []).filter(x => x.link && x.link !== '#').length;
+              const lbl = lang === 'cs'
+                ? (count >= 1 && count <= 4 ? 'aplikace' : 'aplikací')
+                : (count === 1 ? 'app' : 'apps');
+              return { num: count, suffix: '', lbl, href: '#apps' };
+            })(),
             { num:(window.TRACKS_DATA||[]).length, suffix:'', lbl: tx(lang,'stat_tracks'), href:'#music' },
             { num:(window.ALBUMS||[]).length,      suffix:'', lbl: tx(lang,'stat_albums'), href:'#music' },
           ].map(({ num, suffix, lbl, href }) => {
