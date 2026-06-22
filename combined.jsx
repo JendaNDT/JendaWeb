@@ -2065,6 +2065,9 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
   // zhasnuté obrazovce), uložíme sem její id → efekt na změnu skladby pak
   // znovu nenastavuje src/load (jinak by restartoval to, co už hraje).
   const primedTrackIdRef = __useR_pc(null);
+  // Přednačtení další skladby do skrytého <audio> → přechod nemá síťovou pauzu.
+  const prefetchRef = __useR_pc(null);   // skryté audio, jen nahřívá HTTP cache (nehraje)
+  const nextTrackRef = __useR_pc(null);  // „zamčená" další skladba — prefetch i přechod použijí TÚŽ (i u shuffle)
   // Mobil/iOS: přehrávej přímo z <audio> (ne přes Web Audio), ať hudba běží i při
   // zhasnuté obrazovce. iOS uspí AudioContext při zamčení → jinak by se zvuk zastavil.
   const isMobile = __useM_pc(() => {
@@ -2147,6 +2150,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
     audioRef.current.volume = vol;
     return () => {
       try { if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; } } catch (e) {}
+      try { if (prefetchRef.current) { prefetchRef.current.pause(); prefetchRef.current.removeAttribute('src'); prefetchRef.current.load(); prefetchRef.current = null; } } catch (e) {}
       try { if (sourceRef.current) sourceRef.current.disconnect(); } catch (e) {}
       try { if (analyserRef.current) analyserRef.current.disconnect(); } catch (e) {}
       try { if (audioCtxRef.current) audioCtxRef.current.close(); } catch (e) {}
@@ -2258,7 +2262,9 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
       // na stejném <audio> prvku → projde i při zamčené obrazovce (telefon nás
       // v tomhle okamžiku nechá jednat). React stav (UI, zámková obrazovka) pak
       // doženeme hned přes onNext(next), aby ukazoval správnou skladbu.
-      const next = (typeof getNext === 'function') ? getNext() : null;
+      // Použij přednačtenou skladbu (nextTrackRef) → je už nahřátá v cache =
+      // přechod bez síťové pauzy; a shoduje se s tím, co prefetch stáhl.
+      const next = nextTrackRef.current || ((typeof getNext === 'function') ? getNext() : null);
       if (next && next.audioUrl) {
         primedTrackIdRef.current = next.id;
         try { a.src = next.audioUrl; a.play().catch(() => {}); } catch {}
@@ -2274,6 +2280,23 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
       a.removeEventListener('ended', onEnded);
     };
   }, [initialPosition, onNext, getNext, repeat]);
+
+  // Přednačtení další skladby: nahřeje HTTP cache přes skryté (nehrající) <audio>,
+  // aby přechod po dohrání neměl síťovou pauzu. Další skladbu „zamkneme" do
+  // nextTrackRef, ať prefetch i samotný přechod sáhnou po TÉŽE (klíčové u shuffle —
+  // jinak by prefetch stáhl jinou náhodnou skladbu, než na kterou se pak přepne).
+  __useE_pc(() => {
+    if (!track || repeat === 'one') { nextTrackRef.current = null; return; }
+    const next = (typeof getNext === 'function') ? getNext() : null;
+    nextTrackRef.current = next;
+    if (next && next.audioUrl) {
+      try {
+        let p = prefetchRef.current;
+        if (!p) { p = prefetchRef.current = new Audio(); p.crossOrigin = 'anonymous'; p.preload = 'auto'; p.muted = true; }
+        if (p.getAttribute('src') !== next.audioUrl) { p.src = next.audioUrl; p.load(); }
+      } catch {}
+    }
+  }, [track?.id, getNext, repeat]);
 
   __useE_pc(() => {
     const a = audioRef.current; if (!a) return;
