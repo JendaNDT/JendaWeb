@@ -200,19 +200,27 @@ function App() {
   }, [playerTrack]);
 
   const currentIdx = __useM_app(() => playlist.findIndex(t => t.id === playerTrack?.id), [playerTrack, playlist]);
-  const handleNext = __useC_app(() => {
-    if (!playlist.length) return;
-    if (playerTrack) historyRef.current = [...historyRef.current, playerTrack].slice(-30);
+  // Čistě spočítá další skladbu (bez vedlejších efektů). Sdílené mezi tlačítkem
+  // „další", zámkovou obrazovkou a automatickým přechodem v přehrávači, ať se
+  // všichni shodnou na téže skladbě (důležité hlavně u shuffle).
+  const pickNextTrack = __useC_app(() => {
+    if (!playlist.length) return null;
     if (shuffle && playlist.length > 1) {
       let next; do { next = Math.floor(Math.random() * playlist.length); } while (next === currentIdx);
-      setPlayerTrack(playlist[next]); setPlaying(true); setInitialPos(0); return;
+      return playlist[next];
     }
-    if (currentIdx >= 0 && currentIdx < playlist.length - 1) {
-      setPlayerTrack(playlist[currentIdx + 1]); setPlaying(true); setInitialPos(0);
-    } else if (repeat === 'all') {
-      setPlayerTrack(playlist[0]); setPlaying(true); setInitialPos(0);
-    }
-  }, [currentIdx, playlist, shuffle, repeat, playerTrack]);
+    if (currentIdx >= 0 && currentIdx < playlist.length - 1) return playlist[currentIdx + 1];
+    if (repeat === 'all') return playlist[0];
+    return null;
+  }, [currentIdx, playlist, shuffle, repeat]);
+  const handleNext = __useC_app((explicit) => {
+    // `explicit` = skladbu už vybral přehrávač (auto-přechod) → použij ji, ať se
+    // UI shoduje s tím, co reálně začalo hrát. Jinak vyber standardně.
+    const t = (explicit && explicit.id != null) ? explicit : pickNextTrack();
+    if (!t) return;
+    if (playerTrack) historyRef.current = [...historyRef.current, playerTrack].slice(-30);
+    setPlayerTrack(t); setPlaying(true); setInitialPos(0);
+  }, [pickNextTrack, playerTrack]);
   const handlePrev = __useC_app(() => {
     if (!playlist.length) return;
     // First try going back in history (especially important in shuffle mode)
@@ -322,7 +330,7 @@ function App() {
         <AudioPlayer
           track={playerTrack} playlist={playlist}
           isPlaying={playing} setIsPlaying={setPlaying}
-          onPrev={handlePrev} onNext={handleNext}
+          onPrev={handlePrev} onNext={handleNext} getNext={pickNextTrack}
           onClose={handleClose}
           initialPosition={initialPos}
           restoring={restoring}

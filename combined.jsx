@@ -2056,11 +2056,15 @@ Object.assign(window, { AppCard, AppsSection, AlbumCard, TrackRow, MusicSection 
 // player-contact.jsx — Audio player, shortcuts overlay, contact form, footer
 const { useState: __useS_pc, useEffect: __useE_pc, useRef: __useR_pc, useMemo: __useM_pc } = React;
 
-function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext, onClose, initialPosition, restoring, shuffle, setShuffle, repeat, setRepeat, onShare, lang }) {
+function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext, getNext, onClose, initialPosition, restoring, shuffle, setShuffle, repeat, setRepeat, onShare, lang }) {
   const audioRef = __useR_pc(null);
   const audioCtxRef = __useR_pc(null);
   const analyserRef = __useR_pc(null);
   const sourceRef = __useR_pc(null);
+  // Když přejdeme na další skladbu přímo v 'ended' události (auto-přechod při
+  // zhasnuté obrazovce), uložíme sem její id → efekt na změnu skladby pak
+  // znovu nenastavuje src/load (jinak by restartoval to, co už hraje).
+  const primedTrackIdRef = __useR_pc(null);
   // Mobil/iOS: přehrávej přímo z <audio> (ne přes Web Audio), ať hudba běží i při
   // zhasnuté obrazovce. iOS uspí AudioContext při zamčení → jinak by se zvuk zastavil.
   const isMobile = __useM_pc(() => {
@@ -2208,6 +2212,14 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
     const a = audioRef.current; if (!a || !track) return;
     restoredRef.current = false;
     setCurrentTime(initialPosition || 0);
+    // Auto-přechod při zhasnuté obrazovce: tuhle skladbu jsme už nastartovali
+    // přímo v 'ended' handleru (na stejném <audio>), takže src znovu NEnastavuj
+    // ani nevolej load() — jinak by se přehrávání restartovalo/zaseklo.
+    // Čas i délku doženou audio události (timeupdate/loadedmetadata).
+    if (primedTrackIdRef.current === track.id) {
+      primedTrackIdRef.current = null;
+      return;
+    }
     setDuration(0);
     if (track.audioUrl) { a.src = track.audioUrl; a.load(); }
     else { a.removeAttribute('src'); }
@@ -2240,9 +2252,18 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
     const onEnded = () => {
       if (repeat === 'one') {
         try { a.currentTime = 0; a.play().catch(() => {}); } catch {}
-      } else {
-        onNext();
+        return;
       }
+      // Přechod na další skladbu "na jeden zátah" přímo tady v 'ended' události,
+      // na stejném <audio> prvku → projde i při zamčené obrazovce (telefon nás
+      // v tomhle okamžiku nechá jednat). React stav (UI, zámková obrazovka) pak
+      // doženeme hned přes onNext(next), aby ukazoval správnou skladbu.
+      const next = (typeof getNext === 'function') ? getNext() : null;
+      if (next && next.audioUrl) {
+        primedTrackIdRef.current = next.id;
+        try { a.src = next.audioUrl; a.play().catch(() => {}); } catch {}
+      }
+      onNext(next || undefined);
     };
     a.addEventListener('timeupdate', onTime);
     a.addEventListener('loadedmetadata', onMeta);
@@ -2252,7 +2273,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
       a.removeEventListener('loadedmetadata', onMeta);
       a.removeEventListener('ended', onEnded);
     };
-  }, [initialPosition, onNext, repeat]);
+  }, [initialPosition, onNext, getNext, repeat]);
 
   __useE_pc(() => {
     const a = audioRef.current; if (!a) return;
@@ -4404,19 +4425,27 @@ function App() {
   }, [playerTrack]);
 
   const currentIdx = __useM_app(() => playlist.findIndex(t => t.id === playerTrack?.id), [playerTrack, playlist]);
-  const handleNext = __useC_app(() => {
-    if (!playlist.length) return;
-    if (playerTrack) historyRef.current = [...historyRef.current, playerTrack].slice(-30);
+  // Čistě spočítá další skladbu (bez vedlejších efektů). Sdílené mezi tlačítkem
+  // „další", zámkovou obrazovkou a automatickým přechodem v přehrávači, ať se
+  // všichni shodnou na téže skladbě (důležité hlavně u shuffle).
+  const pickNextTrack = __useC_app(() => {
+    if (!playlist.length) return null;
     if (shuffle && playlist.length > 1) {
       let next; do { next = Math.floor(Math.random() * playlist.length); } while (next === currentIdx);
-      setPlayerTrack(playlist[next]); setPlaying(true); setInitialPos(0); return;
+      return playlist[next];
     }
-    if (currentIdx >= 0 && currentIdx < playlist.length - 1) {
-      setPlayerTrack(playlist[currentIdx + 1]); setPlaying(true); setInitialPos(0);
-    } else if (repeat === 'all') {
-      setPlayerTrack(playlist[0]); setPlaying(true); setInitialPos(0);
-    }
-  }, [currentIdx, playlist, shuffle, repeat, playerTrack]);
+    if (currentIdx >= 0 && currentIdx < playlist.length - 1) return playlist[currentIdx + 1];
+    if (repeat === 'all') return playlist[0];
+    return null;
+  }, [currentIdx, playlist, shuffle, repeat]);
+  const handleNext = __useC_app((explicit) => {
+    // `explicit` = skladbu už vybral přehrávač (auto-přechod) → použij ji, ať se
+    // UI shoduje s tím, co reálně začalo hrát. Jinak vyber standardně.
+    const t = (explicit && explicit.id != null) ? explicit : pickNextTrack();
+    if (!t) return;
+    if (playerTrack) historyRef.current = [...historyRef.current, playerTrack].slice(-30);
+    setPlayerTrack(t); setPlaying(true); setInitialPos(0);
+  }, [pickNextTrack, playerTrack]);
   const handlePrev = __useC_app(() => {
     if (!playlist.length) return;
     // First try going back in history (especially important in shuffle mode)
@@ -4526,7 +4555,7 @@ function App() {
         <AudioPlayer
           track={playerTrack} playlist={playlist}
           isPlaying={playing} setIsPlaying={setPlaying}
-          onPrev={handlePrev} onNext={handleNext}
+          onPrev={handlePrev} onNext={handleNext} getNext={pickNextTrack}
           onClose={handleClose}
           initialPosition={initialPos}
           restoring={restoring}
