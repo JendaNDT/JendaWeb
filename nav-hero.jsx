@@ -345,7 +345,7 @@ function Hero({ lang, onPlay }) {
 
         <h1 style={{
           fontFamily:"'Syne', sans-serif",
-          fontSize:'clamp(80px, 16vw, 160px)',
+          fontSize:'clamp(64px, 16vw, 160px)', // min 64px: na ~390px viewportu se 80px nevešlo (oříznuté J/a)
           fontWeight:800, lineHeight:0.88,
           letterSpacing:'-0.05em',
           background:'linear-gradient(135deg, var(--text) 20%, var(--a1) 55%, var(--a2) 85%)',
