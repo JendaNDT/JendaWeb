@@ -1146,7 +1146,8 @@ function Nav({ lang, setLang, mode, setMode }) {
   };
 
   __useEffect_nh(() => {
-    const ids = ['apps', 'music', 'contact'];
+    // POZOR: pořadí musí odpovídat pořadí sekcí na stránce shora dolů (od jw-v40: Hudba → Aplikace → Kontakt)
+    const ids = ['music', 'apps', 'contact'];
     const fn = () => {
       setScrolled(window.scrollY > 50);
       const y = window.scrollY + window.innerHeight * 0.35;
