@@ -17144,7 +17144,7 @@ function initExports({document:d,app,readHistory,readMetadata,open,downloadFile}
   try{report=makeReport(records(),options());}catch(error){status(error.message,true);return;}
   const format=by('export-format').value;invalidate();busy=true;by('export-status').focus();by('export-controls').disabled=true;by('export-panel').setAttribute('aria-busy','true');render();status('Vytvářím soubor v zařízení…');
   try{
-   const {createXlsx}=format==='xlsx'?await __vitePreload(() => import('./export-xlsx-CBHfML-S.js'),true              ?[]:void 0):{};
+   const {createXlsx}=format==='xlsx'?await __vitePreload(() => import('./export-xlsx-BpD31x9A.js'),true              ?[]:void 0):{};
    const blob=await (format==='pdf'?createPdf(report):createXlsx(report)),filename=exportFilename(report,format);
    if(downloadFile)await downloadFile({blob,filename,report});
    else {url=w.URL.createObjectURL(blob);const link=by('export-ready');link.href=url;link.download=filename;link.hidden=false;link.click();}

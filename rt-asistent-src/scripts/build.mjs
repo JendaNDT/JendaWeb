@@ -7,7 +7,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),outpu
 if(process.cwd()!==root||path.basename(root)!=='rt-asistent-src'||path.dirname(root)!==path.dirname(output)||path.basename(output)!=='rt-asistent')throw new Error('Unexpected build directory.');
 try{if((await fs.lstat(output)).isSymbolicLink())throw new Error('Output must not be a symlink.');}catch(e){if(e.code!=='ENOENT')throw e;}
 await fs.rm(output,{recursive:true,force:true});
-await build({configFile:false,base,esbuild:false,build:{outDir:output,emptyOutDir:false,minify:false,cssMinify:false}});
+await build({configFile:false,base,esbuild:false,plugins:[{name:'normalize-line-endings',enforce:'post',renderChunk(code){return {code:code.replace(/\r\n/g,'\n'),map:null};}}],build:{outDir:output,emptyOutDir:false,minify:false,cssMinify:false}});
 const files=(await fs.readdir(output,{recursive:true,withFileTypes:true})).filter(e=>e.isFile()&&e.name!=='index.html').map(e=>path.relative(output,path.join(e.parentPath,e.name)).replaceAll('\\','/')).sort();
 let html=await fs.readFile(path.join(output,'index.html'),'utf8');
 const hashes=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)].filter(m=>!m[1].includes('src=')&&m[2].trim()).map(m=>"'sha256-"+createHash('sha256').update(m[2]).digest('base64')+"'");

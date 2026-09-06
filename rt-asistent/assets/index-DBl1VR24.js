@@ -1,4 +1,4 @@
-import { getOpeningTagMarkup, getClosingTagMarkup, getSelfClosingTagMarkup, getCellAddress, escapeTextContent as sanitizeTextContent, convertDateToSerialNumber, escapeAttributeValue as sanitizeAttributeValue, insertElementMarkupAccordingToOrderOfSiblings, getOrderOfSiblings, findElement, findElementInsideElement, replaceElement, appendMarkupInsideElement, prependMarkupInsideElement } from './index-D2KwxtmB.js';
+import { getOpeningTagMarkup, getClosingTagMarkup, getSelfClosingTagMarkup, getCellAddress, escapeTextContent as sanitizeTextContent, convertDateToSerialNumber, escapeAttributeValue as sanitizeAttributeValue, insertElementMarkupAccordingToOrderOfSiblings, getOrderOfSiblings, findElement, findElementInsideElement, replaceElement, appendMarkupInsideElement, prependMarkupInsideElement } from './index-Bp7saN-c.js';
 
 // This function doesn't use `async`/`await` in order to avoid adding `@babel/runtime` to `dependencies`.
 // https://gitlab.com/catamphetamine/write-excel-file/-/issues/105
