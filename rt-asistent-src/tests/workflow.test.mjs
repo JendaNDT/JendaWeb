@@ -49,10 +49,10 @@ test('drawing and batch survive save, search, replay and restart; older records 
  a.el('job-new').click();a.input('job-name','Dokumentace');a.el('job-create').click();await tick();
  for(const [id,value]of Object.entries({'job-part':'Díl A','job-weld':'S-01','job-drawing':'  V-042 <img src=x>  ','job-batch':'  B-007  '}))a.input(id,value);
  a.el('history-save').click();await tick();const record=a.workflow.store.entries().find(e=>e.kind==='calculation');
- assert.equal(record.drawingNumber,'V-042 <img src=x>');assert.equal(record.batch,'B-007');assert.match(a.el('result-job-context').textContent,/Výkres V-042 <img src=x> · Dávka B-007/);
+ assert.equal(record.drawingNumber,'V-042 <img src=x>');assert.equal(record.batch,'B-007');assert.match(a.el('result-job-context').textContent,/Výkres V-042 <img src=x> · Běžné číslo B-007/);
  a.el('history-open').click();for(const query of ['v-042','b-007']){a.input('history-search',query);assert.equal(a.el('history-list').querySelectorAll('article').length,1);}
- assert.match(a.el('history-list').textContent,/Výkres: V-042 <img src=x> · Dávka: B-007/);assert.equal(a.el('history-list').querySelector('img'),null);
- a.input('job-drawing','Jiný výkres');a.input('job-batch','Jiná dávka');a.el('history-list').querySelector('[data-restore]').click();
+ assert.match(a.el('history-list').textContent,/Výkres: V-042 <img src=x> · Běžné číslo: B-007/);assert.equal(a.el('history-list').querySelector('img'),null);
+ a.input('job-drawing','Jiný výkres');a.input('job-batch','Jiné běžné číslo');a.el('history-list').querySelector('[data-restore]').click();
  assert.equal(a.el('job-drawing').value,record.drawingNumber);assert.equal(a.el('job-batch').value,record.batch);
  const savedContext=a.w.localStorage.getItem('rt_job_context_v1'),old={...record,id:'legacy-record'};delete old.drawingNumber;delete old.batch;await a.workflow.store.add(old);a.close();
  const b=await setup({indexedDB,savedContext});assert.equal(b.el('job-drawing').value,record.drawingNumber);assert.equal(b.el('job-batch').value,record.batch);

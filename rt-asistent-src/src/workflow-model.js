@@ -71,7 +71,7 @@ export function compareVariant(base,changes={}) {
 export function historyEntry({id,jobId,part,weld,drawingNumber='',batch='',context,createdAt=new Date().toISOString()}) {
  if(!jobId)throw new Error('Vyberte nebo vytvořte zakázku.');
  if(!part?.trim()||!weld?.trim())throw new Error('Doplňte díl a číslo svaru.');
- for(const [value,label]of [[drawingNumber,'Číslo výkresu'],[batch,'Dávka']])if(typeof value!=='string'||value.length>120)throw new Error(label+' musí být text do 120 znaků.');
+ for(const [value,label]of [[drawingNumber,'Číslo výkresu'],[batch,'Běžné číslo']])if(typeof value!=='string'||value.length>120)throw new Error(label+' musí být text do 120 znaků.');
  assertContext(context,{partialForm:true});
  const canonicalContext={...context,form:canonicalForm(context)};
  return clone({id,kind:'calculation',jobId,part:part.trim(),weld:weld.trim(),drawingNumber:drawingNumber.trim(),batch:batch.trim(),createdAt,modelVersion:CALCULATION_VERSION,context:canonicalContext,result:evaluate(context)});
