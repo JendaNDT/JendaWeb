@@ -2,6 +2,7 @@
 // TODO: Replace all link / audioUrl / downloadUrl values with real URLs
 
 window.APPS_DATA = [
+  {"id": 28, "name": "RT Asistent", "platform": "PWA", "color": "#255bce", "cs": "Radiografické výpočty: počet expozic, geometrická neostrost, expoziční časy a CR měření. Zakázky a zálohy zůstávají v zařízení. Po prvním stažení funguje offline, bez účtu a synchronizace.", "en": "Radiography calculations: exposure count, geometric unsharpness, exposure times and CR measurements. Jobs and backups stay on your device. Works offline after the initial download, without an account or synchronization.", "link": "/rt-asistent/", "icon_url": "/rt-asistent/icons/rt-192.png", "sort": 0},
   { id:1,  name:'MeditApp',    platform:'PWA',     color:'#7c5cfc', cs:'Průvodce meditací s řízeným dýcháním a ambientními zvuky', en:'Meditation guide with breathing exercises and ambient sounds', link:'#' },
   { id:2,  name:'BeatCraft',   platform:'Android', color:'#f59e0b', cs:'AI generátor beatů – skládej rytmy jedním kliknutím', en:'AI beat generator – compose rhythms with one tap', link:'#' },
   { id:3,  name:'NoteFlow',    platform:'PWA',     color:'#06d6a0', cs:'Chytrý poznámkový blok s tagy a fulltextovým hledáním', en:'Smart notepad with tags and full-text search', link:'#' },

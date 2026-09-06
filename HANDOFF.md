@@ -11,7 +11,7 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
 ## RT Asistent distribution (6 Sep 2026)
 
 - Independent offline application: **https://jenda.cool/rt-asistent/**. Source and release instructions: `rt-asistent-src/README.md`; checked-in static output: `rt-asistent/`.
-- Portfolio worker **jw-v89** preserves caches outside `jw-v*` and leaves `/rt-asistent/` requests to the scoped RT worker. Keep these rules when updating the portfolio.
+- Portfolio worker **jw-v90** preserves caches outside `jw-v*` and leaves `/rt-asistent/` requests to the scoped RT worker. Keep these rules when updating the portfolio.
 - The application itself has no CMS connection or synchronization. Existing Sites data moves only through user-exported/imported JSON backups.
 
 ## Recent updates (20 Jun 2026)

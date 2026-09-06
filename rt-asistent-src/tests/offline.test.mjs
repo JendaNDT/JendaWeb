@@ -29,7 +29,7 @@ test('subdirectory distribution stays offline and preserves the portfolio cache'
 });
 
 test('portfolio upgrade never deletes or intercepts the RT offline installation',async()=>{
- const handlers={},deleted=[],keys=['jw-v88','jw-v89','rt-asistent-shell-test1','unrelated'];
+ const handlers={},deleted=[],keys=['jw-v88','jw-v90','rt-asistent-shell-test1','unrelated'];
  vm.runInNewContext(fs.readFileSync(new URL('../../sw.js',import.meta.url),'utf8'),{self:{addEventListener:(n,fn)=>handlers[n]=fn,clients:{claim(){}},skipWaiting(){}},location:{origin:'https://prototype.test'},URL,caches:{keys:async()=>keys,delete:async k=>deleted.push(k)}});
  let pending;handlers.activate({waitUntil:p=>pending=p});await pending;assert.deepEqual(deleted,['jw-v88']);
  for(const p of ['/rt-asistent','/rt-asistent/','/rt-asistent/offline-worker/test.js'])handlers.fetch({request:{method:'GET',url:'https://prototype.test'+p},respondWith(){assert.fail('Portfolio intercepted RT request');}});
