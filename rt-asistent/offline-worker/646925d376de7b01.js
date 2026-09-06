@@ -1,5 +1,5 @@
 /* Exact downloaded application assets. Runtime never falls through to a network. */
-const MANIFEST={"version":"2f2038ecf335d7a4","base":"/rt-asistent/","shell":"/rt-asistent/index.html","assets":["/rt-asistent/index.html","/rt-asistent/assets/index-D5gDOZqQ.css","/rt-asistent/assets/index-ejmWf0tu.js","/rt-asistent/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2","/rt-asistent/assets/inter-latin-wght-normal-Dx4kXJAl.woff2","/rt-asistent/icons/rt-192.png","/rt-asistent/icons/rt-512.png","/rt-asistent/manifest.webmanifest"]};
+const MANIFEST={"version":"646925d376de7b01","base":"/rt-asistent/","shell":"/rt-asistent/index.html","assets":["/rt-asistent/index.html","/rt-asistent/assets/index-D5gDOZqQ.css","/rt-asistent/assets/index-ejmWf0tu.js","/rt-asistent/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2","/rt-asistent/assets/inter-latin-wght-normal-Dx4kXJAl.woff2","/rt-asistent/icons/rt-192.png","/rt-asistent/icons/rt-512.png","/rt-asistent/manifest.webmanifest"]};
 const BASE=MANIFEST.base||'/';
 const SHELL=MANIFEST.shell||BASE+'offline';
 const CACHE='rt-asistent-shell-'+MANIFEST.version;
