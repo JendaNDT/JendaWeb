@@ -8,6 +8,14 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
 - **Repo:** https://github.com/JendaNDT/JendaWeb — push to `main` → Vercel auto-deploys.
 - **Backend:** Supabase project `jendaweb` (ref `semdgbaearwhkhulkyts`, eu-central-1, free). Frontend uses the public anon/publishable key; writes are protected by RLS (locked to the admin uid). See `SUPABASE_BACKEND.md`.
 
+## Fyzika pastelkou Android download (6 Sep 2026)
+
+- Catalog detail: **https://jenda.cool/#app=fyzika-pastelkou**. The existing app modal handles the download; no new framework or application runtime on the website.
+- Signed **0.1.1-android.1** APK (10,999,293 bytes, Android 9+, ARM64/Vulkan) is in `binaries/fyzika-pastelkou-0.1.1-android.1/` with installation notes and SHA-256. Icon: `icons/fyzika-pastelkou.png`; real emulator screenshot: `screenshots/fyzika-pastelkou/android-water.png`.
+- Supabase `apps` is the primary catalog; `data.js` contains the matching offline seed. Descriptions disclose the Czech app language and pending physical-device test.
+- Portfolio worker **jw-v91** matches `index.html`; the APK is not precached. Preserve the RT Asistent cache/scope isolation below. No JSX changes or regeneration required for this content addition.
+- Only distribution assets belong in this public repo. App source and Android signing credentials remain private in the Fyzika pastelkou project. Its decision D35 authorizes this download.
+
 ## RT Asistent distribution (6 Sep 2026)
 
 - Independent offline application: **https://jenda.cool/rt-asistent/**. Source and release instructions: `rt-asistent-src/README.md`; checked-in static output: `rt-asistent/`.

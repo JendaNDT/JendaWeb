@@ -1,5 +1,5 @@
 // sw.js — Service worker for offline-first PWA
-const VERSION = 'jw-v90';
+const VERSION = 'jw-v91';
 const SHELL = [
   '/',
   '/index.html',
@@ -36,6 +36,7 @@ const SHELL = [
   '/icons/icon-maskable-192.png',
   '/icons/icon-maskable-512.png',
   '/icons/apple-touch-icon-180.png',
+  '/icons/fyzika-pastelkou.png',
 ];
 
 self.addEventListener('install', (e) => {
