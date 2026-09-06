@@ -11,6 +11,19 @@ const measurement=createCrMeasurement({id:'cr-1',name:'Reference',setup:'Tube/IP
 const empty={measurements:[],legacy:[]},library={measurements:[measurement],legacy:[{id:1,name:'Starý odhad',thickness:40}]};
 const backup=()=>createBackup([job,calculation],library);
 
+test('backup preserves drawing and batch, accepts old records and rejects invalid optional metadata',async()=>{
+ const tagged=historyEntry({...calculation,id:'tagged',drawingNumber:' V-0042 ',batch:' D-09 '}),old={...calculation};delete old.drawingNumber;delete old.batch;
+ const data=parseBackup(JSON.stringify(createBackup([job,old,tagged],empty)));assert.deepEqual(data.entries,[job,old,tagged]);
+ assert.equal(tagged.drawingNumber,'V-0042');assert.equal(tagged.batch,'D-09');assert.equal('drawingNumber' in data.entries[1],false);
+ const s=createWorkspaceStore({indexedDB:new IDBFactory()});await s.init();await s.importEntries(data.entries,empty);await s.reload();
+ assert.equal(s.entries().find(e=>e.id==='tagged').batch,'D-09');assert.equal(planRestore(data,s.entries(),empty).counts.skipped,3);
+ for(const key of ['drawingNumber','batch'])for(const invalid of [null,7,{},'x'.repeat(121)]){
+  assert.throws(()=>parseBackup(JSON.stringify({...data,entries:[job,{...tagged,[key]:invalid}]})),/neplatný/);
+  assert.throws(()=>historyEntry({...calculation,[key]:invalid}),/text do 120/);
+ }
+ assert.throws(()=>planRestore({...data,entries:[{...tagged,batch:'Jiná dávka'}]},s.entries(),empty),/odlišný obsah/);s.close();
+});
+
 async function seed(indexedDB){const r=indexedDB.open('rt-workspace-v1',1);r.onupgradeneeded=()=>{r.result.createObjectStore('entries',{keyPath:'key'});r.result.createObjectStore('meta');};await new Promise((resolve,reject)=>{r.onsuccess=resolve;r.onerror=reject;});const db=r.result;await new Promise(resolve=>{const t=db.transaction(['entries','meta'],'readwrite'),e=t.objectStore('entries'),m=t.objectStore('meta');for(const scope of ['@local','user-a','user-b'])e.put({key:scope+'/'+job.id,owner:scope,data:{...job,name:scope},pending:scope!=='@local'});m.put('user-a','owner');m.put('cloud','mode');m.put('55','cursor/user-a');m.put(library,'library-restore');t.oncomplete=resolve;});db.close();}
 test('fresh local workspace saves and reopens with no account, queue or network API',async()=>{
  const indexedDB=new IDBFactory();let requests=0;const opts={indexedDB,fetcher:async()=>{requests++;throw new Error('offline');}};let store=createWorkspaceStore(opts);await store.init();await store.add(job);await store.add(calculation);assert.equal(store.sync,undefined);assert.equal(store.setMode,undefined);assert.equal(requests,0);store.close();

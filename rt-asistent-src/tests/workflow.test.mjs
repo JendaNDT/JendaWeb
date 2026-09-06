@@ -9,7 +9,7 @@ import {evaluate,sharedGeometry,compareVariant,historyEntry,clone} from '../src/
 import {createWorkspaceStore} from '../src/workspace-store.js';
 import {workspaceApi} from '../server/worker.js';
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
-async function setup(){const dom=new JSDOM(html,{url:'https://prototype.test/',pretendToBeVisual:true}),w=dom.window,d=w.document;w.HTMLCanvasElement.prototype.getContext=()=>({});class Chart{destroy(){}resize(){}}w.indexedDB=new IDBFactory();w.fetch=async()=>{throw new Error("Unexpected network");};const app=initApp({document:d,Chart}),workflow=initWorkflow({document:d,app}),el=id=>d.getElementById(id);await workflow.ready;const input=(id,value)=>{const e=el(id);if(e.type==='checkbox')e.checked=!!value;else e.value=String(value);e.dispatchEvent(new w.Event('input',{bubbles:true}));};return {dom,w,d,app,workflow,el,input,close(){workflow.destroy();app.destroy();w.close();}};}
+async function setup({indexedDB=new IDBFactory(),savedContext=null}={}){const dom=new JSDOM(html,{url:'https://prototype.test/',pretendToBeVisual:true}),w=dom.window,d=w.document;w.HTMLCanvasElement.prototype.getContext=()=>({});class Chart{destroy(){}resize(){}}w.indexedDB=indexedDB;if(savedContext)w.localStorage.setItem('rt_job_context_v1',savedContext);w.fetch=async()=>{throw new Error("Unexpected network");};const app=initApp({document:d,Chart}),workflow=initWorkflow({document:d,app}),el=id=>d.getElementById(id);await workflow.ready;const input=(id,value)=>{const e=el(id);if(e.type==='checkbox')e.checked=!!value;else e.value=String(value);e.dispatchEvent(new w.Event('input',{bubbles:true}));};return {dom,w,d,app,workflow,el,input,close(){workflow.destroy();app.destroy();w.close();}};}
 const tick=()=>new Promise(r=>setTimeout(r,10));
 const g={material:'steel',technique:'dwsi',qualityClass:'B',thickness:'10',diameter:'219',sfd:'1000',gap:'0',pathMode:'auto'};
 test('shared geometry maps t, w and distance correctly without applying unsupported nomograms',()=>{
@@ -42,4 +42,20 @@ test('job UI creates, saves, filters and restores history without executing stor
 });
 test('manual film variants retain the confirmed calibration; history reopening asks for confirmation',async()=>{
  const a=await setup();a.app.tab('time');for(const [id,value]of Object.entries({xray_mode:'manual',xray_factor:10,xray_reference_name:'Reference A',xray_current:2}))a.input(id,value);a.el('xray_confirm_reference').click();const original=a.app.captureCalculation();a.el('compare-open').click();assert.equal(a.el('variant-1-film'),null);a.input('variant-1-distance',2000);a.el('variant-1').querySelector('button').click();assert.equal(a.el('t_result_display_xray').textContent,'20 min 0 s');a.app.restoreCalculation(original);assert.equal(a.el('t_result_display_xray').textContent,'—');assert.match(a.el('xray_error').textContent,/Potvrďte/);a.close();
+});
+
+test('drawing and batch survive save, search, replay and restart; older records clear both fields',async()=>{
+ const indexedDB=new IDBFactory(),a=await setup({indexedDB});
+ a.el('job-new').click();a.input('job-name','Dokumentace');a.el('job-create').click();await tick();
+ for(const [id,value]of Object.entries({'job-part':'Díl A','job-weld':'S-01','job-drawing':'  V-042 <img src=x>  ','job-batch':'  B-007  '}))a.input(id,value);
+ a.el('history-save').click();await tick();const record=a.workflow.store.entries().find(e=>e.kind==='calculation');
+ assert.equal(record.drawingNumber,'V-042 <img src=x>');assert.equal(record.batch,'B-007');assert.match(a.el('result-job-context').textContent,/Výkres V-042 <img src=x> · Dávka B-007/);
+ a.el('history-open').click();for(const query of ['v-042','b-007']){a.input('history-search',query);assert.equal(a.el('history-list').querySelectorAll('article').length,1);}
+ assert.match(a.el('history-list').textContent,/Výkres: V-042 <img src=x> · Dávka: B-007/);assert.equal(a.el('history-list').querySelector('img'),null);
+ a.input('job-drawing','Jiný výkres');a.input('job-batch','Jiná dávka');a.el('history-list').querySelector('[data-restore]').click();
+ assert.equal(a.el('job-drawing').value,record.drawingNumber);assert.equal(a.el('job-batch').value,record.batch);
+ const savedContext=a.w.localStorage.getItem('rt_job_context_v1'),old={...record,id:'legacy-record'};delete old.drawingNumber;delete old.batch;await a.workflow.store.add(old);a.close();
+ const b=await setup({indexedDB,savedContext});assert.equal(b.el('job-drawing').value,record.drawingNumber);assert.equal(b.el('job-batch').value,record.batch);
+ b.el('history-open').click();b.el('history-list').querySelector('[data-restore="legacy-record"]').click();assert.equal(b.el('job-drawing').value,'');assert.equal(b.el('job-batch').value,'');
+ b.el('history-save').click();await tick();assert.equal(b.workflow.store.entries().filter(e=>e.kind==='calculation').length,3);b.close();
 });
