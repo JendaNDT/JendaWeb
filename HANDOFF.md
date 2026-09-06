@@ -8,6 +8,12 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
 - **Repo:** https://github.com/JendaNDT/JendaWeb — push to `main` → Vercel auto-deploys.
 - **Backend:** Supabase project `jendaweb` (ref `semdgbaearwhkhulkyts`, eu-central-1, free). Frontend uses the public anon/publishable key; writes are protected by RLS (locked to the admin uid). See `SUPABASE_BACKEND.md`.
 
+## RT Asistent distribution (6 Sep 2026)
+
+- Independent offline application: **https://jenda.cool/rt-asistent/**. Source and release instructions: `rt-asistent-src/README.md`; checked-in static output: `rt-asistent/`.
+- Portfolio worker **jw-v89** preserves caches outside `jw-v*` and leaves `/rt-asistent/` requests to the scoped RT worker. Keep these rules when updating the portfolio.
+- The application itself has no CMS connection or synchronization. Existing Sites data moves only through user-exported/imported JSON backups.
+
 ## Recent updates (20 Jun 2026)
 
 - **Hidden admin entry + back-to-site link (`jw-v82`, `admin.jsx?v=20`, commit `d2547ba`):** The public site opens `/admin` via **5 quick clicks/taps on the "jenda.cool" logo** in the nav (within 1.2 s) → redirects to `/admin.html` (`onLogoTap` in `nav-hero.jsx`; works on mobile + desktop, undiscoverable by accident, and the admin is login-protected anyway). Reverse direction: the admin header gained an **"↗ Web"** link and the login screen a subtle **"↗ Zpět na web"** (`admin.jsx`). This is convenience, **not security** — hiding the entry gates nothing; the Supabase Auth login does. `combined.jsx` rebuilt, SW bumped `jw-v81 → jw-v82` (in `sw.js` + `index.html`). Verified via Babel transpile of `combined.jsx` + `admin.jsx`.

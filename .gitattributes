@@ -1,0 +1,3 @@
+# Keep hashed offline releases reproducible across Windows and Linux.
+rt-asistent/** text=auto eol=lf
+rt-asistent-src/** text=auto eol=lf

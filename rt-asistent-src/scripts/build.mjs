@@ -1,0 +1,32 @@
+import {build} from 'vite';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),output=path.resolve(root,'../rt-asistent'),base='/rt-asistent/';
+if(process.cwd()!==root||path.basename(root)!=='rt-asistent-src'||path.dirname(root)!==path.dirname(output)||path.basename(output)!=='rt-asistent')throw new Error('Unexpected build directory.');
+try{if((await fs.lstat(output)).isSymbolicLink())throw new Error('Output must not be a symlink.');}catch(e){if(e.code!=='ENOENT')throw e;}
+await fs.rm(output,{recursive:true,force:true});
+await build({configFile:false,base,esbuild:false,build:{outDir:output,emptyOutDir:false,minify:false,cssMinify:false}});
+const files=(await fs.readdir(output,{recursive:true,withFileTypes:true})).filter(e=>e.isFile()&&e.name!=='index.html').map(e=>path.relative(output,path.join(e.parentPath,e.name)).replaceAll('\\','/')).sort();
+let html=await fs.readFile(path.join(output,'index.html'),'utf8');
+const hashes=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)].filter(m=>!m[1].includes('src=')&&m[2].trim()).map(m=>"'sha256-"+createHash('sha256').update(m[2]).digest('base64')+"'");
+const policy=`default-src 'self'; script-src 'self' ${hashes.join(' ')}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; worker-src 'self'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'none'; form-action 'none'`;
+html=html.replace('<meta charset="UTF-8">','<meta charset="UTF-8">\n<meta http-equiv="Content-Security-Policy" content="'+policy.replace(" frame-ancestors 'none';",'')+'">');
+const source=await fs.readFile(path.join(root,'server/service-worker.js'),'utf8'),hash=createHash('sha256').update(html).update(source);for(const file of files)hash.update(file).update(await fs.readFile(path.join(output,file)));
+const version=hash.digest('hex').slice(0,16);html=html.replace('content="development"',`content="${version}"`);
+const headers={'content-type':'text/html; charset=utf-8','content-security-policy':policy,'cache-control':'no-cache','x-content-type-options':'nosniff','x-frame-options':'DENY','referrer-policy':'strict-origin-when-cross-origin','permissions-policy':'camera=(), microphone=(), geolocation=(), payment=(), usb=()'};
+const manifest={version,base,shell:base+'index.html',assets:[base+'index.html',...files.map(f=>base+f)]};
+await fs.writeFile(path.join(output,'index.html'),html);
+await fs.writeFile(path.join(output,'offline-shell.json'),JSON.stringify({version,html,headers}));
+await fs.writeFile(path.join(output,'release.json'),JSON.stringify({version}));
+await fs.mkdir(path.join(output,'offline-worker'),{recursive:true});
+await fs.writeFile(path.join(output,'offline-worker',version+'.js'),source.replace('__RT_MANIFEST__',JSON.stringify(manifest)));
+const configPath=path.resolve(root,'../vercel.json'),config=JSON.parse(await fs.readFile(configPath,'utf8'));
+if(!config.redirects.some(rule=>rule.source==='/rt-asistent'))config.redirects.push({source:'/rt-asistent',destination:base,permanent:true});
+config.headers=config.headers.filter(rule=>!rule.source.startsWith('/rt-asistent'));
+config.headers.push({source:'/rt-asistent/(.*)',headers:Object.entries(headers).filter(([key])=>key!=='content-type').map(([key,value])=>({key,value}))},{source:'/rt-asistent/assets/(.*)',headers:[{key:'Cache-Control',value:'public, max-age=31536000, immutable'}]},{source:'/rt-asistent/offline-worker/(.*)',headers:[{key:'Service-Worker-Allowed',value:base},{key:'Cache-Control',value:'public, max-age=31536000, immutable'}]});
+await fs.writeFile(configPath,JSON.stringify(config,null,2)+'\n');
+const checks=[];for(const file of [...files,'index.html','offline-shell.json','release.json','offline-worker/'+version+'.js']){const bytes=await fs.readFile(path.join(output,file));checks.push({path:base+file,sha256:createHash('sha256').update(bytes).digest('hex'),bytes:bytes.length});}
+await fs.writeFile(path.join(root,'build-checks.json'),JSON.stringify({version,base,checks},null,2));
+console.log('Static offline application built: '+base+' ('+version+').');

@@ -1,0 +1,11 @@
+import { Chart, registerables } from 'chart.js/dist/chart.esm.js';
+import { initApp } from './controller.js';
+import { initWorkflow } from './workflow-ui.js';
+import { initOffline } from './offline.js';
+import { initAppearance } from './appearance.js';
+import './fonts.css';
+Chart.register(...registerables);
+initAppearance();
+const app=initApp({ Chart });
+initWorkflow({app});
+initOffline();

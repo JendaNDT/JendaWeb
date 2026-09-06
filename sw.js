@@ -1,5 +1,5 @@
 // sw.js — Service worker for offline-first PWA
-const VERSION = 'jw-v88';
+const VERSION = 'jw-v89';
 const SHELL = [
   '/',
   '/index.html',
@@ -48,7 +48,7 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k)))
+      Promise.all(keys.filter((k) => k.startsWith('jw-v') && k !== VERSION).map((k) => caches.delete(k)))
     )
   );
   self.clients.claim();
@@ -58,6 +58,8 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  // RT Asistent owns its scoped worker and cache; portfolio updates must not touch it.
+  if (url.origin === location.origin && (url.pathname === '/rt-asistent' || url.pathname.startsWith('/rt-asistent/'))) return;
   // Admin je online-only — nikdy neservíruj starou verzi z cache (vždy ze sítě)
   if (url.origin === location.origin && (url.pathname === '/admin' || url.pathname.startsWith('/admin.'))) {
     e.respondWith(fetch(req).catch(() => caches.match(req)));

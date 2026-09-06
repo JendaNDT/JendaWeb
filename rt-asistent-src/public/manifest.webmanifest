@@ -1,0 +1,26 @@
+{
+  "id": "/rt-asistent/",
+  "name": "RT Asistent",
+  "short_name": "RT Asistent",
+  "lang": "cs",
+  "start_url": "/rt-asistent/",
+  "scope": "/rt-asistent/",
+  "display": "standalone",
+  "background_color": "#f4f6f8",
+  "theme_color": "#255bce",
+  "description": "Radiografické výpočty, zakázky a CR měření pro práci offline.",
+  "icons": [
+    {
+      "src": "/rt-asistent/icons/rt-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/rt-asistent/icons/rt-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
