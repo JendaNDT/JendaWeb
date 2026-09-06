@@ -1,5 +1,5 @@
 /* Exact downloaded application assets. Runtime never falls through to a network. */
-const MANIFEST={"version":"24d570693cef9dfe","base":"/rt-asistent/","shell":"/rt-asistent/index.html","assets":["/rt-asistent/index.html","/rt-asistent/assets/index-D5gDOZqQ.css","/rt-asistent/assets/index-DUkcWteQ.js","/rt-asistent/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2","/rt-asistent/assets/inter-latin-wght-normal-Dx4kXJAl.woff2","/rt-asistent/icons/rt-192.png","/rt-asistent/icons/rt-512.png","/rt-asistent/manifest.webmanifest"]};
+const MANIFEST={"version":"01ab745f9c78082f","base":"/rt-asistent/","shell":"/rt-asistent/index.html","assets":["/rt-asistent/index.html","/rt-asistent/assets/_commonjsHelpers-BFTU3MAI.js","/rt-asistent/assets/export-xlsx-CBHfML-S.js","/rt-asistent/assets/index-Bh0RqQ0b.css","/rt-asistent/assets/index-CO4bjT0A.js","/rt-asistent/assets/index-D2KwxtmB.js","/rt-asistent/assets/index-sG9wzbAE.js","/rt-asistent/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2","/rt-asistent/assets/inter-latin-wght-normal-Dx4kXJAl.woff2","/rt-asistent/assets/pdfmake-Q44JKpeV.js","/rt-asistent/assets/vfs_fonts-DYgd5Mxl.js","/rt-asistent/icons/rt-192.png","/rt-asistent/icons/rt-512.png","/rt-asistent/manifest.webmanifest"]};
 const BASE=MANIFEST.base||'/';
 const SHELL=MANIFEST.shell||BASE+'offline';
 const CACHE='rt-asistent-shell-'+MANIFEST.version;

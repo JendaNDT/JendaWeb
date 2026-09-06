@@ -57,5 +57,5 @@ test('drawing and batch survive save, search, replay and restart; older records 
  const savedContext=a.w.localStorage.getItem('rt_job_context_v1'),old={...record,id:'legacy-record'};delete old.drawingNumber;delete old.batch;await a.workflow.store.add(old);a.close();
  const b=await setup({indexedDB,savedContext});assert.equal(b.el('job-drawing').value,record.drawingNumber);assert.equal(b.el('job-batch').value,record.batch);
  b.el('history-open').click();b.el('history-list').querySelector('[data-restore="legacy-record"]').click();assert.equal(b.el('job-drawing').value,'');assert.equal(b.el('job-batch').value,'');
- b.el('history-save').click();await tick();assert.equal(b.workflow.store.entries().filter(e=>e.kind==='calculation').length,3);b.close();
+ b.el('history-save').click();for(let i=0;i<100&&b.el('history-save').disabled;i++)await tick();assert.equal(b.workflow.store.entries().filter(e=>e.kind==='calculation').length,3);b.close();
 });

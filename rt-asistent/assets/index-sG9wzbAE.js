@@ -1,3 +1,4 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/pdfmake-Q44JKpeV.js","assets/_commonjsHelpers-BFTU3MAI.js","assets/vfs_fonts-DYgd5Mxl.js"])))=>i.map(i=>d[i]);
 true              &&(function polyfill() {
 	const relList = document.createElement("link").relList;
 	if (relList && relList.supports && relList.supports("modulepreload")) return;
@@ -16890,6 +16891,270 @@ function initDataTools({document:d,app,store,open,onArchiveChanged,onRestored}){
  return {async ready(){ready=true;try{await recover();}catch{status('Dokončení obnovy CR knihovny čeká na povolení místního úložiště. Záloha dosud obnovených dat je dostupná.',true);}render();controls();},destroy(){abort.abort();}};
 }
 
+const scriptRel = 'modulepreload';const assetsURL = function(dep) { return "/rt-asistent/"+dep };const seen = {};const __vitePreload = function preload(baseModule, deps, importerUrl) {
+	let promise = Promise.resolve();
+	if (true               && deps && deps.length > 0) {
+		document.getElementsByTagName("link");
+		const cspNonceMeta = document.querySelector("meta[property=csp-nonce]");
+		const cspNonce = cspNonceMeta?.nonce || cspNonceMeta?.getAttribute("nonce");
+		function allSettled(promises$2) {
+			return Promise.all(promises$2.map((p) => Promise.resolve(p).then((value$1) => ({
+				status: "fulfilled",
+				value: value$1
+			}), (reason) => ({
+				status: "rejected",
+				reason
+			}))));
+		}
+		promise = allSettled(deps.map((dep) => {
+			dep = assetsURL(dep);
+			if (dep in seen) return;
+			seen[dep] = true;
+			const isCss = dep.endsWith(".css");
+			const cssSelector = isCss ? "[rel=\"stylesheet\"]" : "";
+			if (document.querySelector(`link[href="${dep}"]${cssSelector}`)) return;
+			const link = document.createElement("link");
+			link.rel = isCss ? "stylesheet" : scriptRel;
+			if (!isCss) link.as = "script";
+			link.crossOrigin = "";
+			link.href = dep;
+			if (cspNonce) link.setAttribute("nonce", cspNonce);
+			document.head.appendChild(link);
+			if (isCss) return new Promise((res, rej) => {
+				link.addEventListener("load", res);
+				link.addEventListener("error", () => rej(/* @__PURE__ */ new Error(`Unable to preload CSS for ${dep}`)));
+			});
+		}));
+	}
+	function handlePreloadError(err$2) {
+		const e$1 = new Event("vite:preloadError", { cancelable: true });
+		e$1.payload = err$2;
+		window.dispatchEvent(e$1);
+		if (!e$1.defaultPrevented) throw err$2;
+	}
+	return promise.then((res) => {
+		for (const item of res || []) {
+			if (item.status !== "rejected") continue;
+			handlePreloadError(item.reason);
+		}
+		return baseModule().catch(handlePreloadError);
+	});
+};
+
+const IDENTIFIERS = [['jobName','Zakázka'],['part','Díl'],['drawingNumber','Číslo výkresu'],['batch','Běžné číslo'],['weld','Číslo svaru']];
+const fields = {
+ technique:['Technika',''],qualityClass:['Třída zkoušení',''],thickness:['Tloušťka','mm'],diameter:['Vnější průměr De','mm'],distance:['Vzdálenost zdroj–film SFD','mm'],sourceDistance:['Zdroj–první povrch','mm'],gap:['Mezera předmět–film','mm'],focus:['Velikost zdroje / ohniska','mm'],planar:['Planární vady',''],mode:['Zdroj reference',''],material:['Materiál',''],film:['Film',''],voltage:['Napětí','kV'],current:['Proud','mA'],exposure:['Referenční expozice','mA·min'],referenceDistance:['Referenční SFD','mm'],referenceName:['Vlastní reference',''],activity:['Referenční aktivita','GBq'],referenceTime:['Datum referenční aktivity',''],exposureTime:['Datum expozice',''],fdd:['Vzdálenost zdroj–detektor FDD','mm'],roi:['Místo měření SNR',''],flush:['Zarovnaný svar',''],cp1:['Kompenzace CP I',''],iqiConfirmed:['Potvrzené IQI',''],kind:['Druh SNR',''],measured:['Naměřené SNR',''],srb:['Základní prostorové rozlišení SR_b','mm'],magnification:['Zvětšení',''],seconds:['Skutečný čas','s'],name:['Název měření',''],setup:['Sestava',''],screens:['Fólie / filtrace',''],scan:['Skener',''],delay:['Prodleva','min'],measuredAt:['Datum měření',''],achievedSnr:['Dosažené SNR_N',''],target:['Cílové SNR_N',''],snrPass:['Kritérium SNR_N splněno',''],schema:['Verze dat reference',''],calculationVersion:['Model reference',''],id:['ID reference',''],version:['Verze reference','']
+};
+const resultFields = {count:['Počet expozic',''],nominal:['Nominální odečet',''],nearBoundary:['Bod u hranice oblastí',''],x:['t/De',''],y:['De / vzdálenost',''],outside:['Zdroj vně, film uvnitř',''],yMax:['Horní mez osy y',''],figure:['Obrázek nomogramu',''],maxCount:['Maximum v nomogramu',''],centered:['Zdroj ve středu',''],ug:['Geometrická neostrost Ug','mm'],f:['Hodnocená vzdálenost f','mm'],b:['Vzdálenost b','mm'],minF:['Minimální f','mm'],minInputDistance:['Minimální vzdálenost k prvnímu povrchu','mm'],coefficient:['Koeficient minimální vzdálenosti',''],passes:['Posuzované kritérium splněno',''],minutes:['Expoziční čas','min'],exposure:['Expozice','mA·min'],currentActivity:['Aktivita při expozici','GBq'],ciHours:['Referenční součin aktivity a času','Ci·h'],gbqHours:['Referenční součin aktivity a času','GBq·h'],actual:['Dosažené SNR_N',''],target:['Cílové SNR_N','']};
+const values$1={outside:'Jedna stěna, zdroj vně',inside:'Jedna stěna, zdroj uvnitř',single:'Jedna stěna',double:'Dvě stěny, DWSI',dwsi:'DWSI',dwdi:'DWDI',chart:'Výrobní diagram',manual:'Vlastní reference',weld:'Svar',haz:'HAZ / základní materiál',raw:'SNR',normalized:'SNR_N',...MATERIALS};
+const displayValue = value => value === null || value === undefined || value === '' ? '—' : typeof value === 'boolean' ? value ? 'Ano' : 'Ne' : typeof value === 'number' ? value.toLocaleString('cs-CZ',{maximumSignificantDigits:7}) : String(value);
+const displayDate = date => new Date(date).toLocaleString('cs-CZ',{timeZone:'Europe/Prague'});
+const xml = value => String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
+function fieldLabel(key,kind,inputs={},result=false){
+ const [label,unit]=(result?resultFields:fields)[key]||[key,''];
+ if(!result&&key==='thickness')return [(kind==='n'||kind==='ug')?'Tloušťka jedné stěny t':'Prozářená tloušťka w',unit];
+ if(!result&&key==='distance'&&kind==='n'&&inputs.technique==='outside')return ['Vzdálenost zdroj–předmět f',unit];
+ if(!result&&key==='exposure'&&kind==='reference')return ['Naměřená expozice',unit];
+ return [label,unit];
+}
+function valueRows(object,kind,{result=false,inputs={}}={}){
+ return Object.entries(object||{}).filter(([,v])=>v!==undefined&&v!==null&&v!==''&&['number','string','boolean'].includes(typeof v)).map(([key,value])=>{
+  const [label,unit]=fieldLabel(key,kind,inputs,result);
+  const translated=!result&&['technique','mode','material','roi','kind'].includes(key)?values$1[value]??value:value;
+  return {key,label,unit,value:translated};
+ });
+}
+function inputRows(record){
+ const {kind,inputs}=record.context;
+ let rows=valueRows(inputs,kind,{inputs});
+ if(record.unverified)return rows;
+ if(kind==='cr_estimate')rows=rows.filter(r=>['material','thickness','voltage','qualityClass','roi','flush','cp1','iqiConfirmed','fdd','current','setup','screens','scan','delay','srb','magnification'].includes(r.key));
+ if(kind==='cr_check')rows=rows.filter(r=>['material','thickness','voltage','qualityClass','roi','flush','cp1','iqiConfirmed','kind','measured','srb','magnification'].includes(r.key));
+ if(kind==='xray'&&inputs.mode==='chart')rows=rows.filter(r=>!['exposure','referenceName'].includes(r.key));
+ if(kind==='ug'&&inputs.technique==='single')rows=rows.filter(r=>r.key!=='diameter');
+ return rows;
+}
+function statusText(record){
+ const s=record.result.status,k=record.context.kind;
+ if(record.unverified)return 'Historický záznam – soulad s podporovaným modelem nelze ověřit';
+ if(k==='ug')return s==='pass'?'Kritérium minimální vzdálenosti splněno':'Kritérium minimální vzdálenosti nesplněno';
+ if(k==='cr_check'||k==='cr_record')return s==='pass'?'Kritérium SNR_N splněno':'Kritérium SNR_N nesplněno';
+ return {limit:'Mimo rozsah odečtu',estimate:'Odhad / odečet',info:'Výpočet'}[s]||'Uložený výsledek';
+}
+function recordSources(record){
+ if(record.unverified)return [];
+ const kind=record.context.kind;
+ if(kind==='n'||kind==='ug')return [['ISO 17636-1 – podklad modelu',SOURCES.iso1]];
+ if(kind==='gamma')return [['Výrobní expoziční diagram',SOURCES.film],['Rozpad Ir-192',SOURCES.decay]];
+ if(kind==='xray')return record.context.inputs.mode==='chart'?[['Výrobní expoziční diagram',SOURCES.film]]:[['Vlastní reference',record.context.inputs.referenceName||'']];
+ return [['ISO 17636-2 – podklad modelu',SOURCES.iso2],['CR metodika',SOURCES.cr]];
+}
+function currentExport(context,metadata,{now=new Date().toISOString()}={}){
+ const result=evaluate(context);
+ return clone({...metadata,id:'current',kind:'calculation',createdAt:now,modelVersion:CALCULATION_VERSION,context,result,current:true});
+}
+// Historical results and reference snapshots are copied verbatim. Validation
+// only supplies a warning; it never substitutes a freshly evaluated result.
+function snapshotRecords(records,jobs=[]){
+ const names=new Map(jobs.filter(j=>j.kind==='job').map(j=>[j.id,j.name]));
+ return records.map(record=>{
+  if(!record.current&&!entryShape(record))throw new Error('Záznam má nečitelný formát. Uchovejte úplnou zálohu JSON.');
+  return clone({...record,jobName:record.jobName??names.get(record.jobId)??'',unverified:record.current?false:!validEntry(record)});
+ });
+}
+function makeReport(records,options={}){
+ if(!records.length)throw new Error('Vyberte alespoň jeden výpočet.');
+ return {records:clone(records),exportedAt:new Date().toISOString(),title:records.length===1?'Výpočtový list RT':'Přehled výpočtů RT',technician:String(options.technician||'').trim().slice(0,120),note:String(options.note||'').trim().slice(0,2000),details:options.details!==false,nomogram:options.nomogram!==false,geometry:!!options.geometry,logo:options.logo||null};
+}
+function exportFilename(report,extension){
+ const sameJob=report.records.every(r=>r.jobName===report.records[0].jobName),label=sameJob&&report.records[0].jobName||'vyber';
+ const slug=label.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-|-$/g,'').slice(0,60)||'vypocty';
+ return `RT-${slug}-${report.exportedAt.slice(0,10)}.${extension}`;
+}
+
+function nomogramSvg(record){
+ if(record.unverified||record.context.kind!=='n')return null;
+ const r=record.result.values,lines=NOMOGRAMS[(r.outside?'outside':'inside')+record.context.inputs.qualityClass];
+ if(!lines||![r.x,r.y,r.yMax].every(Number.isFinite))return null;
+ const px=x=>48+x/.25*430,py=y=>215-y/r.yMax*195;
+ let body='';
+ for(let i=0;i<=5;i++){const x=i*.05;body+=`<path d="M${px(x)} 20V215" stroke="#dce2eb"/><text x="${px(x)}" y="233" text-anchor="middle">${displayValue(x)}</text>`;}
+ for(let i=0;i<=8;i++){const y=r.yMax*i/8;body+=`<path d="M48 ${py(y)}H478" stroke="#dce2eb"/><text x="40" y="${py(y)+4}" text-anchor="end">${displayValue(y)}</text>`;}
+ for(const line of lines){
+  body+=`<polyline points="${line.dataPoints.map(p=>`${px(p.x)},${py(p.y)}`).join(' ')}" stroke="#7d8fa9" stroke-width="1" fill="none" clip-path="url(#plot)"/>`;
+  const p=line.dataPoints.find(p=>p.x>=0&&p.x<=.25&&p.y>0&&p.y<r.yMax);
+  if(p)body+=`<text x="${px(p.x)+4}" y="${py(p.y)-3}" font-size="9">${line.N}</text>`;
+ }
+ body+=`<circle cx="${px(r.x)}" cy="${py(r.y)}" r="5" fill="#2557cf" stroke="white" stroke-width="1.5"/>`;
+ return `<svg xmlns="http://www.w3.org/2000/svg" width="510" height="260" viewBox="0 0 510 260"><defs><clipPath id="plot"><rect x="48" y="20" width="430" height="195"/></clipPath></defs><g font-family="Roboto" font-size="11" fill="#35465e">${body}<text x="260" y="255" text-anchor="middle">t/De</text><text x="8" y="12">${r.outside?'De/f':'De/SFD'}</text></g></svg>`;
+}
+function geometrySvg(record){
+ if(record.unverified||!['n','ug'].includes(record.context.kind))return null;
+ const i=record.context.inputs,technique=i.technique==='double'?'dwsi':i.technique;
+ let svg=geometryDiagram(technique,{module:record.context.kind,gap:i.gap??0}).split('</svg>')[0]+'</svg>';
+ const styles={'object-wall':'fill="#dbe3ee" stroke="#738198" stroke-width="1.5"','object-void':'fill="white" stroke="#738198"','radiation-ray':'fill="none" stroke="#879abc" stroke-width="1.5"','source-point':'fill="#172437"','film-line':'stroke="#2557cf" stroke-width="5"','evaluated-wall':'stroke="#28765b" stroke-width="7"','dimension':'fill="none" stroke="#738198" stroke-width="1"','diagram-label':'fill="#4f6076" font-size="13"'};
+ svg=svg.replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="356" height="250" font-family="Roboto" ');
+ for(const [name,style]of Object.entries(styles))svg=svg.replaceAll(`class="${name}"`,style);
+ return svg.replace(/<text ([^>]+)>/g,(_,attributes)=>`<text ${attributes}${attributes.includes('fill=')?'':' fill="#4f6076"'} stroke="none"${attributes.includes('font-size=')?'':' font-size="13"'}>`);
+}
+const text=value=>displayValue(value).replace(/[\u2011\u2013\u2014]/g,'-');
+const cell=(value,style={})=>({text:text(value),...style});
+const layout={hLineWidth:()=>.5,vLineWidth:()=>0,hLineColor:()=>'#dce2eb',paddingLeft:()=>7,paddingRight:()=>7,paddingTop:()=>2.5,paddingBottom:()=>2.5};
+const table=(body,widths,headerRows=0)=>({table:{headerRows,widths,body},layout,margin:[0,0,0,12]});
+const section=label=>({text:label,fontSize:12,bold:true,color:'#203651',margin:[0,12,0,7]});
+function rowTable(rows){return table(rows.map(r=>[cell(r.label,{color:'#526176'}),cell(r.value),{text:r.unit,color:'#526176'}]),[210,'*',55]);}
+function pdfDefinition(report){
+ const content=[];
+ const heading={stack:[{text:report.title,fontSize:24,bold:true,color:'#173352'}, {text:`Vytvořeno ${displayDate(report.exportedAt)} (Europe/Prague) · Počet výpočtů: ${report.records.length}`,fontSize:9,color:'#526176',margin:[0,7,0,0]}]};
+ content.push(report.logo?{columns:[heading,{image:report.logo,fit:[85,48],width:85}],columnGap:15}:heading);
+ if(report.technician)content.push({text:'Technik: '+report.technician,margin:[0,10,0,0]});
+ if(report.note)content.push({text:'Poznámka: '+report.note,margin:[0,8,0,0]});
+ if(report.records.length>1||!report.details){
+  content.push(section('Přehled'));
+  const headers=['Identifikace','Výpočet / datum','Výsledek'].map(v=>cell(v,{bold:true,fillColor:'#eaf0fa'}));
+  content.push(table([headers,...report.records.map(r=>[
+   {stack:IDENTIFIERS.map(([key,label])=>({text:`${label}: ${text(r[key])}`,margin:[0,0,0,3]}))},
+   {stack:[cell(KINDS[r.context.kind],{bold:true}),cell(displayDate(r.createdAt),{margin:[0,5,0,0]}),cell('Model '+r.modelVersion,{fontSize:8,margin:[0,5,0,0]})]},
+   {stack:[cell(r.result.summary,{bold:true,fontSize:12}),cell(statusText(r),{margin:[0,5,0,0]}),...(r.current?[cell('Aktuální zadání – neuloženo v historii',{fontSize:8})]:[])]}
+  ])],[175,145,'*'],1));
+ }
+ if(report.details)for(const [index,r]of report.records.entries()){
+  if(report.records.length>1)content.push({text:`${index+1}. ${KINDS[r.context.kind]}`,pageBreak:'before',fontSize:20,bold:true,color:'#173352',margin:[0,0,0,12]});
+  else content.push(section(KINDS[r.context.kind]));
+  content.push(table(IDENTIFIERS.map(([key,label])=>[cell(label,{color:'#526176'}),cell(r[key],{bold:true})]),[125,'*']));
+  content.push({text:`${r.current?'Zachyceno z aktuálního zadání':'Uloženo'}: ${displayDate(r.createdAt)} (Europe/Prague) · Model: ${r.modelVersion} · ID: ${r.id}`,fontSize:9,color:'#526176',margin:[0,0,0,10]});
+  const sources=recordSources(r);
+  if(sources.length)content.push({stack:sources.map(([label,url])=>({text:'Podklad: '+label+(url&&!url.startsWith('https://')?': '+url:''),...(url.startsWith('https://')?{link:url}:{}),fontSize:8,color:'#35557c'})),margin:[0,0,0,8],unbreakable:true});
+  content.push({stack:[{text:text(r.result.summary),fontSize:25,bold:true,color:'#173352'},{text:statusText(r),margin:[0,5,0,0],color:r.unverified||r.result.status==='fail'?'#a92c37':'#526176'}],margin:[0,0,0,8]});
+  if(r.current)content.push({text:'Aktuální zadání – neuloženo v historii.',fontSize:9,color:'#526176'});
+  content.push(section('Vstupy'),rowTable(inputRows(r)));
+  if(r.result.values.nearBoundary)content.push({text:'Bod leží u hranice oblastí; výsledek zahrnuje nejistotu odečtu.',fontSize:9,color:'#526176'});
+  const mainKeys=['ug','f','b','minF','minInputDistance','minutes','exposure','currentActivity','actual','target'];
+  const details=valueRows(r.result.values,r.context.kind,{result:true}).filter(row=>mainKeys.includes(row.key));
+  if(details.length)content.push(section('Podrobnosti výsledku'),rowTable(details));
+  if(report.nomogram){const svg=nomogramSvg(r);if(svg)content.push({stack:[section('Nomogram '+r.result.values.figure),{svg,width:480},{text:`t/De = ${displayValue(r.result.values.x)} · ${r.result.values.outside?'De/f':'De/SFD'} = ${displayValue(r.result.values.y)}. Čísla křivek označují počty expozic.`,fontSize:9,color:'#526176',margin:[0,5,0,0]}],unbreakable:true});}
+  if(report.geometry){const svg=geometrySvg(r);if(svg)content.push({stack:[section('Schéma geometrie'),{svg,width:250},{text:'Schéma není v měřítku.',fontSize:9,color:'#526176'}],unbreakable:true});}
+  if(r.context.reference){content.push({text:'Použitá reference CR',pageBreak:'before',fontSize:18,bold:true,color:'#173352',margin:[0,0,0,12]},{text:'Výpočet '+r.id+' · Zakázka '+text(r.jobName)+' · Svar '+text(r.weld),fontSize:9,margin:[0,0,0,12]},rowTable(valueRows(r.context.reference,'reference')));}
+ }
+ return {info:{title:report.title,author:report.technician||'RT Asistent',subject:'Radiografické výpočty',creator:'RT Asistent'},pageSize:'A4',pageMargins:[40,40,40,45],defaultStyle:{font:'Roboto',fontSize:10,color:'#172437'},content,footer:(page,pages)=>({columns:[{text:'RT Asistent · Výpočtový podklad',width:'*'},{text:`${page} / ${pages}`,alignment:'right',width:70}],margin:[40,15,40,0],fontSize:8,color:'#526176'})};
+}
+async function createPdf(report){
+ const [{default:pdfMake},{default:fonts}]=await Promise.all([__vitePreload(() => import('./pdfmake-Q44JKpeV.js').then(n => n.p),true              ?__vite__mapDeps([0,1]):void 0),__vitePreload(() => import('./vfs_fonts-DYgd5Mxl.js').then(n => n.v),true              ?__vite__mapDeps([2,1]):void 0)]);
+ pdfMake.addVirtualFileSystem(fonts);
+ pdfMake.setUrlAccessPolicy(()=>false);
+ const buffer=await pdfMake.createPdf(pdfDefinition(report)).getBuffer();
+ return new Blob([buffer],{type:'application/pdf'});
+}
+
+const exportBody=`
+ <p>Soubor se vytvoří v tomto zařízení. Výsledky z historie zachovají podobu při uložení.</p>
+ <fieldset id="export-controls" class="export-controls">
+ <div class="work-grid"><div><label for="export-scope">Co exportovat</label><select id="export-scope"><option value="current">Aktuální výpočet</option><option value="selected">Vybrané záznamy</option><option value="job">Celá zakázka</option></select></div><div><label for="export-format">Formát souboru</label><select id="export-format"><option value="pdf">PDF dokument</option><option value="xlsx">Excel (.xlsx)</option></select></div></div>
+ <div id="export-job-wrap" class="export-field" hidden><label for="export-job">Zakázka k exportu</label><select id="export-job"></select></div>
+ <div id="export-pdf-options" class="export-field"><label for="export-detail">Obsah PDF</label><select id="export-detail"><option value="details">Přehled a podrobné výpočtové listy</option><option value="summary">Pouze stručný přehled</option></select><div id="export-figures"><label class="work-check"><input id="export-nomogram" type="checkbox" checked> Přidat nomogram, pokud je dostupný</label><label class="work-check"><input id="export-geometry" type="checkbox"> Přidat schéma geometrie</label></div></div>
+ <details class="export-field"><summary>Technik, poznámka a logo</summary><div class="export-field"><label for="export-technician">Jméno technika (nepovinné)</label><input id="export-technician" maxlength="120" autocomplete="name"></div><div class="export-field"><label for="export-note">Poznámka do dokumentu (nepovinná)</label><textarea id="export-note" maxlength="2000" rows="3"></textarea></div><div id="export-logo-wrap" class="export-field"><label for="export-logo">Logo do PDF (PNG nebo JPG, nejvýše 2 MB)</label><input id="export-logo" type="file" accept="image/png,image/jpeg"><button id="export-logo-remove" type="button" class="text-button" hidden>Odebrat logo</button><p id="export-logo-status" role="status"></p></div></details>
+ </fieldset>
+ <div class="export-preview-heading"><h4>Náhled obsahu</h4><p id="export-count" role="status"></p></div><div id="export-preview"></div>
+ <nav class="history-pages" aria-label="Stránky náhledu exportu"><button id="export-prev" type="button" class="secondary-button">Předchozí</button><span id="export-page"></span><button id="export-next" type="button" class="secondary-button">Další</button></nav>
+ <div class="export-submit"><p id="export-status" role="status" tabindex="-1"></p><button id="export-download" type="button" class="primary-button">Stáhnout PDF</button><a id="export-ready" class="secondary-button" hidden>Stáhnout soubor znovu</a></div>`;
+
+function initExports({document:d,app,readHistory,readMetadata,open,downloadFile}){
+ const w=d.defaultView,by=id=>d.getElementById(id),abort=new w.AbortController(),on=(id,event,fn)=>by(id).addEventListener(event,fn,{signal:abort.signal});
+ let current=[],history=[],selected=[],jobs=[],currentError='',page=0,logo=null,url=null,busy=false,logoLoading=false,logoRevision=0;
+ const status=(message,error=false)=>{by('export-status').textContent=message;by('export-status').dataset.error=String(error);};
+ const invalidate=()=>{if(url){w.URL.revokeObjectURL(url);url=null;}by('export-ready').hidden=true;by('export-ready').removeAttribute('href');status('');};
+ const records=()=>by('export-scope').value==='current'?current:by('export-scope').value==='selected'?selected:history.filter(r=>r.jobId===by('export-job').value);
+ const options=()=>({details:by('export-detail').value==='details',nomogram:by('export-nomogram').checked,geometry:by('export-geometry').checked,technician:by('export-technician').value,note:by('export-note').value,logo});
+ function render(){
+  const pdf=by('export-format').value==='pdf',detail=by('export-detail').value==='details',rows=records(),pages=Math.max(1,Math.ceil(rows.length/10));page=Math.min(page,pages-1);
+  by('export-job-wrap').hidden=by('export-scope').value!=='job';by('export-pdf-options').hidden=!pdf;by('export-logo-wrap').hidden=!pdf;by('export-figures').hidden=!detail;
+  by('export-count').textContent=`Počet výpočtů: ${rows.length}`;by('export-download').disabled=!rows.length||busy||logoLoading;by('export-download').textContent=busy?'Vytvářím soubor…':pdf?'Stáhnout PDF':'Stáhnout Excel';
+  by('export-prev').disabled=page===0;by('export-next').disabled=page===pages-1;by('export-page').textContent=`${page+1} / ${pages}`;
+  by('export-preview').innerHTML=rows.length?rows.slice(page*10,page*10+10).map(r=>{
+   const graph=pdf&&detail&&by('export-nomogram').checked?nomogramSvg(r):null,geometry=pdf&&detail&&by('export-geometry').checked?geometrySvg(r):null;
+   const fields=[...inputRows(r),...valueRows(r.result.values,r.context.kind,{result:true})];
+   return `<article class="export-preview-card"><h4>${xml(KINDS[r.context.kind])}</h4><dl class="export-identifiers">${IDENTIFIERS.map(([key,label])=>`<dt>${label}</dt><dd>${xml(displayValue(r[key]))}</dd>`).join('')}</dl><strong class="export-result">${xml(r.result.summary)}</strong><p>${xml(statusText(r))}</p><p class="export-meta">${r.current?'Aktuální zadání, neuloženo':'Uložená historie'} · ${xml(displayDate(r.createdAt))} · model ${xml(r.modelVersion)}</p>${!pdf||detail?`<details><summary>Vstupy a podrobnosti výsledku</summary><dl class="export-identifiers">${fields.map(f=>`<dt>${xml(f.label)}${f.unit?' ('+xml(f.unit)+')':''}</dt><dd>${xml(displayValue(f.value))}</dd>`).join('')}</dl></details>`:''}${graph?`<div class="export-chart" role="img" aria-label="Nomogram exportovaného výpočtu">${graph}</div>`:''}${geometry?`<div class="export-chart" role="img" aria-label="Schéma exportovaného výpočtu">${geometry}</div><p>Schéma není v měřítku.</p>`:''}</article>`;
+  }).join(''):`<p class="export-empty">${xml(by('export-scope').value==='current'?currentError||'Doplňte platný výpočet.':by('export-scope').value==='job'?'Tato zakázka zatím nemá uložené výpočty.':'Vyberte záznamy v historii.')}</p>`;
+ }
+ function show({scope='current',selection=[],button}={}){
+  invalidate();page=0;const all=readHistory();jobs=all.filter(e=>e.kind==='job');history=snapshotRecords(all.filter(e=>e.kind==='calculation'),jobs);selected=snapshotRecords(selection,jobs);
+  try{const meta=readMetadata();current=[currentExport(app.captureCalculation(),meta)];currentError='';}catch(error){current=[];currentError=error.message;}
+  by('export-job').replaceChildren(...jobs.map(j=>{const option=d.createElement('option');option.value=j.id;option.textContent=j.name;return option;}));
+  const meta=readMetadata();if(jobs.some(j=>j.id===meta.jobId))by('export-job').value=meta.jobId;
+  by('export-scope').querySelector('[value=selected]').disabled=!selected.length;by('export-scope').querySelector('[value=job]').disabled=!jobs.length;by('export-scope').value=scope;
+  open(button);render();
+ }
+ for(const id of ['export-scope','export-format','export-job','export-detail','export-nomogram','export-geometry','export-technician','export-note'])on(id,'input',()=>{invalidate();page=0;render();});
+ on('export-prev','click',()=>{page--;render();});on('export-next','click',()=>{page++;render();});
+ on('export-logo-remove','click',()=>{logoRevision++;logo=null;by('export-logo').value='';by('export-logo-remove').hidden=true;by('export-logo-status').textContent='';invalidate();});
+ on('export-logo','change',async()=>{
+  const revision=++logoRevision,file=by('export-logo').files?.[0];logo=null;invalidate();by('export-logo-remove').hidden=true;by('export-logo-status').textContent='';logoLoading=false;if(!file){render();return;}logoLoading=true;render();
+  try{
+   if(!['image/png','image/jpeg'].includes(file.type)||file.size>2*1024*1024)throw new Error('Vyberte PNG nebo JPG do 2 MB.');
+   const data=await new Promise((resolve,reject)=>{const reader=new w.FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error('Obrázek nelze přečíst.'));reader.readAsDataURL(file);});
+   const img=new w.Image();await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('Soubor není platný obrázek.'));img.src=data;});
+   if(img.naturalWidth*img.naturalHeight>16000000)throw new Error('Logo je příliš velké. Použijte obrázek do 16 megapixelů.');
+   const scale=Math.min(1,600/Math.max(img.naturalWidth,img.naturalHeight)),canvas=d.createElement('canvas');canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+   if(revision!==logoRevision)return;logo=canvas.toDataURL('image/png');by('export-logo-remove').hidden=false;by('export-logo-status').textContent='Logo připraveno: '+file.name;
+  }catch(error){if(revision!==logoRevision)return;by('export-logo').value='';by('export-logo-status').textContent=error.message;}
+  finally{if(revision===logoRevision){logoLoading=false;render();}}
+ });
+ on('export-download','click',async()=>{
+  if(busy||logoLoading)return;let report;
+  try{report=makeReport(records(),options());}catch(error){status(error.message,true);return;}
+  const format=by('export-format').value;invalidate();busy=true;by('export-status').focus();by('export-controls').disabled=true;by('export-panel').setAttribute('aria-busy','true');render();status('Vytvářím soubor v zařízení…');
+  try{
+   const {createXlsx}=format==='xlsx'?await __vitePreload(() => import('./export-xlsx-CBHfML-S.js'),true              ?[]:void 0):{};
+   const blob=await (format==='pdf'?createPdf(report):createXlsx(report)),filename=exportFilename(report,format);
+   if(downloadFile)await downloadFile({blob,filename,report});
+   else {url=w.URL.createObjectURL(blob);const link=by('export-ready');link.href=url;link.download=filename;link.hidden=false;link.click();}
+   status(`Soubor ${filename} je připravený ke stažení. Počet výpočtů: ${report.records.length}.`);
+  }catch(error){status('Export se nepodařil: '+error.message,true);}
+  finally{busy=false;by('export-controls').disabled=false;by('export-panel').removeAttribute('aria-busy');render();}
+ });
+ return {show,destroy(){abort.abort();logoRevision++;if(url)w.URL.revokeObjectURL(url);}};
+}
+
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const field=(id,label,value='',hint='')=>`<div><label for="${id}">${label}</label><input id="${id}" inputmode="decimal" value="${esc(value)}">${hint?`<small>${hint}</small>`:''}</div>`;
 const select=(id,label,options)=>`<div><label for="${id}">${label}</label><select id="${id}">${options.map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select></div>`;
@@ -16898,16 +17163,17 @@ const jobFields={part:'job-part',weld:'job-weld',drawingNumber:'job-drawing',bat
 const geometryIds={material:'shared-material',technique:'shared-technique',qualityClass:'shared-class',thickness:'shared-thickness',diameter:'shared-diameter',sfd:'shared-sfd',gap:'shared-gap',pathMode:'shared-path',penetrated:'shared-penetrated'};
 const labels={technique:'Technika',qualityClass:'Třída',thickness:'Tloušťka (mm)',diameter:'Průměr De (mm)',distance:'Vzdálenost (mm)',sourceDistance:'Zdroj–první povrch (mm)',gap:'Mezera (mm)',focus:'Ohnisko (mm)',planar:'Planární vady',mode:'Zdroj reference',material:'Materiál',film:'Film',voltage:'Napětí (kV)',current:'Proud (mA)',exposure:'Referenční E (mA·min)',referenceDistance:'Referenční SFD (mm)',referenceName:'Vlastní reference',activity:'Referenční aktivita (GBq)',referenceTime:'Datum aktivity',exposureTime:'Datum expozice',fdd:'FDD (mm)',roi:'Místo měření',flush:'Zarovnaný svar',cp1:'CP I',iqiConfirmed:'Potvrzené IQI',kind:'Druh SNR',measured:'Naměřené SNR',srb:'SR_b (mm)',magnification:'Zvětšení',seconds:'Skutečný čas (s)',name:'Název měření',setup:'Sestava',screens:'Fólie / filtrace',scan:'Skener',delay:'Prodleva (min)',measuredAt:'Datum měření'};
 const values={outside:'Jedna stěna · zdroj vně',inside:'Jedna stěna · zdroj uvnitř',single:'Jedna stěna',double:'DWSI',dwsi:'DWSI',dwdi:'DWDI',chart:'Výrobní diagram',manual:'Vlastní reference',weld:'Svar',haz:'HAZ / základní materiál',raw:'SNR',normalized:'SNR_N',...MATERIALS};
-function initWorkflow({document:d=globalThis.document,app,store:provided}={}){
+function initWorkflow({document:d=globalThis.document,app,store:provided,downloadExport}={}){
  const w=d.defaultView,by=id=>d.getElementById(id),abort=new w.AbortController(),on=(el,event,fn)=>el.addEventListener(event,fn,{signal:abort.signal});
  const store=provided||createWorkspaceStore({indexedDB:w.indexedDB,onChange:refresh});
  let entries=[],base=null,variants=[],activePanel=null,returnFocus=null,readyForStorage=false,stopped=false,historyPage=0,historyIndex=[],jobNames=new Map();
- const PAGE_SIZE=50;
+ const PAGE_SIZE=50,historySelection=new Set();
  const message=(text,error=false)=>{const target=activePanel?by(activePanel).querySelector('.panel-message'):by('workflow-message');target.textContent=text;target.dataset.error=String(error);};
  by('workflow-panels').innerHTML=
  panel('data-panel','Offline a zálohy',dataToolsBody)+
+ panel('export-panel','Export výpočtů',exportBody)+
  panel('job-panel','Nová zakázka','<label for="job-name">Název nebo číslo zakázky</label><input id="job-name" maxlength="120" placeholder="Např. RT-2026-042"><div class="work-panel-actions"><button id="job-create" type="button" class="primary-button">Vytvořit zakázku</button></div>')+
- panel('history-panel','Historie výpočtů',`<div class="work-grid">${select('history-scope','Rozsah historie',[['current','Aktuální zakázka'],['all','Všechny zakázky']])}<div><label for="history-search">Najít záznam</label><input id="history-search" type="search" placeholder="Zakázka, díl, svar, výkres, běžné číslo…"></div></div><p>Každý záznam uchovává původní výsledek a verzi modelu. Otevření přenese vstupy do aktuálního kalkulátoru.</p><div id="history-list"></div><nav class="history-pages" aria-label="Stránky historie"><button id="history-prev" type="button" class="secondary-button">Předchozí</button><p id="history-page-status" role="status"></p><button id="history-next" type="button" class="secondary-button">Další</button></nav>`)+
+ panel('history-panel','Historie výpočtů',`<div class="work-grid">${select('history-scope','Rozsah historie',[['current','Aktuální zakázka'],['all','Všechny zakázky']])}<div><label for="history-search">Najít záznam</label><input id="history-search" type="search" placeholder="Zakázka, díl, svar, výkres, běžné číslo…"></div></div><p>Každý záznam uchovává původní výsledek a verzi modelu. Otevření přenese vstupy do aktuálního kalkulátoru.</p><div class="history-export-actions"><button id="history-select-all" type="button" class="secondary-button">Vybrat nalezené</button><button id="history-clear-selection" type="button" class="text-button">Zrušit výběr</button><span id="history-selected-count" role="status"></span><button id="history-export" type="button" class="primary-button">Exportovat</button></div><div id="history-list"></div><nav class="history-pages" aria-label="Stránky historie"><button id="history-prev" type="button" class="secondary-button">Předchozí</button><p id="history-page-status" role="status"></p><button id="history-next" type="button" class="secondary-button">Další</button></nav>`)+
  panel('geometry-panel','Společná geometrie',`<p>Vyplňte geometrii a vyberte, kam ji přenést. Následné úpravy jednotlivých kalkulátorů jsou samostatné.</p><div class="work-grid">${select('shared-material','Materiál',Object.entries(MATERIALS))}${select('shared-technique','Technika',[['outside','Trubka · jedna stěna, zdroj vně'],['inside','Trubka · jedna stěna, zdroj uvnitř'],['dwsi','Dvě stěny · DWSI'],['dwdi','Dvě stěny · DWDI'],['flat','Plochý díl · jedna stěna']])}${select('shared-class','Třída',[['B','B'],['A','A']])}${field('shared-thickness','Jedna stěna t (mm)',10)}${field('shared-diameter','Vnější průměr De (mm)',219)}${field('shared-sfd','Zdroj–film SFD (mm)',1000)}${field('shared-gap','Mezera předmět–film (mm)',0)}${select('shared-path','Prozářená tloušťka w',[['auto','Odvodit t / 2t'],['manual','Zadat skutečnou dráhu']])}${field('shared-penetrated','Skutečné w (mm)',20,'Bez vzduchu; včetně převýšení a šikmé dráhy.')}</div><p id="geometry-summary" role="status"></p><p id="geometry-skipped"></p><div class="work-panel-actions">${[['n','Počet expozic'],['ug','Neostrost'],['film','Čas filmu'],['cr','CR']].map(([id,l])=>`<label class="work-check"><input type="checkbox" id="shared-target-${id}" checked>${l}</label>`).join('')}</div><div class="work-panel-actions"><button id="geometry-apply" type="button" class="primary-button">Přenést vybrané údaje</button></div>`)+
  panel('compare-panel','Porovnání variant','<p id="compare-description"></p><button id="compare-refresh" class="secondary-button" type="button">Načíst aktuální zadání</button><div id="comparison-grid" class="comparison-grid"></div>');
  let pref={};try{pref=JSON.parse(w.localStorage.getItem('rt_job_context_v1'))||{};}catch{}
@@ -16930,12 +17196,14 @@ function initWorkflow({document:d=globalThis.document,app,store:provided}={}){
  for(const id of ['job-select',...Object.values(jobFields)])on(by(id),'input',()=>{pref.job=by('job-select').value;preference();jobContext();renderHistory();});
  async function saveContext(context){const entry=historyEntry({id:w.crypto.randomUUID(),jobId:by('job-select').value,...jobValues(),context});await persist(entry);message('Výpočet uložen do místní historie.');}
  on(by('history-save'),'click',async()=>{by('history-save').disabled=true;try{await saveContext(app.captureCalculation());}catch(error){message(error.message,true);if(!by('job-select').value)by('job-select').focus();else if(!by('job-part').value.trim())by('job-part').focus();else if(!by('job-weld').value.trim())by('job-weld').focus();}finally{by('history-save').disabled=false;}});
- function renderHistory(){if(activePanel!=='history-panel')return;const query=by('history-search').value.trim().toLocaleLowerCase('cs-CZ');const rows=historyIndex.filter(({entry:e,search})=>(by('history-scope').value==='all'||e.jobId===by('job-select').value)&&search.includes(query)).map(r=>r.entry);
+ function filteredHistory(){const query=by('history-search').value.trim().toLocaleLowerCase('cs-CZ');return historyIndex.filter(({entry:e,search})=>(by('history-scope').value==='all'||e.jobId===by('job-select').value)&&search.includes(query)).map(r=>r.entry);}
+ function selectionStatus(){by('history-selected-count').textContent='Vybráno: '+historySelection.size;by('history-clear-selection').disabled=!historySelection.size;by('history-select-all').disabled=!filteredHistory().length;by('history-export').disabled=!historySelection.size&&!filteredHistory().length;}
+ function renderHistory(){if(activePanel!=='history-panel')return;const rows=filteredHistory();selectionStatus();
   const pages=Math.max(1,Math.ceil(rows.length/PAGE_SIZE));historyPage=Math.min(historyPage,pages-1);const visible=rows.slice(historyPage*PAGE_SIZE,(historyPage+1)*PAGE_SIZE);
   by('history-page-status').textContent=rows.length?`${historyPage*PAGE_SIZE+1}–${Math.min((historyPage+1)*PAGE_SIZE,rows.length)} z ${rows.length}`:'Žádné záznamy';by('history-prev').disabled=historyPage===0;by('history-next').disabled=historyPage===pages-1;
-  by('history-list').innerHTML=visible.length?visible.map(e=>`<article class="history-card"><h4>${esc(KINDS[e.context.kind])} · ${esc(e.weld)}</h4><div>${esc(jobNames.get(e.jobId)||'Zakázka')} / ${esc(e.part)}</div>${e.drawingNumber||e.batch?`<div class="history-identifiers">${[e.drawingNumber?'Výkres: '+e.drawingNumber:'',e.batch?'Běžné číslo: '+e.batch:''].filter(Boolean).map(esc).join(' · ')}</div>`:''}<strong class="history-result">${esc(e.result.summary)}</strong><p>${esc(e.result.status==='pass'?'Posuzované kritérium splněno':e.result.status==='fail'?'Posuzované kritérium nesplněno':e.result.status==='limit'?'Mimo rozsah odečtu':'Výpočet / odhad v rozsahu daného modelu')}</p><div class="history-meta">${esc(new Date(e.createdAt).toLocaleString('cs-CZ'))} · model ${esc(e.modelVersion)} · uloženo v zařízení</div><details><summary>Původní vstupy a reference</summary><dl>${Object.entries(e.context.inputs).filter(([,v])=>v!==null&&v!=='').map(([key,value])=>`<dt>${esc(labels[key]||key)}</dt><dd>${esc(typeof value==='boolean'?value?'Ano':'Ne':typeof value==='number'?fmt(value):values[value]||value)}</dd>`).join('')}</dl>${e.context.reference?`<p>Reference: ${esc(e.context.reference.name)} · ${esc(e.context.reference.measuredAt)} · ${fmt(e.context.reference.exposure)} mA·min · SNR_N ${fmt(e.context.reference.achievedSnr)}</p>`:''}</details><button type="button" class="secondary-button" data-restore="${esc(e.id)}" ${validEntry(e)?'':'disabled'}>Otevřít vstupy v kalkulátoru</button>${validEntry(e)?'':'<p>Tento historický záznam nelze ověřit v podporované verzi. Původní údaje lze číst a exportovat.</p>'}</article>`).join(''):'<p>V tomto výběru zatím nejsou uložené výpočty. Vyberte zakázku, doplňte díl a svar a použijte „Uložit k tomuto svaru“.</p>';
+  by('history-list').innerHTML=visible.length?visible.map(e=>`<article class="history-card"><label class="work-check history-select"><input type="checkbox" data-export-select="${esc(e.id)}" ${historySelection.has(e.id)?'checked':''}> Vybrat pro export</label><h4>${esc(KINDS[e.context.kind])} · ${esc(e.weld)}</h4><div>${esc(jobNames.get(e.jobId)||'Zakázka')} / ${esc(e.part)}</div>${e.drawingNumber||e.batch?`<div class="history-identifiers">${[e.drawingNumber?'Výkres: '+e.drawingNumber:'',e.batch?'Běžné číslo: '+e.batch:''].filter(Boolean).map(esc).join(' · ')}</div>`:''}<strong class="history-result">${esc(e.result.summary)}</strong><p>${esc(e.result.status==='pass'?'Posuzované kritérium splněno':e.result.status==='fail'?'Posuzované kritérium nesplněno':e.result.status==='limit'?'Mimo rozsah odečtu':'Výpočet / odhad v rozsahu daného modelu')}</p><div class="history-meta">${esc(new Date(e.createdAt).toLocaleString('cs-CZ'))} · model ${esc(e.modelVersion)} · uloženo v zařízení</div><details><summary>Původní vstupy a reference</summary><dl>${Object.entries(e.context.inputs).filter(([,v])=>v!==null&&v!=='').map(([key,value])=>`<dt>${esc(labels[key]||key)}</dt><dd>${esc(typeof value==='boolean'?value?'Ano':'Ne':typeof value==='number'?fmt(value):values[value]||value)}</dd>`).join('')}</dl>${e.context.reference?`<p>Reference: ${esc(e.context.reference.name)} · ${esc(e.context.reference.measuredAt)} · ${fmt(e.context.reference.exposure)} mA·min · SNR_N ${fmt(e.context.reference.achievedSnr)}</p>`:''}</details><button type="button" class="text-button" data-export-record="${esc(e.id)}">Exportovat záznam</button><button type="button" class="secondary-button" data-restore="${esc(e.id)}" ${validEntry(e)?'':'disabled'}>Otevřít vstupy v kalkulátoru</button>${validEntry(e)?'':'<p>Tento historický záznam nelze ověřit v podporované verzi. Původní údaje lze číst a exportovat.</p>'}</article>`).join(''):'<p>V tomto výběru zatím nejsou uložené výpočty. Vyberte zakázku, doplňte díl a svar a použijte „Uložit k tomuto svaru“.</p>';
  }
- on(by('history-open'),'click',()=>{historyPage=0;open('history-panel',by('history-open'));renderHistory();});for(const id of ['history-search','history-scope'])on(by(id),'input',()=>{historyPage=0;renderHistory();});
+ on(by('history-open'),'click',()=>{historyPage=0;open('history-panel',by('history-open'));renderHistory();});for(const id of ['history-search','history-scope'])on(by(id),'input',()=>{historyPage=0;historySelection.clear();renderHistory();});
  for(const [id,delta]of [['history-prev',-1],['history-next',1]])on(by(id),'click',()=>{historyPage+=delta;renderHistory();by('history-panel-title').focus();by('history-panel').scrollTop=0;});
  on(by('history-list'),'click',e=>{const button=e.target.closest('[data-restore]');if(!button)return;const record=entries.find(r=>r.id===button.dataset.restore);if(!record)return;try{if(!validEntry(record))throw new Error('Historický záznam je rozporný nebo používá nepodporovaný model. Původní údaje zůstávají dostupné pro export.');app.restoreCalculation(clone(record.context));by('job-select').value=record.jobId;for(const [key,id]of Object.entries(jobFields))by(id).value=record[key]??'';pref.job=record.jobId;preference();jobContext();close();message(`Vstupy otevřeny v aktuálním kalkulátoru. Původní výsledek „${record.result.summary}“ zůstává v historii.${record.context.kind==='xray'&&record.context.inputs.mode==='manual'?' Platnost vlastní reference před novým použitím znovu potvrďte.':''}`);}catch(error){message(error.message,true);}});
 
@@ -16949,10 +17217,18 @@ function initWorkflow({document:d=globalThis.document,app,store:provided}={}){
  on(by('compare-open'),'click',()=>{loadComparison();open('compare-panel',by('compare-open'));});on(by('compare-refresh'),'click',loadComparison);
  on(by('comparison-grid'),'input',e=>{const el=e.target;if(!el.hasAttribute('data-variant')||Number(el.dataset.variant)===0)return;variants[Number(el.dataset.variant)][el.dataset.key]=el.value;renderVariant(Number(el.dataset.variant));});
  on(by('comparison-grid'),'click',e=>{const button=e.target.closest('[data-use-variant]');if(!button)return;try{const r=compareVariant(base,variants[Number(button.dataset.useVariant)]);app.restoreCalculation(r.context,{preserveCalibration:true});close();message('Varianta přenesena do kalkulátoru. Výsledek lze nyní uložit do zakázky.');}catch(error){message(error.message,true);}});
- const dataTools=initDataTools({document:d,app,store,open:()=>open('data-panel',by('data-open')),onArchiveChanged:async()=>{pref.job='';by('job-select').value='';refresh();preference();localStatus();},onRestored:async()=>{refresh();localStatus();}});
+ const exports=initExports({document:d,app,downloadFile:downloadExport,readHistory:()=>entries,readMetadata:()=>({jobId:by('job-select').value,jobName:jobNames.get(by('job-select').value)||'',...jobValues()}),open:button=>open('export-panel',button||by('export-current'))});
+ const showExport=options=>{try{exports.show(options);}catch(error){message(error.message,true);}};
+ on(by('export-current'),'click',()=>showExport({scope:'current',button:by('export-current')}));
+ on(by('history-export'),'click',()=>showExport({scope:'selected',selection:historySelection.size?entries.filter(e=>historySelection.has(e.id)):filteredHistory(),button:by('history-open')}));
+ on(by('history-select-all'),'click',()=>{historySelection.clear();for(const e of filteredHistory())historySelection.add(e.id);renderHistory();});
+ on(by('history-clear-selection'),'click',()=>{historySelection.clear();renderHistory();});
+ on(by('history-list'),'change',e=>{const input=e.target.closest('[data-export-select]');if(!input)return;if(input.checked)historySelection.add(input.dataset.exportSelect);else historySelection.delete(input.dataset.exportSelect);selectionStatus();});
+ on(by('history-list'),'click',e=>{const button=e.target.closest('[data-export-record]');if(!button)return;const record=entries.find(e=>e.id===button.dataset.exportRecord);if(record)showExport({scope:'selected',selection:[record],button:by('history-open')});});
+ const dataTools=initDataTools({document:d,app,store,open:()=>open('data-panel',by('data-open')),onArchiveChanged:async()=>{historySelection.clear();pref.job='';by('job-select').value='';refresh();preference();localStatus();},onRestored:async()=>{refresh();localStatus();}});
  jobContext();renderGeometry();
  const ready=store.init().then(async()=>{if(stopped)return;readyForStorage=true;refresh();await dataTools.ready();if(!stopped)return localStatus();}).catch(error=>{if(stopped)return;by('storage-status').dataset.state='error';by('storage-status').textContent=error.message;message('Zakázky nyní nelze bezpečně uložit. Výpočty můžete dál používat.',true);});
- return {ready,store,destroy(){stopped=true;abort.abort();dataTools.destroy();store.close();}};
+ return {ready,store,destroy(){stopped=true;abort.abort();dataTools.destroy();exports.destroy();store.close();}};
 }
 
 function initOffline({window:w=globalThis.window}={}){
@@ -17022,3 +17298,5 @@ initAppearance();
 const app=initApp({ Chart });
 initWorkflow({app});
 initOffline();
+
+export { IDENTIFIERS as I, KINDS as K, __vitePreload as _, fieldLabel as f, inputRows as i, recordSources as r, statusText as s, valueRows as v };

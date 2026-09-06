@@ -27,3 +27,13 @@ Jobs, history and CR measurements stay in this browser's local storage. Regularl
 On the old Sites address, open **Offline a zálohy** and export a JSON backup. On this address import the file, review the preview, and confirm restore. Origins cannot share browser storage; no automatic migration or upload is performed. The original installation is left intact.
 
 The portfolio application card is maintained in `public.apps` in the existing JendaWeb CMS, with an offline fallback in root `data.js`. That listing metadata has no connection to the RT application's local records.
+
+## Export výpočtů
+
+U výsledku zvolte **Exportovat výpočet**. V historii lze označit jednotlivé záznamy nebo použít **Vybrat nalezené** (zahrnuje všechny stránky výsledků hledání) a **Exportovat**. Panel umožňuje přepnout na celou zakázku a před stažením ukazuje počet a obsah záznamů.
+
+PDF nabízí stručný přehled nebo podrobné výpočtové listy, volitelný nomogram, schéma, jméno technika, poznámku a místní logo PNG/JPG. Excel obsahuje přehled, listy podle druhu výpočtu a použité reference CR. Identifikátory zůstávají textem včetně úvodních nul; číselné vstupy a výsledky jsou čísla. Datum záznamu v Excelu je v UTC, PDF uvádí pražský čas.
+
+Export zachovává uložené výsledky a verzi modelu; nepřepočítává historii. Aktuální zadání je ve výstupu označeno jako neuložené. Nepodporované historické modely jsou označeny a nevytváří se pro ně nový nomogram. Neplatné aktuální zadání nelze exportovat. PDF ani XLSX neslouží k obnově aplikace; k tomu nadále používejte zálohu JSON.
+
+Všechny knihovny a písma pro export jsou součástí offline kopie. Při vytváření souborů se žádné údaje neodesílají na server.
