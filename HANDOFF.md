@@ -16,7 +16,7 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
 - Supabase `apps.id = 29` is the primary catalog record; `data.js` contains the matching offline seed. Switch the live record only after the new versioned asset is deployed and its complete download hash is verified.
 - Icon: `icons/fyzika-pastelkou.png`. Actual emulator screenshots: `android-panel-bottom.png`, `android-panel-top.png`, and retained `android-water.png` in `screenshots/fyzika-pastelkou/`.
 - Portfolio worker **jw-v92** matches `index.html`; APKs are not precached. Preserve the RT Asistent cache/scope isolation below. No JSX changes or regeneration required.
-- Release 1 deployment `6a333ce` was verified live. Release 2 deployment verification is recorded after publishing below.
+- Release 1 deployment `6a333ce` was verified live. Release 2 commit `c5e71e9` also has Vercel success. Full public download: HTTP 200, expected APK MIME/attachment filename, 11,003,389 bytes, SHA-256 matching the signed original above. The CMS record was switched only after this check; its public REST values match the fallback. Both new screenshots, instructions, checksum, data.js, sw.js and index.html were verified byte-for-byte. Verification covers HTTP/data/file contracts, without a new browser UI pass.
 - Only distribution assets belong in this public repo. App source and Android signing credentials remain private in the Fyzika pastelkou project. Its decision D35 authorizes this download.
 
 ## RT Asistent distribution (6 Sep 2026)
