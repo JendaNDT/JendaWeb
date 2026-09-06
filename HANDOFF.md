@@ -12,8 +12,9 @@ Content is now managed through a **Supabase-backed CMS** (login-protected `/admi
 
 - Catalog detail: **https://jenda.cool/#app=fyzika-pastelkou**. The existing app modal handles the download; no new framework or application runtime on the website.
 - Signed **0.1.1-android.1** APK (10,999,293 bytes, Android 9+, ARM64/Vulkan) is in `binaries/fyzika-pastelkou-0.1.1-android.1/` with installation notes and SHA-256. Icon: `icons/fyzika-pastelkou.png`; real emulator screenshot: `screenshots/fyzika-pastelkou/android-water.png`.
-- Supabase `apps` is the primary catalog; `data.js` contains the matching offline seed. Descriptions disclose the Czech app language and pending physical-device test.
+- Supabase `apps.id = 29` is the primary catalog record; `data.js` contains the matching offline seed. Descriptions disclose the Czech app language and pending physical-device test.
 - Portfolio worker **jw-v91** matches `index.html`; the APK is not precached. Preserve the RT Asistent cache/scope isolation below. No JSX changes or regeneration required for this content addition.
+- Deployment `6a333ce` succeeded on Vercel. The full public APK download returns HTTP 200, the expected MIME/attachment filename and SHA-256 `7b996978cbc368fdb36e9145f08291665956db1dea46af03166ce865b69982ee`. Public REST data and the icon, screenshot, instructions, checksum and updated web files match the commit. Verification covered HTTP/data/file contracts; no new browser UI pass.
 - Only distribution assets belong in this public repo. App source and Android signing credentials remain private in the Fyzika pastelkou project. Its decision D35 authorizes this download.
 
 ## RT Asistent distribution (6 Sep 2026)
