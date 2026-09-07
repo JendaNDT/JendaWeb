@@ -1,5 +1,5 @@
 // sw.js — Service worker for offline-first PWA
-const VERSION = 'jw-v92';
+const VERSION = 'jw-v93';
 const SHELL = [
   '/',
   '/index.html',
