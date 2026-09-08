@@ -112,6 +112,10 @@ function App() {
   const [initialPos, setInitialPos] = __useS_app(0);
   const [restoring, setRestoring] = __useS_app(false);
   const [selectedApp, setSelectedApp] = __useS_app(null);
+  const appOriginRef = __useR_app(null);
+  const appTransitionRef = __useR_app(null);
+  const [playerExpanded, setPlayerExpanded] = __useS_app(false);
+  const albumOriginRef = __useR_app(null);
   const [showShortcuts, setShowShortcuts] = __useS_app(false);
   const [showSearch, setShowSearch] = __useS_app(false);
   const [shuffle, setShuffle] = __useS_app(() => {
@@ -236,6 +240,8 @@ function App() {
   // Handle URL hash for sharing: #track=<id> / #album=<id> / &t=<seconds> / #app=<slug>
   __useE_app(() => {
     const applyHash = () => {
+      appTransitionRef.current?.skipTransition();
+      appOriginRef.current = null;
       const h = window.location.hash || '';
       const trackMatch = h.match(/track=(\d+)/);
       const albumMatch = h.match(/album=([\w-]+)/);
@@ -302,12 +308,90 @@ function App() {
 
   const handleClose = __useC_app(() => {
     setPlayerTrack(null); setPlaying(false);
+    setPlayerExpanded(false); albumOriginRef.current = null;
     try { localStorage.removeItem(PLAYER_STORAGE_KEY); } catch {}
     if (location.hash.match(/track=|album=/)) history.replaceState(null, '', location.pathname);
   }, []);
+  const transitionAppModal = __useC_app((card, update, opening, name = 'app-detail-panel', afterCommit) => {
+    const commit = () => { ReactDOM.flushSync(update); afterCommit?.(); };
+    if (appTransitionRef.current) {
+      appTransitionRef.current.skipTransition();
+      commit();
+      return;
+    }
+    const rect = card?.isConnected ? card.getBoundingClientRect() : null;
+    const visible = rect && rect.width && rect.height && rect.bottom > 0 && rect.top < innerHeight;
+    if (!visible || !document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      commit();
+      return;
+    }
+    const root = document.documentElement;
+    root.classList.add('app-detail-transition');
+    if (opening) card.style.viewTransitionName = name;
+    const transition = document.startViewTransition(() => {
+      if (opening) card.style.viewTransitionName = '';
+      commit();
+      if (!opening && card.isConnected) card.style.viewTransitionName = name;
+    });
+    appTransitionRef.current = transition;
+    // A skipped visual transition must never prevent the modal state update.
+    transition.ready.catch(() => {});
+    const finish = () => {
+      card.style.viewTransitionName = '';
+      root.classList.remove('app-detail-transition');
+      if (appTransitionRef.current === transition) appTransitionRef.current = null;
+    };
+    transition.finished.then(finish, finish);
+  }, []);
+
+  const handleOpenAppModal = __useC_app((app, card) => {
+    appOriginRef.current = { card, hash:location.hash, x:window.scrollX, y:window.scrollY };
+    card.focus({ preventScroll:true });
+    transitionAppModal(card, () => {
+      setSelectedApp(app);
+      history.pushState(null, '', `#app=${slugify(app.name)}`);
+    }, true);
+  }, [transitionAppModal]);
+
   const handleCloseAppModal = __useC_app(() => {
-    setSelectedApp(null);
-    if (location.hash.match(/app=/)) history.replaceState(null, '', location.pathname);
+    const origin = appOriginRef.current;
+    transitionAppModal(origin?.card, () => {
+      setSelectedApp(null);
+      if (location.hash.match(/app=/)) history.replaceState(null, '', location.pathname + location.search + (origin?.hash || ''));
+      appOriginRef.current = null;
+    }, false, 'app-detail-panel', () => {
+      if (origin) window.scrollTo({ left:origin.x, top:origin.y, behavior:'instant' });
+    });
+  }, [transitionAppModal]);
+
+  const handleOpenAlbum = __useC_app((album, card) => {
+    const tracks = (window.TRACKS_DATA || []).filter(t => t.album === album.id && isPlayableTrack(t));
+    if (!tracks.length) return;
+    albumOriginRef.current = { card, x:window.scrollX, y:window.scrollY };
+    card.focus({ preventScroll:true });
+    // Start audio from the original user gesture, independently of the visual transition.
+    if (playerTrack?.album === album.id) { setPlaylist(tracks); setPlaying(true); }
+    else handlePlay(tracks[0], tracks);
+    transitionAppModal(card, () => setPlayerExpanded(true), true, 'album-player-cover');
+  }, [playerTrack, handlePlay, transitionAppModal]);
+
+  const handlePlayerExpanded = __useC_app(value => {
+    const next = typeof value === 'function' ? value(playerExpanded) : value;
+    if (next) { albumOriginRef.current = null; setPlayerExpanded(true); return; }
+    const origin = albumOriginRef.current;
+    transitionAppModal(origin?.card, () => {
+      setPlayerExpanded(false);
+      albumOriginRef.current = null;
+    }, false, 'album-player-cover', () => {
+      if (origin) {
+        window.scrollTo({ left:origin.x, top:origin.y, behavior:'instant' });
+        if (origin.card.isConnected) origin.card.focus({ preventScroll:true });
+      }
+    });
+  }, [playerExpanded, transitionAppModal]);
+
+  __useE_app(() => () => {
+    appTransitionRef.current?.skipTransition();
   }, []);
 
   return (
@@ -316,8 +400,8 @@ function App() {
       <Nav lang={lang} setLang={setLang} mode={tw.mode || 'auto'} setMode={(v) => setTweak('mode', v)} />
       <main>
         <Hero lang={lang} onPlay={handlePlay} />
-        <MusicSection lang={lang} onPlay={handlePlay} currentTrack={playerTrack} playing={playing} />
-        <AppsSection lang={lang} />
+        <MusicSection lang={lang} onPlay={handlePlay} onOpenAlbum={handleOpenAlbum} currentTrack={playerTrack} playing={playing} />
+        <AppsSection lang={lang} onOpen={handleOpenAppModal} />
         <ComparisonSection lang={lang} />
         <StatsSection lang={lang} />
         <NewsletterSection lang={lang} />
@@ -337,6 +421,7 @@ function App() {
           repeat={repeat} setRepeat={setRepeat}
           onShare={handleShare}
           lang={lang}
+          expanded={playerExpanded} setExpanded={handlePlayerExpanded}
         />
       )}
 

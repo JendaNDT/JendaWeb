@@ -1,7 +1,7 @@
 // player-contact.jsx — Audio player, shortcuts overlay, contact form, footer
 const { useState: __useS_pc, useEffect: __useE_pc, useRef: __useR_pc, useMemo: __useM_pc } = React;
 
-function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext, getNext, onClose, initialPosition, restoring, shuffle, setShuffle, repeat, setRepeat, onShare, lang }) {
+function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext, getNext, onClose, initialPosition, restoring, shuffle, setShuffle, repeat, setRepeat, onShare, lang, expanded, setExpanded }) {
   const audioRef = __useR_pc(null);
   const audioCtxRef = __useR_pc(null);
   const analyserRef = __useR_pc(null);
@@ -31,7 +31,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
   });
   const [muted, setMuted] = __useS_pc(false);
   const [hovBar, setHovBar] = __useS_pc(null);
-  const [expanded, setExpanded] = __useS_pc(false);
+  const collapsePlayer = React.useCallback(() => setExpanded(false), [setExpanded]);
   const [compact, setCompact] = __useS_pc(true);
   const [speed, setSpeed] = __useS_pc(() => {
     try { const v = parseFloat(localStorage.getItem('jw_speed')); return [0.75,1,1.25,1.5,2].includes(v) ? v : 1; }
@@ -359,6 +359,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
 
   __useE_pc(() => {
     const onKey = (e) => {
+      if (e.defaultPrevented) return;
       const t = e.target;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
       // Modal interactions must not also trigger the player behind them.
@@ -593,7 +594,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
         hovBar={hovBar} setHovBar={setHovBar}
         isPlaying={isPlaying} setIsPlaying={setIsPlaying}
         onPrev={onPrev} onNext={onNext}
-        onClose={() => setExpanded(false)}
+        onClose={collapsePlayer}
         shuffle={shuffle} setShuffle={setShuffle}
         repeat={repeat} setRepeat={setRepeat}
         vol={vol} setVol={setVol} muted={muted} setMuted={setMuted}

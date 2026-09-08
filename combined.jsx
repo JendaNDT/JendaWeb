@@ -1402,7 +1402,7 @@ const APP_VISUALS = {
   'rt-asistent': { src:'/screenshots/showcase/rt-asistent-v1.jpg', kind:'desktop', cs:'Radiografické výpočty přehledně.', en:'Radiography calculations, clearly.' },
 };
 
-function AppCard({ app, lang, mode = 'live' }) {
+function AppCard({ app, lang, mode = 'live', onOpen }) {
   const moveLight = (e) => {
     if (e.pointerType === 'touch' || !window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return;
     const card = e.currentTarget;
@@ -1417,7 +1417,12 @@ function AppCard({ app, lang, mode = 'live' }) {
   }) : null;
   return (
     <a href={'#app=' + slugify(app.name)} className={`app-card${visual ? ' app-showcase' : ''}`}
-       style={{ '--app-accent': app.color }} onPointerMove={visual ? moveLight : undefined}>
+       style={{ '--app-accent': app.color }} onPointerMove={visual ? moveLight : undefined}
+       onClick={e => {
+         if (!onOpen || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+         e.preventDefault();
+         onOpen(app, e.currentTarget);
+       }}>
       {visual && <div className={`app-stage app-stage-${visual.kind}`}>
         <span className="app-stage-caption">{lang === 'cs' ? visual.cs : visual.en}</span>
         {visual.src ? <img src={visual.src} alt={visual.kind === 'icon' ? '' : (lang === 'cs' ? `Ukázka aplikace ${app.name}` : `${app.name} screenshot`)}
@@ -1437,7 +1442,7 @@ function AppCard({ app, lang, mode = 'live' }) {
   );
 }
 
-function AppGrid({ items, mode = 'live', lang }) {
+function AppGrid({ items, mode = 'live', lang, onOpen }) {
   const gridRef = __useR(null);
   const previous = __useR(null);
   const order = items.map(app => app.id).join(',');
@@ -1484,12 +1489,12 @@ function AppGrid({ items, mode = 'live', lang }) {
 
   return <div ref={gridRef} className="apps-grid">
     {items.map(app => <div className="app-slot" data-app-key={app.id} key={app.id}>
-      <AppCard app={app} lang={lang} mode={mode} />
+      <AppCard app={app} lang={lang} mode={mode} onOpen={onOpen} />
     </div>)}
   </div>;
 }
 
-function AppsSection({ lang }) {
+function AppsSection({ lang, onOpen }) {
   const [filter, setFilter] = __useS('all');
   const [query, setQuery] = __useS('');
   const [showStudies, setShowStudies] = __useS(false);
@@ -1509,7 +1514,7 @@ function AppsSection({ lang }) {
     { key: 'all', label: lang === 'cs' ? 'Vše' : 'All', count: live.length },
     ...['PWA', 'Android'].map(key => ({ key, label: key, count: live.filter(a => a.platform === key).length })),
   ];
-  const cards = (items, mode = 'live') => <AppGrid items={items} mode={mode} lang={lang} />;
+  const cards = (items, mode = 'live') => <AppGrid items={items} mode={mode} lang={lang} onOpen={onOpen} />;
 
   return (
     <section id="apps" className="studio-section">
@@ -1591,9 +1596,9 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
 
   __useE(() => {
     const previousFocus = document.activeElement;
-    dialogRef.current?.focus();
+    dialogRef.current?.focus({ preventScroll:true });
     const handleEsc = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') { e.preventDefault(); onClose(); return; }
       if (e.key !== 'Tab') return;
       const controls = [...(dialogRef.current?.querySelectorAll('button, a[href], summary, [tabindex="0"]') || [])]
         .filter(el => !el.disabled && el.getClientRects().length);
@@ -1606,7 +1611,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
       }
     };
     window.addEventListener('keydown', handleEsc);
-    return () => { window.removeEventListener('keydown', handleEsc); if (previousFocus?.isConnected) previousFocus.focus(); };
+    return () => { window.removeEventListener('keydown', handleEsc); if (previousFocus?.isConnected) previousFocus.focus({ preventScroll:true }); };
   }, [onClose]);
 
   __useE(() => {
@@ -1843,11 +1848,11 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
   );
 }
 
-function AlbumCard({ album, lang, onPlay, onFilter, selected, nowPlaying }) {
+function AlbumCard({ album, lang, onPlay, onOpenAlbum, onFilter, selected, nowPlaying }) {
   const tracks = (window.TRACKS_DATA || []).filter(t => t.album === album.id && isPlayableTrack(t));
   return (
     <article className={`album-card${selected ? ' album-selected' : ''}${nowPlaying ? ' album-playing' : ''}`}>
-      <button className="album-cover-button" onClick={() => tracks.length && onPlay(tracks[0], tracks)}
+      <button className="album-cover-button" onClick={e => tracks.length && (onOpenAlbum ? onOpenAlbum(album, e.currentTarget) : onPlay(tracks[0], tracks))}
         aria-label={`${tx(lang,'music_play_album')}: ${album.title}`}>
         <img src={albumArt(album)} alt="" width="1024" height="1024" loading="lazy" decoding="async" />
         <span className="album-cover-mark" aria-hidden="true">J / {album.year}</span>
@@ -1945,7 +1950,7 @@ function TrackRow({ track, album, idx, active, playing, onPlay }) {
   );
 }
 
-function MusicSection({ lang, onPlay, currentTrack, playing }) {
+function MusicSection({ lang, onPlay, onOpenAlbum, currentTrack, playing }) {
   const [ref, vis] = useInView();
   const [tracksRef, tracksVis] = useInView();
   const [albumFilter, setAlbumFilter] = __useS('all');
@@ -1976,7 +1981,7 @@ function MusicSection({ lang, onPlay, currentTrack, playing }) {
           {albums.length > 0 && <SubLabel>{tx(lang,'music_albums')}</SubLabel>}
           <div className="albums-grid">
             {albums.map(a => (
-              <AlbumCard key={a.id} album={a} lang={lang} onPlay={onPlay} onFilter={filterByAlbum} selected={albumFilter === a.id} nowPlaying={!!(playing && currentTrack && currentTrack.album === a.id)} />
+              <AlbumCard key={a.id} album={a} lang={lang} onPlay={onPlay} onOpenAlbum={onOpenAlbum} onFilter={filterByAlbum} selected={albumFilter === a.id} nowPlaying={!!(playing && currentTrack && currentTrack.album === a.id)} />
             ))}
           </div>
         </div>
@@ -2037,7 +2042,7 @@ Object.assign(window, { AppCard, AppsSection, AlbumCard, TrackRow, MusicSection 
 // player-contact.jsx — Audio player, shortcuts overlay, contact form, footer
 const { useState: __useS_pc, useEffect: __useE_pc, useRef: __useR_pc, useMemo: __useM_pc } = React;
 
-function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext, getNext, onClose, initialPosition, restoring, shuffle, setShuffle, repeat, setRepeat, onShare, lang }) {
+function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext, getNext, onClose, initialPosition, restoring, shuffle, setShuffle, repeat, setRepeat, onShare, lang, expanded, setExpanded }) {
   const audioRef = __useR_pc(null);
   const audioCtxRef = __useR_pc(null);
   const analyserRef = __useR_pc(null);
@@ -2067,7 +2072,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
   });
   const [muted, setMuted] = __useS_pc(false);
   const [hovBar, setHovBar] = __useS_pc(null);
-  const [expanded, setExpanded] = __useS_pc(false);
+  const collapsePlayer = React.useCallback(() => setExpanded(false), [setExpanded]);
   const [compact, setCompact] = __useS_pc(true);
   const [speed, setSpeed] = __useS_pc(() => {
     try { const v = parseFloat(localStorage.getItem('jw_speed')); return [0.75,1,1.25,1.5,2].includes(v) ? v : 1; }
@@ -2395,6 +2400,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
 
   __useE_pc(() => {
     const onKey = (e) => {
+      if (e.defaultPrevented) return;
       const t = e.target;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
       // Modal interactions must not also trigger the player behind them.
@@ -2629,7 +2635,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
         hovBar={hovBar} setHovBar={setHovBar}
         isPlaying={isPlaying} setIsPlaying={setIsPlaying}
         onPrev={onPrev} onNext={onNext}
-        onClose={() => setExpanded(false)}
+        onClose={collapsePlayer}
         shuffle={shuffle} setShuffle={setShuffle}
         repeat={repeat} setRepeat={setRepeat}
         vol={vol} setVol={setVol} muted={muted} setMuted={setMuted}
@@ -3074,9 +3080,27 @@ function ExpandMode({
   analyser,
   handlePointerDown, handlePointerMove, handlePointerUp, isDraggingRef,
 }) {
+  const dialogRef = __useR_xp(null);
+  __useE_xp(() => {
+    const previousFocus = document.activeElement;
+    dialogRef.current?.focus({ preventScroll:true });
+    return () => { if (previousFocus?.isConnected) previousFocus.focus({ preventScroll:true }); };
+  }, []);
   __useE_xp(() => {
     const onKey = (e) => {
+      if (e.defaultPrevented) return;
       if (document.querySelector('[role="dialog"][aria-modal="true"]:not([data-player-dialog])')) return;
+      if (e.key === 'Tab') {
+        const controls = [...(dialogRef.current?.querySelectorAll('button, a[href], input, [tabindex="0"]') || [])]
+          .filter(el => !el.disabled && el.getClientRects().length);
+        const first = controls[0], last = controls[controls.length - 1];
+        if (!first) { e.preventDefault(); return; }
+        if (e.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.current)) {
+          e.preventDefault(); last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault(); first.focus();
+        }
+      }
       if (e.key === 'Escape' || (e.key === 'ArrowDown' && !e.shiftKey && !showLyrics)) { e.preventDefault(); onClose(); }
     };
     window.addEventListener('keydown', onKey);
@@ -3224,7 +3248,7 @@ function ExpandMode({
   );
 
   return (
-    <div role="dialog" aria-modal="true" data-player-dialog aria-label={track.title}
+    <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" data-player-dialog aria-label={track.title}
       style={{
         position:'fixed', inset:0, zIndex:350,
         background:'#000',
@@ -4282,6 +4306,10 @@ function App() {
   const [initialPos, setInitialPos] = __useS_app(0);
   const [restoring, setRestoring] = __useS_app(false);
   const [selectedApp, setSelectedApp] = __useS_app(null);
+  const appOriginRef = __useR_app(null);
+  const appTransitionRef = __useR_app(null);
+  const [playerExpanded, setPlayerExpanded] = __useS_app(false);
+  const albumOriginRef = __useR_app(null);
   const [showShortcuts, setShowShortcuts] = __useS_app(false);
   const [showSearch, setShowSearch] = __useS_app(false);
   const [shuffle, setShuffle] = __useS_app(() => {
@@ -4406,6 +4434,8 @@ function App() {
   // Handle URL hash for sharing: #track=<id> / #album=<id> / &t=<seconds> / #app=<slug>
   __useE_app(() => {
     const applyHash = () => {
+      appTransitionRef.current?.skipTransition();
+      appOriginRef.current = null;
       const h = window.location.hash || '';
       const trackMatch = h.match(/track=(\d+)/);
       const albumMatch = h.match(/album=([\w-]+)/);
@@ -4472,12 +4502,90 @@ function App() {
 
   const handleClose = __useC_app(() => {
     setPlayerTrack(null); setPlaying(false);
+    setPlayerExpanded(false); albumOriginRef.current = null;
     try { localStorage.removeItem(PLAYER_STORAGE_KEY); } catch {}
     if (location.hash.match(/track=|album=/)) history.replaceState(null, '', location.pathname);
   }, []);
+  const transitionAppModal = __useC_app((card, update, opening, name = 'app-detail-panel', afterCommit) => {
+    const commit = () => { ReactDOM.flushSync(update); afterCommit?.(); };
+    if (appTransitionRef.current) {
+      appTransitionRef.current.skipTransition();
+      commit();
+      return;
+    }
+    const rect = card?.isConnected ? card.getBoundingClientRect() : null;
+    const visible = rect && rect.width && rect.height && rect.bottom > 0 && rect.top < innerHeight;
+    if (!visible || !document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      commit();
+      return;
+    }
+    const root = document.documentElement;
+    root.classList.add('app-detail-transition');
+    if (opening) card.style.viewTransitionName = name;
+    const transition = document.startViewTransition(() => {
+      if (opening) card.style.viewTransitionName = '';
+      commit();
+      if (!opening && card.isConnected) card.style.viewTransitionName = name;
+    });
+    appTransitionRef.current = transition;
+    // A skipped visual transition must never prevent the modal state update.
+    transition.ready.catch(() => {});
+    const finish = () => {
+      card.style.viewTransitionName = '';
+      root.classList.remove('app-detail-transition');
+      if (appTransitionRef.current === transition) appTransitionRef.current = null;
+    };
+    transition.finished.then(finish, finish);
+  }, []);
+
+  const handleOpenAppModal = __useC_app((app, card) => {
+    appOriginRef.current = { card, hash:location.hash, x:window.scrollX, y:window.scrollY };
+    card.focus({ preventScroll:true });
+    transitionAppModal(card, () => {
+      setSelectedApp(app);
+      history.pushState(null, '', `#app=${slugify(app.name)}`);
+    }, true);
+  }, [transitionAppModal]);
+
   const handleCloseAppModal = __useC_app(() => {
-    setSelectedApp(null);
-    if (location.hash.match(/app=/)) history.replaceState(null, '', location.pathname);
+    const origin = appOriginRef.current;
+    transitionAppModal(origin?.card, () => {
+      setSelectedApp(null);
+      if (location.hash.match(/app=/)) history.replaceState(null, '', location.pathname + location.search + (origin?.hash || ''));
+      appOriginRef.current = null;
+    }, false, 'app-detail-panel', () => {
+      if (origin) window.scrollTo({ left:origin.x, top:origin.y, behavior:'instant' });
+    });
+  }, [transitionAppModal]);
+
+  const handleOpenAlbum = __useC_app((album, card) => {
+    const tracks = (window.TRACKS_DATA || []).filter(t => t.album === album.id && isPlayableTrack(t));
+    if (!tracks.length) return;
+    albumOriginRef.current = { card, x:window.scrollX, y:window.scrollY };
+    card.focus({ preventScroll:true });
+    // Start audio from the original user gesture, independently of the visual transition.
+    if (playerTrack?.album === album.id) { setPlaylist(tracks); setPlaying(true); }
+    else handlePlay(tracks[0], tracks);
+    transitionAppModal(card, () => setPlayerExpanded(true), true, 'album-player-cover');
+  }, [playerTrack, handlePlay, transitionAppModal]);
+
+  const handlePlayerExpanded = __useC_app(value => {
+    const next = typeof value === 'function' ? value(playerExpanded) : value;
+    if (next) { albumOriginRef.current = null; setPlayerExpanded(true); return; }
+    const origin = albumOriginRef.current;
+    transitionAppModal(origin?.card, () => {
+      setPlayerExpanded(false);
+      albumOriginRef.current = null;
+    }, false, 'album-player-cover', () => {
+      if (origin) {
+        window.scrollTo({ left:origin.x, top:origin.y, behavior:'instant' });
+        if (origin.card.isConnected) origin.card.focus({ preventScroll:true });
+      }
+    });
+  }, [playerExpanded, transitionAppModal]);
+
+  __useE_app(() => () => {
+    appTransitionRef.current?.skipTransition();
   }, []);
 
   return (
@@ -4486,8 +4594,8 @@ function App() {
       <Nav lang={lang} setLang={setLang} mode={tw.mode || 'auto'} setMode={(v) => setTweak('mode', v)} />
       <main>
         <Hero lang={lang} onPlay={handlePlay} />
-        <MusicSection lang={lang} onPlay={handlePlay} currentTrack={playerTrack} playing={playing} />
-        <AppsSection lang={lang} />
+        <MusicSection lang={lang} onPlay={handlePlay} onOpenAlbum={handleOpenAlbum} currentTrack={playerTrack} playing={playing} />
+        <AppsSection lang={lang} onOpen={handleOpenAppModal} />
         <ComparisonSection lang={lang} />
         <StatsSection lang={lang} />
         <NewsletterSection lang={lang} />
@@ -4507,6 +4615,7 @@ function App() {
           repeat={repeat} setRepeat={setRepeat}
           onShare={handleShare}
           lang={lang}
+          expanded={playerExpanded} setExpanded={handlePlayerExpanded}
         />
       )}
 

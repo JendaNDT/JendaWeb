@@ -167,9 +167,27 @@ function ExpandMode({
   analyser,
   handlePointerDown, handlePointerMove, handlePointerUp, isDraggingRef,
 }) {
+  const dialogRef = __useR_xp(null);
+  __useE_xp(() => {
+    const previousFocus = document.activeElement;
+    dialogRef.current?.focus({ preventScroll:true });
+    return () => { if (previousFocus?.isConnected) previousFocus.focus({ preventScroll:true }); };
+  }, []);
   __useE_xp(() => {
     const onKey = (e) => {
+      if (e.defaultPrevented) return;
       if (document.querySelector('[role="dialog"][aria-modal="true"]:not([data-player-dialog])')) return;
+      if (e.key === 'Tab') {
+        const controls = [...(dialogRef.current?.querySelectorAll('button, a[href], input, [tabindex="0"]') || [])]
+          .filter(el => !el.disabled && el.getClientRects().length);
+        const first = controls[0], last = controls[controls.length - 1];
+        if (!first) { e.preventDefault(); return; }
+        if (e.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.current)) {
+          e.preventDefault(); last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault(); first.focus();
+        }
+      }
       if (e.key === 'Escape' || (e.key === 'ArrowDown' && !e.shiftKey && !showLyrics)) { e.preventDefault(); onClose(); }
     };
     window.addEventListener('keydown', onKey);
@@ -317,7 +335,7 @@ function ExpandMode({
   );
 
   return (
-    <div role="dialog" aria-modal="true" data-player-dialog aria-label={track.title}
+    <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" data-player-dialog aria-label={track.title}
       style={{
         position:'fixed', inset:0, zIndex:350,
         background:'#000',

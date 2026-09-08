@@ -11,7 +11,7 @@ const APP_VISUALS = {
   'rt-asistent': { src:'/screenshots/showcase/rt-asistent-v1.jpg', kind:'desktop', cs:'Radiografické výpočty přehledně.', en:'Radiography calculations, clearly.' },
 };
 
-function AppCard({ app, lang, mode = 'live' }) {
+function AppCard({ app, lang, mode = 'live', onOpen }) {
   const moveLight = (e) => {
     if (e.pointerType === 'touch' || !window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return;
     const card = e.currentTarget;
@@ -26,7 +26,12 @@ function AppCard({ app, lang, mode = 'live' }) {
   }) : null;
   return (
     <a href={'#app=' + slugify(app.name)} className={`app-card${visual ? ' app-showcase' : ''}`}
-       style={{ '--app-accent': app.color }} onPointerMove={visual ? moveLight : undefined}>
+       style={{ '--app-accent': app.color }} onPointerMove={visual ? moveLight : undefined}
+       onClick={e => {
+         if (!onOpen || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+         e.preventDefault();
+         onOpen(app, e.currentTarget);
+       }}>
       {visual && <div className={`app-stage app-stage-${visual.kind}`}>
         <span className="app-stage-caption">{lang === 'cs' ? visual.cs : visual.en}</span>
         {visual.src ? <img src={visual.src} alt={visual.kind === 'icon' ? '' : (lang === 'cs' ? `Ukázka aplikace ${app.name}` : `${app.name} screenshot`)}
@@ -46,7 +51,7 @@ function AppCard({ app, lang, mode = 'live' }) {
   );
 }
 
-function AppGrid({ items, mode = 'live', lang }) {
+function AppGrid({ items, mode = 'live', lang, onOpen }) {
   const gridRef = __useR(null);
   const previous = __useR(null);
   const order = items.map(app => app.id).join(',');
@@ -93,12 +98,12 @@ function AppGrid({ items, mode = 'live', lang }) {
 
   return <div ref={gridRef} className="apps-grid">
     {items.map(app => <div className="app-slot" data-app-key={app.id} key={app.id}>
-      <AppCard app={app} lang={lang} mode={mode} />
+      <AppCard app={app} lang={lang} mode={mode} onOpen={onOpen} />
     </div>)}
   </div>;
 }
 
-function AppsSection({ lang }) {
+function AppsSection({ lang, onOpen }) {
   const [filter, setFilter] = __useS('all');
   const [query, setQuery] = __useS('');
   const [showStudies, setShowStudies] = __useS(false);
@@ -118,7 +123,7 @@ function AppsSection({ lang }) {
     { key: 'all', label: lang === 'cs' ? 'Vše' : 'All', count: live.length },
     ...['PWA', 'Android'].map(key => ({ key, label: key, count: live.filter(a => a.platform === key).length })),
   ];
-  const cards = (items, mode = 'live') => <AppGrid items={items} mode={mode} lang={lang} />;
+  const cards = (items, mode = 'live') => <AppGrid items={items} mode={mode} lang={lang} onOpen={onOpen} />;
 
   return (
     <section id="apps" className="studio-section">
@@ -200,9 +205,9 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
 
   __useE(() => {
     const previousFocus = document.activeElement;
-    dialogRef.current?.focus();
+    dialogRef.current?.focus({ preventScroll:true });
     const handleEsc = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') { e.preventDefault(); onClose(); return; }
       if (e.key !== 'Tab') return;
       const controls = [...(dialogRef.current?.querySelectorAll('button, a[href], summary, [tabindex="0"]') || [])]
         .filter(el => !el.disabled && el.getClientRects().length);
@@ -215,7 +220,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
       }
     };
     window.addEventListener('keydown', handleEsc);
-    return () => { window.removeEventListener('keydown', handleEsc); if (previousFocus?.isConnected) previousFocus.focus(); };
+    return () => { window.removeEventListener('keydown', handleEsc); if (previousFocus?.isConnected) previousFocus.focus({ preventScroll:true }); };
   }, [onClose]);
 
   __useE(() => {
@@ -452,11 +457,11 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
   );
 }
 
-function AlbumCard({ album, lang, onPlay, onFilter, selected, nowPlaying }) {
+function AlbumCard({ album, lang, onPlay, onOpenAlbum, onFilter, selected, nowPlaying }) {
   const tracks = (window.TRACKS_DATA || []).filter(t => t.album === album.id && isPlayableTrack(t));
   return (
     <article className={`album-card${selected ? ' album-selected' : ''}${nowPlaying ? ' album-playing' : ''}`}>
-      <button className="album-cover-button" onClick={() => tracks.length && onPlay(tracks[0], tracks)}
+      <button className="album-cover-button" onClick={e => tracks.length && (onOpenAlbum ? onOpenAlbum(album, e.currentTarget) : onPlay(tracks[0], tracks))}
         aria-label={`${tx(lang,'music_play_album')}: ${album.title}`}>
         <img src={albumArt(album)} alt="" width="1024" height="1024" loading="lazy" decoding="async" />
         <span className="album-cover-mark" aria-hidden="true">J / {album.year}</span>
@@ -554,7 +559,7 @@ function TrackRow({ track, album, idx, active, playing, onPlay }) {
   );
 }
 
-function MusicSection({ lang, onPlay, currentTrack, playing }) {
+function MusicSection({ lang, onPlay, onOpenAlbum, currentTrack, playing }) {
   const [ref, vis] = useInView();
   const [tracksRef, tracksVis] = useInView();
   const [albumFilter, setAlbumFilter] = __useS('all');
@@ -585,7 +590,7 @@ function MusicSection({ lang, onPlay, currentTrack, playing }) {
           {albums.length > 0 && <SubLabel>{tx(lang,'music_albums')}</SubLabel>}
           <div className="albums-grid">
             {albums.map(a => (
-              <AlbumCard key={a.id} album={a} lang={lang} onPlay={onPlay} onFilter={filterByAlbum} selected={albumFilter === a.id} nowPlaying={!!(playing && currentTrack && currentTrack.album === a.id)} />
+              <AlbumCard key={a.id} album={a} lang={lang} onPlay={onPlay} onOpenAlbum={onOpenAlbum} onFilter={filterByAlbum} selected={albumFilter === a.id} nowPlaying={!!(playing && currentTrack && currentTrack.album === a.id)} />
             ))}
           </div>
         </div>

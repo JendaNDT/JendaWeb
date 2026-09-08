@@ -736,6 +736,32 @@
     .catalog-empty { padding:28px 0; color:var(--muted); }
     .app-install-details { border-top:1px solid var(--border); }
     .app-detail button:focus-visible, .ss-carousel:focus-visible { outline:2px solid var(--a1) !important; outline-offset:4px; }
+    html { scrollbar-gutter:stable; }
+    .app-detail { view-transition-name:app-detail-panel; }
+    #jw-expand-cover { view-transition-name:album-player-cover; }
+    html.app-detail-transition .app-detail,html.app-detail-transition .modal-backdrop { animation:none !important; }
+    html.app-detail-transition [data-player-dialog],html.app-detail-transition #jw-expand-cover { animation:none !important; }
+    html.app-detail-transition::view-transition-group(root),
+    html.app-detail-transition::view-transition-new(root) { animation:none; }
+    html.app-detail-transition::view-transition-old(root) { display:none; }
+    html.app-detail-transition::view-transition-group(app-detail-panel),
+    html.app-detail-transition::view-transition-group(album-player-cover) {
+      animation-duration:.44s; animation-timing-function:cubic-bezier(.22,1,.36,1);
+      overflow:clip; border-radius:20px;
+    }
+    html.app-detail-transition::view-transition-old(app-detail-panel),
+    html.app-detail-transition::view-transition-new(app-detail-panel),
+    html.app-detail-transition::view-transition-old(album-player-cover),
+    html.app-detail-transition::view-transition-new(album-player-cover) {
+      height:100%; object-fit:cover; object-position:top;
+      animation-duration:.3s; mix-blend-mode:normal;
+    }
+    @media(prefers-reduced-motion:reduce) {
+      .app-detail,.modal-backdrop { animation:none !important; }
+      html.app-detail-transition::view-transition-group(*),
+      html.app-detail-transition::view-transition-old(*),
+      html.app-detail-transition::view-transition-new(*) { animation-duration:0s !important; }
+    }
     @media (max-width: 640px) {
       .site-nav { height:auto !important; min-height:100px; padding:10px 16px 0 !important; flex-wrap:wrap; gap:4px; background:color-mix(in srgb, var(--bg) 94%, transparent) !important; backdrop-filter:blur(20px) !important; }
       .nav-desktop { display:flex !important; order:3; width:100%; gap:0 !important; justify-content:space-around; }
