@@ -1,8 +1,8 @@
-## 2026-09-08 — Visual studio preview (LOCAL ONLY)
+## 2026-09-08 — Visual studio release (APPROVED)
 
 Prepared on `codex/visual-studio-preview`, based on deployed commit `a917807`.
-The user explicitly requires seeing and approving the preview before deployment.
-**Do not push to main or deploy this visual change until the user approves it.**
+The user reviewed the local preview and explicitly approved publishing the current website on 2026-09-08.
+Release validation passed: combined JSX compiles, gallery gesture checks pass, all 33 PWA shell assets exist, and index/service-worker versions both use `jw-v99`. Production base is still `a917807`; the release includes all 15 reviewed preview commits. Publication verification is recorded separately after deployment. The notes below preserve the preview's development and validation history.
 
 - New two-column hero with original Relax/Celtic Code artwork; square album cards.
 - Follow-up: all 7 available apps render as full cards in one visible grid, each with a real application screenshot. Nekouřím, Ballista and Vandrák captured from published APKs; RT Asistent captured in the browser. Each new screenshot is also available in the app detail gallery. Desktop grid uses up to three wider columns. No More apps disclosure. Screenshot provenance is in `screenshots/showcase/README.md`.
