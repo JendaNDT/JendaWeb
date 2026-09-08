@@ -582,6 +582,8 @@
     .app-stage-landscape { align-items:center; background:#d8dfc5; }
     .app-stage-landscape .app-stage-caption { color:#34402e; }
     .app-stage-landscape img { width:100%; height:auto; object-fit:contain; border-radius:8px; box-shadow:0 10px 24px #0002; }
+    .app-stage-desktop { align-items:center; padding:46px 14px 14px; }
+    .app-stage-desktop img { width:100%; height:auto; border-radius:8px; border:1px solid var(--border); box-shadow:0 10px 24px #0003; }
     .app-stage-icon { align-items:center; padding-bottom:22px; }
     .app-stage-icon img { width:112px; height:112px; object-fit:contain; border-radius:25px; box-shadow:0 14px 36px #0003; }
     .app-stage-letter { font-family:'Syne',sans-serif; font-size:80px; font-weight:800; color:var(--app-accent); }
@@ -638,7 +640,7 @@
 
     /* Keep the three destinations visible on mobile, without an extra menu tap. */
     section[id] { scroll-margin-top: 82px; }
-    .apps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)); gap:20px; }
+    .apps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:20px; }
     .apps-grid .app-card p { font-size:15px !important; line-height:1.65 !important; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
 
     .apps-tools { display:flex; gap:16px; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:32px; }

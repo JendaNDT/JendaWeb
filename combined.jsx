@@ -1392,6 +1392,10 @@ const APP_VISUALS = {
   'fyzika-pastelkou': { src:'/screenshots/fyzika-pastelkou/android-water.png', kind:'landscape', cs:'Kresli. Zkoušej. Objevuj.', en:'Draw. Try. Discover.' },
   georeminder: { src:'/screenshots/showcase/georeminder-v1.png', kind:'phone', cs:'Připomínka na správném místě.', en:'A reminder in the right place.' },
   engitab: { src:'/screenshots/showcase/engitab-v1.png', kind:'phone', cs:'Celá dílna v kapse.', en:'Your workshop, in your pocket.' },
+  nekourim: { src:'/screenshots/showcase/nekourim-v1.png', kind:'phone', cs:'Každý den bez cigarety se počítá.', en:'Every smoke-free day counts.' },
+  ballista: { src:'/screenshots/showcase/ballista-v1.png', kind:'phone', cs:'Nástroje pro sportovní střelbu.', en:'Tools for sport shooting.' },
+  vandrak: { src:'/screenshots/showcase/vandrak-v1.png', kind:'phone', cs:'Výbava na každou výpravu.', en:'Tools for every outdoor trip.' },
+  'rt-asistent': { src:'/screenshots/showcase/rt-asistent-v1.jpg', kind:'desktop', cs:'Radiografické výpočty přehledně.', en:'Radiography calculations, clearly.' },
 };
 
 function AppCard({ app, lang, mode = 'live' }) {

@@ -5,7 +5,7 @@ The user explicitly requires seeing and approving the preview before deployment.
 **Do not push to main or deploy this visual change until the user approves it.**
 
 - New two-column hero with original Relax/Celtic Code artwork; square album cards.
-- Follow-up: all available apps now render as full cards in one visible grid; no More apps disclosure. Featured ordering is preserved. Cards without screenshots use their own app icon. Platform filtering verified, including the RT Asistent icon in the local preview.
+- Follow-up: all 7 available apps render as full cards in one visible grid, each with a real application screenshot. Nekouřím, Ballista and Vandrák captured from published APKs; RT Asistent captured in the browser. Each new screenshot is also available in the app detail gallery. Desktop grid uses up to three wider columns. No More apps disclosure. Screenshot provenance is in `screenshots/showcase/README.md`.
 - Real app screenshots on featured cards. GeoReminder 2.7 CI196 and EngiTab 0.2.0 captured from their public APKs in a disposable read-only API35 emulator; no reminder was saved.
 - App screenshot fallback in the detail dialog, stronger body contrast, neutral backgrounds, light-mode accent contrast, quieter animation and reduced-motion support.
 - Native separate album play/filter buttons; existing custom CMS and track cover overrides preserved.
