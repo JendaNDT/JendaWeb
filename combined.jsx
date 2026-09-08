@@ -1091,14 +1091,16 @@ function BackgroundFX() {
       const speedM = (playing ? 1 : 0.08) + env.surge*1.8 + env.treble*0.5;  // beat mírně zrychlí pohyb
       const linkDist = (playing ? 116 : 96) + lvl*64;
 
-      ctx.globalCompositeOperation = col.dark ? 'lighter' : 'source-over';
+      // Keep the orange/gold hue when particles overlap instead of bleaching it.
+      ctx.globalCompositeOperation = 'source-over';
+      const colorGain = col.dark ? 1.18 : 1.08;
 
       // expandující prstence vyslané na beat
       for (let i=rings.length-1;i>=0;i--) {
         const rg = rings[i];
         rg.r += 7 + env.level*10; rg.a *= 0.93;
         if (rg.a < 0.03) { rings.splice(i,1); continue; }
-        ctx.strokeStyle = `rgba(${col.a1[0]},${col.a1[1]},${col.a1[2]},${rg.a*0.22})`;
+        ctx.strokeStyle = `rgba(${col.a1[0]},${col.a1[1]},${col.a1[2]},${rg.a*0.22*colorGain})`;
         ctx.lineWidth = rg.w;
         ctx.beginPath(); ctx.arc(cx, cy, rg.r, 0, Math.PI*2); ctx.stroke();
       }
@@ -1116,7 +1118,7 @@ function BackgroundFX() {
         const sizeD = 0.6 + p.depth*0.55, alphaD = 0.62 + p.depth*0.38; // blízké větší/jasnější
         const rr = Math.max(0.3, p.r*sizeD*(1 + drive*0.6 + be*2.1 + env.flash*0.6) + Math.sin(p.ph)*0.3);
         const c = p.warm < 0.5 ? col.a1 : col.a2;
-        const al = Math.min(0.9, ((col.dark ? 0.055 : 0.08) + be*0.6 + env.flash*0.22) * alphaD);
+        const al = Math.min(0.9, ((col.dark ? 0.055 : 0.08) + (be*0.6 + env.flash*0.22)*colorGain) * alphaD);
         ctx.beginPath();
         ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${al})`;
         ctx.arc(dx, dy, rr, 0, Math.PI*2); ctx.fill();
@@ -1128,7 +1130,7 @@ function BackgroundFX() {
           const A = particles[i], B = particles[j];
           const dx = A._x-B._x, dy = A._y-B._y, d = Math.hypot(dx,dy);
           if (d < linkDist) {
-            const o = (1 - d/linkDist) * (col.dark ? 0.10 : 0.14) * (0.10 + lvl*1.4 + env.flash*0.5);
+            const o = (1 - d/linkDist) * (col.dark ? 0.10 : 0.14) * (0.10 + (lvl*1.4 + env.flash*0.5)*colorGain);
             ctx.strokeStyle = `rgba(${col.a1[0]},${col.a1[1]},${col.a1[2]},${Math.min(0.5,o)})`;
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.moveTo(A._x,A._y); ctx.lineTo(B._x,B._y); ctx.stroke();
