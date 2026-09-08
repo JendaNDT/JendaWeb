@@ -290,7 +290,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
       const seen = window.__jwCounted || (window.__jwCounted = new Set());
       if (!seen.has(track.id)) {
         seen.add(track.id);
-        track.plays = (track.plays || 0) + 1; // optimisticky → "Nejvíce poslouchané" reaguje hned
+        track.plays = (track.plays || 0) + 1; // immediately update the visible play count
         const sb = window.__jwSupa;
         if (sb) {
           fetch(sb.url + '/rest/v1/rpc/increment_play', {
@@ -361,6 +361,8 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
     const onKey = (e) => {
       const t = e.target;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      // Modal interactions must not also trigger the player behind them.
+      if (document.querySelector('[role="dialog"][aria-modal="true"]:not([data-player-dialog])')) return;
       const a = audioRef.current;
       if (e.code === 'Space')           { e.preventDefault(); setIsPlaying(p => !p); }
       else if (e.key === 'ArrowRight')  { if (e.shiftKey && a) a.currentTime = Math.min((a.duration||0), a.currentTime + 5); else onNext(); }

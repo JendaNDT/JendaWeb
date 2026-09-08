@@ -317,7 +317,6 @@ function App() {
       <main>
         <Hero lang={lang} onPlay={handlePlay} />
         <MusicSection lang={lang} onPlay={handlePlay} currentTrack={playerTrack} playing={playing} />
-        <MostPlayedSection lang={lang} onPlay={handlePlay} currentTrack={playerTrack} playing={playing} />
         <AppsSection lang={lang} />
         <ComparisonSection lang={lang} />
         <StatsSection lang={lang} />

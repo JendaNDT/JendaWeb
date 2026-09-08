@@ -69,6 +69,10 @@ const tx = (lang, key) => {
   return fallbacks[lang]?.[key] ?? key;
 };
 const slugify = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const preferredScrollBehavior = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+function scrollToSection(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior:preferredScrollBehavior(), block:'start' });
+}
 
 // Presentation uses the same availability rules for cards, filters and counters.
 const isLiveApp = app => !!(app.link && app.link.trim() && app.link.trim() !== '#');
@@ -402,7 +406,7 @@ function SectionDivider() {
 }
 
 Object.assign(window, {
-  THEMES, applyTheme, resolveMode, applyMode, tx,
+  THEMES, applyTheme, resolveMode, applyMode, tx, preferredScrollBehavior, scrollToSection,
   isLiveApp, isPlayableTrack, publishedAlbums, appCopy, featuredAppSlugs,
   PLAYER_STORAGE_KEY, VOL_STORAGE_KEY,
   LIKES_TRACKS_KEY, LIKES_APPS_KEY,

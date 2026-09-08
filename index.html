@@ -618,8 +618,7 @@
     .app-stage-icon img { width:112px; height:112px; object-fit:contain; border-radius:25px; box-shadow:0 14px 36px #0003; }
     .app-stage-letter { font-family:'Syne',sans-serif; font-size:80px; font-weight:800; color:var(--app-accent); }
     /* Directional light and contact shadows separate the content from the page. */
-    .studio-surface { background-color:var(--card); }
-    .studio-track-list, .studio-surface, .apps-grid .app-card {
+    .studio-track-list, .apps-grid .app-card {
       background-image:linear-gradient(145deg, var(--depth-top), transparent 42%, var(--depth-shade));
       box-shadow:inset 0 1px 0 var(--depth-edge), var(--depth-shadow);
       border-color:color-mix(in srgb, var(--border) 75%, transparent);
@@ -635,6 +634,11 @@
     }
     .app-stage-phone img {
       box-shadow:0 20px 34px -12px rgba(0,0,0,0.65), 0 0 0 1px var(--depth-edge);
+    }
+    .app-stage img { transform-origin:50% 25%; transition:transform .42s var(--ease-out); }
+    .app-showcase:focus-visible .app-stage img { transform:scale(1.035); }
+    @media (hover:hover) and (pointer:fine) {
+      .app-showcase:hover .app-stage img { transform:scale(1.035); }
     }
     .app-card:focus-visible, .album-cover-button:focus-visible, .hero-sleeve:focus-visible { outline:3px solid var(--a1); outline-offset:5px; }
     .mesh-orb { animation:none; }
@@ -683,13 +687,16 @@
       .app-stage { height:270px; }
     }
     @media (prefers-reduced-motion:reduce) {
+      html { scroll-behavior:auto; }
+      .fade-up { transition:none !important; }
       .album-playing .album-play,.brand-motion { animation:none !important; }
-      .hero-sleeve,.album-cover-button > img,.album-play,.app-card { transition:none !important; }
+      .hero-sleeve,.album-cover-button > img,.album-play,.app-card,.app-stage img { transition:none !important; }
       .album-cover-button:hover > img,.app-card:hover { transform:none; }
+      .app-showcase:hover .app-stage img,.app-showcase:focus-visible .app-stage img { transform:none !important; }
     }
 
     /* Keep the three destinations visible on mobile, without an extra menu tap. */
-    section[id] { scroll-margin-top: 82px; }
+    section[id], #tracks { scroll-margin-top: 82px; }
     .apps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:20px; }
     .apps-grid .app-card p { font-size:15px !important; line-height:1.65 !important; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
 
@@ -712,7 +719,7 @@
       .site-nav > a { font-size:18px !important; }
       .nav-settings { margin-left:auto; }
       .app-gallery-slide { height:auto !important; aspect-ratio:16 / 10; }
-      section[id] { scroll-margin-top:116px; }
+      section[id], #tracks { scroll-margin-top:116px; }
       #hero { padding-top:132px !important; }
       .app-detail { padding:18px !important; max-height:90dvh !important; }
     }
@@ -848,7 +855,7 @@
           <div style="color:var(--a1); font-size:12px; letter-spacing:.14em; margin-bottom:36px;">VIBE CODER & AI MUSIC</div>
           <h1 class="hero-name" style="font-family:'Syne',sans-serif; font-weight:800; line-height:.88; margin-bottom:32px;">Jenda</h1>
           <p class="hero-description" style="font-size:20px; color:var(--muted); line-height:1.65;">Tvořím experimentální elektronickou hudbu pomocí AI — a k tomu vlastní appky.</p>
-          <div class="hero-actions"><a href="#music" style="background:var(--a1); color:var(--bg); border-radius:50px;">Poslechnout hudbu</a><a href="#apps" style="border:1px solid var(--border); border-radius:50px;">Prozkoumat aplikace</a></div>
+          <div class="hero-actions"><a href="#tracks" style="background:var(--a1); color:var(--bg); border-radius:50px;">Poslechnout hudbu</a><a href="#apps" style="border:1px solid var(--border); border-radius:50px;">Prozkoumat aplikace</a></div>
           <div class="hero-stats" style="color:var(--muted); font-size:13px;">Načítám tvorbu…</div>
         </div>
         <div class="hero-sleeves" aria-hidden="true">

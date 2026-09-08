@@ -19,9 +19,7 @@ function SearchOverlay({ lang, onClose, onPlay }) {
       color: a.color,
       hay: `${a.name} ${a.cs} ${a.en} ${a.platform}`.toLowerCase(),
       action: () => {
-        if (window.CASE_STUDIES?.[a.id]) { window.location.href = window.CASE_STUDIES[a.id]; }
-        else if (a.link && a.link !== '#') { window.location.href = a.link; }
-        else { history.replaceState(null, '', '#apps'); window.scrollTo({ top: document.getElementById('apps').offsetTop - 60, behavior: 'smooth' }); }
+        window.location.hash = `app=${slugify(a.name)}`;
       },
     }));
     const albums = publishedAlbums().map(al => ({

@@ -323,8 +323,7 @@ function Hero({ lang, onPlay }) {
     const tracks = (window.TRACKS_DATA || []).filter(isPlayableTrack);
     const featured = tracks[0];
     if (featured && onPlay) onPlay(featured, tracks);
-    const el = document.getElementById('music');
-    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 64, behavior: 'smooth' });
+    scrollToSection('tracks');
   };
   return (
     <section id="hero" className="studio-hero">
@@ -373,7 +372,7 @@ function Hero({ lang, onPlay }) {
                 : (count === 1 ? 'app' : 'apps');
               return { num: count, suffix: '', lbl, href: '#apps' };
             })(),
-            { num:(window.TRACKS_DATA||[]).filter(isPlayableTrack).length, suffix:'', lbl: tx(lang,'stat_tracks'), href:'#music' },
+            { num:(window.TRACKS_DATA||[]).filter(isPlayableTrack).length, suffix:'', lbl: tx(lang,'stat_tracks'), href:'#tracks' },
             { num:publishedAlbums().length, suffix:'', lbl: lang === 'cs' ? (publishedAlbums().length === 1 ? 'album' : publishedAlbums().length >= 2 && publishedAlbums().length <= 4 ? 'alba' : 'alb') : tx(lang,'stat_albums'), href:'#music' },
           ].map(({ num, suffix, lbl, href }) => {
             const [r, v] = useCountUp(num);

@@ -501,8 +501,8 @@ function TrackRow({ track, album, idx, active, playing, onPlay }) {
 
 function MusicSection({ lang, onPlay, currentTrack, playing }) {
   const [ref, vis] = useInView();
+  const [tracksRef, tracksVis] = useInView();
   const [albumFilter, setAlbumFilter] = __useS('all');
-  const trackListRef = __useR(null);
   const albums = publishedAlbums();
   const tracks = (window.TRACKS_DATA || []).filter(isPlayableTrack);
   const albumMap = __useM(() => Object.fromEntries(albums.map(a => [a.id, a])), [albums]);
@@ -514,65 +514,68 @@ function MusicSection({ lang, onPlay, currentTrack, playing }) {
   const filterByAlbum = __useC((id) => {
     setAlbumFilter(id);
     setTimeout(() => {
-      const el = trackListRef.current;
-      if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+      scrollToSection('tracks');
     }, 50);
   }, []);
 
   return (
     <section id="music" className="studio-section">
-      <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:1200, margin:'0 auto' }}>
-        <SectionLabel color="a2" num="01">{tx(lang,'music_title')}</SectionLabel>
-        <p style={{ color:'var(--muted)', fontSize:16, marginBottom:32 }}>
-          {tx(lang,'music_sub')}
-        </p>
+      <div style={{ maxWidth:1200, margin:'0 auto' }}>
+        <div ref={ref} className={`fade-up${vis?' in-view':''}`}>
+          <SectionLabel color="a2" num="01">{tx(lang,'music_title')}</SectionLabel>
+          <p style={{ color:'var(--muted)', fontSize:16, marginBottom:32 }}>
+            {tx(lang,'music_sub')}
+          </p>
 
-        {albums.length > 0 && <SubLabel>{tx(lang,'music_albums')}</SubLabel>}
-        <div className="albums-grid">
-          {albums.map(a => (
-            <AlbumCard key={a.id} album={a} lang={lang} onPlay={onPlay} onFilter={filterByAlbum} selected={albumFilter === a.id} nowPlaying={!!(playing && currentTrack && currentTrack.album === a.id)} />
-          ))}
+          {albums.length > 0 && <SubLabel>{tx(lang,'music_albums')}</SubLabel>}
+          <div className="albums-grid">
+            {albums.map(a => (
+              <AlbumCard key={a.id} album={a} lang={lang} onPlay={onPlay} onFilter={filterByAlbum} selected={albumFilter === a.id} nowPlaying={!!(playing && currentTrack && currentTrack.album === a.id)} />
+            ))}
+          </div>
         </div>
 
-        <div ref={trackListRef} className="studio-track-list">
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18, gap:12, flexWrap:'wrap' }}>
-            <SubLabel>{tx(lang,'music_tracks')}</SubLabel>
-            <span style={{ fontSize:12, color:'var(--muted)', opacity:0.6 }}>
-              {filteredTracks.length} {lang === 'cs' ? (filteredTracks.length === 1 ? 'skladba' : filteredTracks.length >= 2 && filteredTracks.length < 5 ? 'skladby' : 'skladeb') : (filteredTracks.length === 1 ? 'track' : 'tracks')}
-            </span>
-          </div>
+        <div id="tracks" className="studio-track-list">
+          <div ref={tracksRef} className={`fade-up${tracksVis?' in-view':''}`}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18, gap:12, flexWrap:'wrap' }}>
+              <SubLabel>{tx(lang,'music_tracks')}</SubLabel>
+              <span style={{ fontSize:12, color:'var(--muted)', opacity:0.6 }}>
+                {filteredTracks.length} {lang === 'cs' ? (filteredTracks.length === 1 ? 'skladba' : filteredTracks.length >= 2 && filteredTracks.length < 5 ? 'skladby' : 'skladeb') : (filteredTracks.length === 1 ? 'track' : 'tracks')}
+              </span>
+            </div>
 
-          <div style={{ display:'flex', gap:8, marginBottom:18, flexWrap:'wrap' }}>
-            <button onClick={() => setAlbumFilter('all')} style={{
-              padding:'6px 14px', borderRadius:50, fontSize:12, fontWeight:600,
-              background: albumFilter === 'all' ? 'var(--a1)' : 'transparent',
-              color: albumFilter === 'all' ? 'var(--bg)' : 'var(--muted)',
-              border: `1px solid ${albumFilter === 'all' ? 'var(--a1)' : 'var(--border)'}`,
-              transition:'all 0.2s',
-            }}>
-              {tx(lang,'music_filter_all')}
-            </button>
-            {albums.map(a => {
-              const on = albumFilter === a.id;
-              return (
-                <button key={a.id} onClick={() => setAlbumFilter(a.id)} style={{
-                  padding:'6px 14px', borderRadius:50, fontSize:12, fontWeight:600,
-                  background: on ? 'var(--a1)' : 'transparent',
-                  color: on ? 'var(--bg)' : 'var(--muted)',
-                  border: `1px solid ${on ? 'transparent' : 'var(--border)'}`,
-                  transition:'all 0.2s',
-                }}>
-                  {a.title}
-                </button>
-              );
-            })}
-          </div>
+            <div style={{ display:'flex', gap:8, marginBottom:18, flexWrap:'wrap' }}>
+              <button onClick={() => setAlbumFilter('all')} style={{
+                padding:'6px 14px', borderRadius:50, fontSize:12, fontWeight:600,
+                background: albumFilter === 'all' ? 'var(--a1)' : 'transparent',
+                color: albumFilter === 'all' ? 'var(--bg)' : 'var(--muted)',
+                border: `1px solid ${albumFilter === 'all' ? 'var(--a1)' : 'var(--border)'}`,
+                transition:'all 0.2s',
+              }}>
+                {tx(lang,'music_filter_all')}
+              </button>
+              {albums.map(a => {
+                const on = albumFilter === a.id;
+                return (
+                  <button key={a.id} onClick={() => setAlbumFilter(a.id)} style={{
+                    padding:'6px 14px', borderRadius:50, fontSize:12, fontWeight:600,
+                    background: on ? 'var(--a1)' : 'transparent',
+                    color: on ? 'var(--bg)' : 'var(--muted)',
+                    border: `1px solid ${on ? 'transparent' : 'var(--border)'}`,
+                    transition:'all 0.2s',
+                  }}>
+                    {a.title}
+                  </button>
+                );
+              })}
+            </div>
 
-          <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
-            {tracks.length === 0 && <p style={{ color:'var(--muted)', lineHeight:1.6 }}>{lang === 'cs' ? 'Skladby teď nejsou dostupné. Zkus se sem vrátit s připojením k internetu.' : 'Tracks are currently unavailable. Please return with an internet connection.'}</p>}
-            {filteredTracks.map((tr, i) => (
-              <TrackRow key={tr.id} track={tr} album={albumMap[tr.album]} idx={i} active={currentTrack?.id === tr.id} playing={playing} onPlay={(t) => onPlay(t, filteredTracks)} />
-            ))}
+            <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
+              {tracks.length === 0 && <p style={{ color:'var(--muted)', lineHeight:1.6 }}>{lang === 'cs' ? 'Skladby teď nejsou dostupné. Zkus se sem vrátit s připojením k internetu.' : 'Tracks are currently unavailable. Please return with an internet connection.'}</p>}
+              {filteredTracks.map((tr, i) => (
+                <TrackRow key={tr.id} track={tr} album={albumMap[tr.album]} idx={i} active={currentTrack?.id === tr.id} playing={playing} onPlay={(t) => onPlay(t, filteredTracks)} />
+              ))}
+            </div>
           </div>
         </div>
       </div>

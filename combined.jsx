@@ -618,6 +618,10 @@ const tx = (lang, key) => {
   return fallbacks[lang]?.[key] ?? key;
 };
 const slugify = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const preferredScrollBehavior = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+function scrollToSection(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior:preferredScrollBehavior(), block:'start' });
+}
 
 // Presentation uses the same availability rules for cards, filters and counters.
 const isLiveApp = app => !!(app.link && app.link.trim() && app.link.trim() !== '#');
@@ -951,7 +955,7 @@ function SectionDivider() {
 }
 
 Object.assign(window, {
-  THEMES, applyTheme, resolveMode, applyMode, tx,
+  THEMES, applyTheme, resolveMode, applyMode, tx, preferredScrollBehavior, scrollToSection,
   isLiveApp, isPlayableTrack, publishedAlbums, appCopy, featuredAppSlugs,
   PLAYER_STORAGE_KEY, VOL_STORAGE_KEY,
   LIKES_TRACKS_KEY, LIKES_APPS_KEY,
@@ -1292,8 +1296,7 @@ function Hero({ lang, onPlay }) {
     const tracks = (window.TRACKS_DATA || []).filter(isPlayableTrack);
     const featured = tracks[0];
     if (featured && onPlay) onPlay(featured, tracks);
-    const el = document.getElementById('music');
-    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 64, behavior: 'smooth' });
+    scrollToSection('tracks');
   };
   return (
     <section id="hero" className="studio-hero">
@@ -1342,7 +1345,7 @@ function Hero({ lang, onPlay }) {
                 : (count === 1 ? 'app' : 'apps');
               return { num: count, suffix: '', lbl, href: '#apps' };
             })(),
-            { num:(window.TRACKS_DATA||[]).filter(isPlayableTrack).length, suffix:'', lbl: tx(lang,'stat_tracks'), href:'#music' },
+            { num:(window.TRACKS_DATA||[]).filter(isPlayableTrack).length, suffix:'', lbl: tx(lang,'stat_tracks'), href:'#tracks' },
             { num:publishedAlbums().length, suffix:'', lbl: lang === 'cs' ? (publishedAlbums().length === 1 ? 'album' : publishedAlbums().length >= 2 && publishedAlbums().length <= 4 ? 'alba' : 'alb') : tx(lang,'stat_albums'), href:'#music' },
           ].map(({ num, suffix, lbl, href }) => {
             const [r, v] = useCountUp(num);
@@ -1889,8 +1892,8 @@ function TrackRow({ track, album, idx, active, playing, onPlay }) {
 
 function MusicSection({ lang, onPlay, currentTrack, playing }) {
   const [ref, vis] = useInView();
+  const [tracksRef, tracksVis] = useInView();
   const [albumFilter, setAlbumFilter] = __useS('all');
-  const trackListRef = __useR(null);
   const albums = publishedAlbums();
   const tracks = (window.TRACKS_DATA || []).filter(isPlayableTrack);
   const albumMap = __useM(() => Object.fromEntries(albums.map(a => [a.id, a])), [albums]);
@@ -1902,65 +1905,68 @@ function MusicSection({ lang, onPlay, currentTrack, playing }) {
   const filterByAlbum = __useC((id) => {
     setAlbumFilter(id);
     setTimeout(() => {
-      const el = trackListRef.current;
-      if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+      scrollToSection('tracks');
     }, 50);
   }, []);
 
   return (
     <section id="music" className="studio-section">
-      <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:1200, margin:'0 auto' }}>
-        <SectionLabel color="a2" num="01">{tx(lang,'music_title')}</SectionLabel>
-        <p style={{ color:'var(--muted)', fontSize:16, marginBottom:32 }}>
-          {tx(lang,'music_sub')}
-        </p>
+      <div style={{ maxWidth:1200, margin:'0 auto' }}>
+        <div ref={ref} className={`fade-up${vis?' in-view':''}`}>
+          <SectionLabel color="a2" num="01">{tx(lang,'music_title')}</SectionLabel>
+          <p style={{ color:'var(--muted)', fontSize:16, marginBottom:32 }}>
+            {tx(lang,'music_sub')}
+          </p>
 
-        {albums.length > 0 && <SubLabel>{tx(lang,'music_albums')}</SubLabel>}
-        <div className="albums-grid">
-          {albums.map(a => (
-            <AlbumCard key={a.id} album={a} lang={lang} onPlay={onPlay} onFilter={filterByAlbum} selected={albumFilter === a.id} nowPlaying={!!(playing && currentTrack && currentTrack.album === a.id)} />
-          ))}
+          {albums.length > 0 && <SubLabel>{tx(lang,'music_albums')}</SubLabel>}
+          <div className="albums-grid">
+            {albums.map(a => (
+              <AlbumCard key={a.id} album={a} lang={lang} onPlay={onPlay} onFilter={filterByAlbum} selected={albumFilter === a.id} nowPlaying={!!(playing && currentTrack && currentTrack.album === a.id)} />
+            ))}
+          </div>
         </div>
 
-        <div ref={trackListRef} className="studio-track-list">
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18, gap:12, flexWrap:'wrap' }}>
-            <SubLabel>{tx(lang,'music_tracks')}</SubLabel>
-            <span style={{ fontSize:12, color:'var(--muted)', opacity:0.6 }}>
-              {filteredTracks.length} {lang === 'cs' ? (filteredTracks.length === 1 ? 'skladba' : filteredTracks.length >= 2 && filteredTracks.length < 5 ? 'skladby' : 'skladeb') : (filteredTracks.length === 1 ? 'track' : 'tracks')}
-            </span>
-          </div>
+        <div id="tracks" className="studio-track-list">
+          <div ref={tracksRef} className={`fade-up${tracksVis?' in-view':''}`}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18, gap:12, flexWrap:'wrap' }}>
+              <SubLabel>{tx(lang,'music_tracks')}</SubLabel>
+              <span style={{ fontSize:12, color:'var(--muted)', opacity:0.6 }}>
+                {filteredTracks.length} {lang === 'cs' ? (filteredTracks.length === 1 ? 'skladba' : filteredTracks.length >= 2 && filteredTracks.length < 5 ? 'skladby' : 'skladeb') : (filteredTracks.length === 1 ? 'track' : 'tracks')}
+              </span>
+            </div>
 
-          <div style={{ display:'flex', gap:8, marginBottom:18, flexWrap:'wrap' }}>
-            <button onClick={() => setAlbumFilter('all')} style={{
-              padding:'6px 14px', borderRadius:50, fontSize:12, fontWeight:600,
-              background: albumFilter === 'all' ? 'var(--a1)' : 'transparent',
-              color: albumFilter === 'all' ? 'var(--bg)' : 'var(--muted)',
-              border: `1px solid ${albumFilter === 'all' ? 'var(--a1)' : 'var(--border)'}`,
-              transition:'all 0.2s',
-            }}>
-              {tx(lang,'music_filter_all')}
-            </button>
-            {albums.map(a => {
-              const on = albumFilter === a.id;
-              return (
-                <button key={a.id} onClick={() => setAlbumFilter(a.id)} style={{
-                  padding:'6px 14px', borderRadius:50, fontSize:12, fontWeight:600,
-                  background: on ? 'var(--a1)' : 'transparent',
-                  color: on ? 'var(--bg)' : 'var(--muted)',
-                  border: `1px solid ${on ? 'transparent' : 'var(--border)'}`,
-                  transition:'all 0.2s',
-                }}>
-                  {a.title}
-                </button>
-              );
-            })}
-          </div>
+            <div style={{ display:'flex', gap:8, marginBottom:18, flexWrap:'wrap' }}>
+              <button onClick={() => setAlbumFilter('all')} style={{
+                padding:'6px 14px', borderRadius:50, fontSize:12, fontWeight:600,
+                background: albumFilter === 'all' ? 'var(--a1)' : 'transparent',
+                color: albumFilter === 'all' ? 'var(--bg)' : 'var(--muted)',
+                border: `1px solid ${albumFilter === 'all' ? 'var(--a1)' : 'var(--border)'}`,
+                transition:'all 0.2s',
+              }}>
+                {tx(lang,'music_filter_all')}
+              </button>
+              {albums.map(a => {
+                const on = albumFilter === a.id;
+                return (
+                  <button key={a.id} onClick={() => setAlbumFilter(a.id)} style={{
+                    padding:'6px 14px', borderRadius:50, fontSize:12, fontWeight:600,
+                    background: on ? 'var(--a1)' : 'transparent',
+                    color: on ? 'var(--bg)' : 'var(--muted)',
+                    border: `1px solid ${on ? 'transparent' : 'var(--border)'}`,
+                    transition:'all 0.2s',
+                  }}>
+                    {a.title}
+                  </button>
+                );
+              })}
+            </div>
 
-          <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
-            {tracks.length === 0 && <p style={{ color:'var(--muted)', lineHeight:1.6 }}>{lang === 'cs' ? 'Skladby teď nejsou dostupné. Zkus se sem vrátit s připojením k internetu.' : 'Tracks are currently unavailable. Please return with an internet connection.'}</p>}
-            {filteredTracks.map((tr, i) => (
-              <TrackRow key={tr.id} track={tr} album={albumMap[tr.album]} idx={i} active={currentTrack?.id === tr.id} playing={playing} onPlay={(t) => onPlay(t, filteredTracks)} />
-            ))}
+            <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
+              {tracks.length === 0 && <p style={{ color:'var(--muted)', lineHeight:1.6 }}>{lang === 'cs' ? 'Skladby teď nejsou dostupné. Zkus se sem vrátit s připojením k internetu.' : 'Tracks are currently unavailable. Please return with an internet connection.'}</p>}
+              {filteredTracks.map((tr, i) => (
+                <TrackRow key={tr.id} track={tr} album={albumMap[tr.album]} idx={i} active={currentTrack?.id === tr.id} playing={playing} onPlay={(t) => onPlay(t, filteredTracks)} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -2265,7 +2271,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
       const seen = window.__jwCounted || (window.__jwCounted = new Set());
       if (!seen.has(track.id)) {
         seen.add(track.id);
-        track.plays = (track.plays || 0) + 1; // optimisticky → "Nejvíce poslouchané" reaguje hned
+        track.plays = (track.plays || 0) + 1; // immediately update the visible play count
         const sb = window.__jwSupa;
         if (sb) {
           fetch(sb.url + '/rest/v1/rpc/increment_play', {
@@ -2336,6 +2342,8 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
     const onKey = (e) => {
       const t = e.target;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      // Modal interactions must not also trigger the player behind them.
+      if (document.querySelector('[role="dialog"][aria-modal="true"]:not([data-player-dialog])')) return;
       const a = audioRef.current;
       if (e.code === 'Space')           { e.preventDefault(); setIsPlaying(p => !p); }
       else if (e.key === 'ArrowRight')  { if (e.shiftKey && a) a.currentTime = Math.min((a.duration||0), a.currentTime + 5); else onNext(); }
@@ -3013,6 +3021,7 @@ function ExpandMode({
 }) {
   __useE_xp(() => {
     const onKey = (e) => {
+      if (document.querySelector('[role="dialog"][aria-modal="true"]:not([data-player-dialog])')) return;
       if (e.key === 'Escape' || (e.key === 'ArrowDown' && !e.shiftKey && !showLyrics)) { e.preventDefault(); onClose(); }
     };
     window.addEventListener('keydown', onKey);
@@ -3029,7 +3038,7 @@ function ExpandMode({
   __useE_xp(() => {
     if (synced && showLyrics && lyricsBoxRef.current && activeLineRef.current) {
       const box = lyricsBoxRef.current, el = activeLineRef.current;
-      box.scrollTo({ top: Math.max(0, el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2), behavior: 'smooth' });
+      box.scrollTo({ top: Math.max(0, el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2), behavior: preferredScrollBehavior() });
     }
   }, [activeIdx, showLyrics]);
 
@@ -3160,7 +3169,7 @@ function ExpandMode({
   );
 
   return (
-    <div role="dialog" aria-modal="true" aria-label={track.title}
+    <div role="dialog" aria-modal="true" data-player-dialog aria-label={track.title}
       style={{
         position:'fixed', inset:0, zIndex:350,
         background:'#000',
@@ -3874,77 +3883,7 @@ function DonationButton({ lang }) {
   );
 }
 
-// ── Most Played (reads localStorage.jw_plays counter) ───────────────────
-function MostPlayedSection({ lang, onPlay, currentTrack, playing }) {
-  const [ref, vis] = useInView();
-  const [tick, setTick] = __useS_ex(0);
-
-  __useE_ex(() => {
-    const id = setInterval(() => setTick(t => t + 1), 4000);
-    return () => clearInterval(id);
-  }, []);
-
-  const top = __useM_ex(() => {
-    // Reálná globální čísla z DB (window.TRACKS_DATA[].plays), průběžně i optimisticky.
-    const tracks = (window.TRACKS_DATA || []).filter(isPlayableTrack);
-    return tracks
-      .map(t => ({ track: t, count: t.plays || 0 }))
-      .filter(x => x.count > 0)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-  }, [tick]);
-
-  if (top.length === 0) return null;
-  const albums = window.ALBUMS || [];
-  const albumMap = Object.fromEntries(albums.map(a => [a.id, a]));
-  const max = top[0].count;
-
-  return (
-    <section style={{ padding:'80px 24px', background:'transparent' }}>
-      <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:760, margin:'0 auto' }}>
-        <SubLabel>{lang === 'cs' ? 'Nejvíce poslouchané' : 'Most played'}</SubLabel>
-        <div className="studio-surface" style={{
-          border:'1px solid var(--border)',
-          borderRadius:'var(--r)', padding:'6px',
-        }}>
-          {top.map((row, i) => {
-            const al = albumMap[row.track.album];
-            const active = currentTrack?.id === row.track.id;
-            return (
-              <button key={row.track.id} onClick={() => onPlay(row.track, top.map(r => r.track))}
-                style={{
-                  width:'100%', display:'flex', alignItems:'center', gap:14,
-                  padding:'12px 16px', borderRadius:10, textAlign:'left',
-                  background: active ? 'color-mix(in srgb, var(--a1) 12%, transparent)' : 'transparent',
-                  border: `1px solid ${active ? 'color-mix(in srgb, var(--a1) 40%, transparent)' : 'transparent'}`,
-                  cursor:'pointer', transition:'background 0.12s',
-                }}>
-                <div style={{ width:24, fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:800, color:'var(--a1)', textAlign:'center' }}>
-                  {active && playing ? <EqBars /> : `#${i + 1}`}
-                </div>
-                <div style={{ width:38, height:38, borderRadius:7, flexShrink:0, backgroundImage:`url("${trackArt(row.track, al)}")`, backgroundSize:'cover' }} />
-                <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:14, fontWeight:600, color: active ? 'var(--a1)' : 'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{row.track.title}</div>
-                  <div style={{ fontSize:12, color:'var(--muted)' }}>{al?.title || ''}</div>
-                </div>
-                <div style={{ minWidth:80, textAlign:'right' }}>
-                  <div style={{ fontSize:12, color:'var(--muted)', fontVariantNumeric:'tabular-nums' }}>
-                    {row.count}×
-                  </div>
-                  <div style={{ height:3, width:'100%', maxWidth:80, marginTop:5, marginLeft:'auto', background:'var(--border)', borderRadius:2, overflow:'hidden' }}>
-                    <div style={{ width:`${(row.count / max) * 100}%`, height:'100%', background:'var(--a1)' }} />
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-Object.assign(window, { NewsletterSection, StatsSection, ComparisonSection, DonationButton, MostPlayedSection });
+Object.assign(window, { NewsletterSection, StatsSection, ComparisonSection, DonationButton });
 
 // ==========================================
 // FILE: search.jsx
@@ -3970,9 +3909,7 @@ function SearchOverlay({ lang, onClose, onPlay }) {
       color: a.color,
       hay: `${a.name} ${a.cs} ${a.en} ${a.platform}`.toLowerCase(),
       action: () => {
-        if (window.CASE_STUDIES?.[a.id]) { window.location.href = window.CASE_STUDIES[a.id]; }
-        else if (a.link && a.link !== '#') { window.location.href = a.link; }
-        else { history.replaceState(null, '', '#apps'); window.scrollTo({ top: document.getElementById('apps').offsetTop - 60, behavior: 'smooth' }); }
+        window.location.hash = `app=${slugify(a.name)}`;
       },
     }));
     const albums = publishedAlbums().map(al => ({
@@ -4495,7 +4432,6 @@ function App() {
       <main>
         <Hero lang={lang} onPlay={handlePlay} />
         <MusicSection lang={lang} onPlay={handlePlay} currentTrack={playerTrack} playing={playing} />
-        <MostPlayedSection lang={lang} onPlay={handlePlay} currentTrack={playerTrack} playing={playing} />
         <AppsSection lang={lang} />
         <ComparisonSection lang={lang} />
         <StatsSection lang={lang} />

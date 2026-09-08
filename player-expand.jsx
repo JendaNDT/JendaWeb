@@ -169,6 +169,7 @@ function ExpandMode({
 }) {
   __useE_xp(() => {
     const onKey = (e) => {
+      if (document.querySelector('[role="dialog"][aria-modal="true"]:not([data-player-dialog])')) return;
       if (e.key === 'Escape' || (e.key === 'ArrowDown' && !e.shiftKey && !showLyrics)) { e.preventDefault(); onClose(); }
     };
     window.addEventListener('keydown', onKey);
@@ -185,7 +186,7 @@ function ExpandMode({
   __useE_xp(() => {
     if (synced && showLyrics && lyricsBoxRef.current && activeLineRef.current) {
       const box = lyricsBoxRef.current, el = activeLineRef.current;
-      box.scrollTo({ top: Math.max(0, el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2), behavior: 'smooth' });
+      box.scrollTo({ top: Math.max(0, el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2), behavior: preferredScrollBehavior() });
     }
   }, [activeIdx, showLyrics]);
 
@@ -316,7 +317,7 @@ function ExpandMode({
   );
 
   return (
-    <div role="dialog" aria-modal="true" aria-label={track.title}
+    <div role="dialog" aria-modal="true" data-player-dialog aria-label={track.title}
       style={{
         position:'fixed', inset:0, zIndex:350,
         background:'#000',
