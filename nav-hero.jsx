@@ -258,7 +258,7 @@ function Nav({ lang, setLang, mode, setMode }) {
     logo: {
       fontFamily:"'Syne', sans-serif", fontWeight:800, fontSize:20,
       letterSpacing:'-0.04em',
-      background:'linear-gradient(135deg, var(--brand-a1), var(--brand-a2))',
+      backgroundImage:'linear-gradient(135deg, var(--brand-a1), var(--brand-a2))',
       WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
     },
     link: { fontSize:15, fontWeight:500, color:'var(--muted)', transition:'color 0.2s', padding:'4px 0' },
@@ -279,7 +279,7 @@ function Nav({ lang, setLang, mode, setMode }) {
 
   return (
     <nav className="site-nav" aria-label={lang === 'cs' ? 'Hlavní navigace' : 'Main navigation'} style={s.nav}>
-      <a href="#hero" style={s.logo} onClick={onLogoTap}>jenda.cool</a>
+      <a href="#hero" className="brand-motion" style={s.logo} onClick={onLogoTap}>jenda.cool</a>
       <div className="nav-desktop" style={{ display:'flex', gap:36, alignItems:'center' }}>
         {links.map(l => {
           const on = active === l.href.slice(1);
@@ -339,15 +339,13 @@ function Hero({ lang, onPlay }) {
           {tx(lang, 'hero_tag')}
         </div>
 
-        <h1 className="hero-name" style={{
+        <h1 className="hero-name brand-motion" style={{
           fontFamily:"'Syne', sans-serif",
           fontSize:'clamp(48px, 16vw, 160px)',
           fontWeight:800, lineHeight:0.88,
           letterSpacing:'-0.05em',
-          background:'linear-gradient(135deg, var(--text) 20%, var(--a1) 55%, var(--a2) 85%)',
+          backgroundImage:'linear-gradient(135deg, var(--text) 20%, var(--a1) 55%, var(--a2) 85%)',
           WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
-          backgroundSize:'200% 200%',
-          animation:'none',
           marginBottom:32,
         }}>
           Jenda
