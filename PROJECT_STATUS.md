@@ -7,6 +7,8 @@ The user explicitly requires seeing and approving the preview before deployment.
 - New two-column hero with original Relax/Celtic Code artwork; square album cards.
 - Follow-up: all 7 available apps render as full cards in one visible grid, each with a real application screenshot. Nekouřím, Ballista and Vandrák captured from published APKs; RT Asistent captured in the browser. Each new screenshot is also available in the app detail gallery. Desktop grid uses up to three wider columns. No More apps disclosure. Screenshot provenance is in `screenshots/showcase/README.md`.
 - Real app screenshots on featured cards. GeoReminder 2.7 CI196 and EngiTab 0.2.0 captured from their public APKs in a disposable read-only API35 emulator; no reminder was saved.
+- Dark-mode follow-up: five Android cards and their fallback detail galleries now use fresh native dark screenshots. RT Asistent was already dark. Fyzika retains the light water scene because the published 0.1.1-android.3 UI has no dark-theme selector (verified in app and source). Screenshot colors are unmodified.
+- Follow-up validation: all seven images loaded in Chrome; the Nekouřím detail uses the new dark image; desktop and 390px viewport inspected, no horizontal overflow or captured JS errors. Updated full catalog screenshot saved for local review.
 - App screenshot fallback in the detail dialog, stronger body contrast, neutral backgrounds, light-mode accent contrast, quieter animation and reduced-motion support.
 - Native separate album play/filter buttons; existing custom CMS and track cover overrides preserved.
 - `jw-v99` prepared; localhost skips JSX cache and new service-worker registration so the preview refreshes reliably.

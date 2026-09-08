@@ -2,6 +2,12 @@
 
 Captured from running published applications on 2026-09-08 for the local portfolio design preview. Images are unretouched UI captures.
 
+## Dark-mode follow-up
+
+The portfolio now uses `georeminder-dark-v1.png`, `engitab-dark-v1.png`, `nekourim-dark-v1.png`, `ballista-dark-v1.png` and `vandrak-dark-v1.png`, captured again from the same published APKs listed below. API35 read-only emulator, 1080 × 1920, density 420, Czech locale. GeoReminder, EngiTab, Ballista and Vandrák follow Android night mode. Nekouřím was switched using its own Settings → Appearance → Dark mode toggle; its disposable demo profile uses the same values listed below. The temporary emulator was stopped after capture.
+
+RT Asistent's existing browser capture is already dark. Fyzika pastelkou retains its real light water-scene image: the installed release 0.1.1-android.3 exposes paper/grid controls but no dark-theme selector, including its native menu. The core supports a chalkboard palette in imported drawings, but this is not currently an ordinary theme toggle. No app source, private user data or screenshot colors were modified for these captures.
+
 ## Android captures
 
 API35 disposable read-only emulator, 1080 × 1920, density 420, Czech app locale. The emulator was stopped after capture. All three APKs report versionName 1.0, versionCode 1.
