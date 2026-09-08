@@ -100,9 +100,9 @@ function StatsSection({ lang }) {
   const s = window.PUBLIC_STATS || {};
   const log = window.BUILD_LOG || [];
 
-  const albumsCount = (window.ALBUMS || []).length;
-  const appsCount = (window.APPS_DATA || []).filter(x => x.link && x.link !== '#').length;
-  const tracksCount = (window.TRACKS_DATA || []).length;
+  const albumsCount = publishedAlbums().length;
+  const appsCount = (window.APPS_DATA || []).filter(isLiveApp).length;
+  const tracksCount = (window.TRACKS_DATA || []).filter(isPlayableTrack).length;
   const studiesCount = Object.keys(window.CASE_STUDIES || {}).length;
 
   return (
@@ -172,7 +172,7 @@ function ComparisonSection({ lang }) {
   const cfg = window.COMPARISON || { apps:[], rows:[], data:{} };
   const apps = __useM_ex(() => {
     const all = window.APPS_DATA || [];
-    return cfg.apps.map(id => all.find(a => a.id === id)).filter(Boolean);
+    return cfg.apps.map(id => all.find(a => a.id === id)).filter(a => a && isLiveApp(a));
   }, []);
 
   if (!apps.length) return null;
@@ -189,7 +189,7 @@ function ComparisonSection({ lang }) {
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:1000, margin:'0 auto' }}>
         <SectionLabel color="a2" num="03">{tx(lang,'compare_title')}</SectionLabel>
         <p style={{ color:'var(--muted)', fontSize:16, marginBottom:36 }}>
-          {tx(lang,'compare_desc')}
+          {lang === 'cs' ? 'Porovnej dostupné aplikace' : 'Compare available apps'}
         </p>
 
         <div style={{ overflowX:'auto', border:'1px solid var(--border)', borderRadius:'var(--r)', background:'var(--card)' }}>
@@ -286,7 +286,7 @@ function MostPlayedSection({ lang, onPlay, currentTrack, playing }) {
 
   const top = __useM_ex(() => {
     // Reálná globální čísla z DB (window.TRACKS_DATA[].plays), průběžně i optimisticky.
-    const tracks = window.TRACKS_DATA || [];
+    const tracks = (window.TRACKS_DATA || []).filter(isPlayableTrack);
     return tracks
       .map(t => ({ track: t, count: t.plays || 0 }))
       .filter(x => x.count > 0)

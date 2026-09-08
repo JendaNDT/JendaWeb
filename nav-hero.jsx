@@ -278,7 +278,7 @@ function Nav({ lang, setLang, mode, setMode }) {
   ];
 
   return (
-    <nav style={s.nav}>
+    <nav className="site-nav" aria-label={lang === 'cs' ? 'Hlavní navigace' : 'Main navigation'} style={s.nav}>
       <a href="#hero" style={s.logo} onClick={onLogoTap}>jenda.cool</a>
       <div className="nav-desktop" style={{ display:'flex', gap:36, alignItems:'center' }}>
         {links.map(l => {
@@ -293,7 +293,7 @@ function Nav({ lang, setLang, mode, setMode }) {
           );
         })}
       </div>
-      <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+      <div className="nav-settings" style={{ display:'flex', gap:6, alignItems:'center' }}>
         <button
           onClick={() => setMode(mode === 'auto' ? 'light' : mode === 'light' ? 'dark' : 'auto')}
           title={tx(lang,'mode_'+mode)}
@@ -318,8 +318,8 @@ function Nav({ lang, setLang, mode, setMode }) {
 
 function Hero({ lang, onPlay }) {
   const playFeatured = () => {
-    const tracks = window.TRACKS_DATA || [];
-    const featured = tracks.find(t => t.audioUrl) || tracks[0];
+    const tracks = (window.TRACKS_DATA || []).filter(isPlayableTrack);
+    const featured = tracks[0];
     if (featured && onPlay) onPlay(featured, tracks);
     const el = document.getElementById('music');
     if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 64, behavior: 'smooth' });
@@ -331,7 +331,7 @@ function Hero({ lang, onPlay }) {
       textAlign:'center', padding:'90px 24px 80px',
       position:'relative', overflow:'hidden',
     }}>
-      <div style={{ position:'relative', zIndex:1, maxWidth:820 }}>
+      <div style={{ position:'relative', zIndex:1, maxWidth:820, width:'100%' }}>
         <div style={{
           display:'inline-flex', alignItems:'center', gap:8,
           fontSize:12, fontWeight:600, letterSpacing:'0.14em', textTransform:'uppercase',
@@ -345,7 +345,7 @@ function Hero({ lang, onPlay }) {
 
         <h1 style={{
           fontFamily:"'Syne', sans-serif",
-          fontSize:'clamp(64px, 16vw, 160px)', // min 64px: na ~390px viewportu se 80px nevešlo (oříznuté J/a)
+          fontSize:'clamp(48px, 16vw, 160px)',
           fontWeight:800, lineHeight:0.88,
           letterSpacing:'-0.05em',
           background:'linear-gradient(135deg, var(--text) 20%, var(--a1) 55%, var(--a2) 85%)',
@@ -372,14 +372,14 @@ function Hero({ lang, onPlay }) {
         <div style={{ display:'flex', gap:56, justifyContent:'center', marginTop:80, flexWrap:'wrap' }}>
           {[
             (() => {
-              const count = (window.APPS_DATA || []).filter(x => x.link && x.link !== '#').length;
+              const count = (window.APPS_DATA || []).filter(isLiveApp).length;
               const lbl = lang === 'cs'
                 ? (count >= 1 && count <= 4 ? 'aplikace' : 'aplikací')
                 : (count === 1 ? 'app' : 'apps');
               return { num: count, suffix: '', lbl, href: '#apps' };
             })(),
-            { num:(window.TRACKS_DATA||[]).length, suffix:'', lbl: tx(lang,'stat_tracks'), href:'#music' },
-            { num:(window.ALBUMS||[]).length,      suffix:'', lbl: tx(lang,'stat_albums'), href:'#music' },
+            { num:(window.TRACKS_DATA||[]).filter(isPlayableTrack).length, suffix:'', lbl: tx(lang,'stat_tracks'), href:'#music' },
+            { num:publishedAlbums().length, suffix:'', lbl: lang === 'cs' ? (publishedAlbums().length === 1 ? 'album' : publishedAlbums().length >= 2 && publishedAlbums().length <= 4 ? 'alba' : 'alb') : tx(lang,'stat_albums'), href:'#music' },
           ].map(({ num, suffix, lbl, href }) => {
             const [r, v] = useCountUp(num);
             return (

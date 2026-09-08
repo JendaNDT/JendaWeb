@@ -1,4 +1,7 @@
 import os
+from pathlib import Path
+
+PROJECT_DIR = Path(__file__).resolve().parent
 
 jsx_files = [
     'tweaks-panel.jsx',
@@ -13,19 +16,19 @@ jsx_files = [
     'app.jsx'
 ]
 
-combined_path = "/Users/jenda/Desktop/JendaWeb/combined.jsx"
+combined_path = str(PROJECT_DIR / "combined.jsx")
 
 print("Combining JSX files...")
 combined_code = []
 for file in jsx_files:
-    path = os.path.join("/Users/jenda/Desktop/JendaWeb", file)
+    path = PROJECT_DIR / file
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as f:
             code = f.read()
         combined_code.append(f"\n// ==========================================\n// FILE: {file}\n// ==========================================\n")
         combined_code.append(code)
     else:
-        print(f"Warning: {file} not found!")
+        raise FileNotFoundError(path)
 
 with open(combined_path, "w", encoding="utf-8") as f:
     f.write("".join(combined_code))

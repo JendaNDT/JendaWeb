@@ -158,7 +158,7 @@ function App() {
       const raw = localStorage.getItem(PLAYER_STORAGE_KEY);
       if (!raw) return;
       const s = JSON.parse(raw);
-      const tracks = window.TRACKS_DATA || [];
+      const tracks = (window.TRACKS_DATA || []).filter(isPlayableTrack);
       const t = tracks.find(x => x.id === s.trackId);
       if (t) {
         setPlayerTrack(t);
@@ -242,7 +242,7 @@ function App() {
       const tMatch = h.match(/t=(\d+(?:\.\d+)?)/);
       const appMatch = h.match(/app=([\w-]+)/);
       const startAt = tMatch ? parseFloat(tMatch[1]) : 0;
-      const tracks = window.TRACKS_DATA || [];
+      const tracks = (window.TRACKS_DATA || []).filter(isPlayableTrack);
       const apps = window.APPS_DATA || [];
       
       if (appMatch) {

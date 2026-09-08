@@ -24,17 +24,17 @@ function SearchOverlay({ lang, onClose, onPlay }) {
         else { history.replaceState(null, '', '#apps'); window.scrollTo({ top: document.getElementById('apps').offsetTop - 60, behavior: 'smooth' }); }
       },
     }));
-    const albums = (window.ALBUMS || []).map(al => ({
+    const albums = publishedAlbums().map(al => ({
       type: 'album',
       id: `album-${al.id}`,
       title: al.title,
       sub: al.genre,
-      tag: `${al.tracks} tracks · ${al.year}`,
+      tag: `${(window.TRACKS_DATA || []).filter(t => t.album === al.id && isPlayableTrack(t)).length} ${lang === 'cs' ? 'skladeb' : 'tracks'} · ${al.year}`,
       hay: `${al.title} ${al.genre} ${al.cs} ${al.en}`.toLowerCase(),
       g1: al.g1, g2: al.g2,
       action: () => { window.location.hash = `album=${al.id}`; },
     }));
-    const tracks = (window.TRACKS_DATA || []).map(t => {
+    const tracks = (window.TRACKS_DATA || []).filter(isPlayableTrack).map(t => {
       const al = (window.ALBUMS || []).find(a => a.id === t.album);
       return {
         type: 'track',
@@ -45,7 +45,7 @@ function SearchOverlay({ lang, onClose, onPlay }) {
         hay: `${t.title} ${al?.title || ''} ${al?.genre || ''}`.toLowerCase(),
         g1: al?.g1, g2: al?.g2,
         action: () => {
-          if (onPlay) onPlay(t, window.TRACKS_DATA || []);
+          if (onPlay) onPlay(t, (window.TRACKS_DATA || []).filter(isPlayableTrack));
           history.replaceState(null, '', `#track=${t.id}`);
         },
       };

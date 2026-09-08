@@ -32,6 +32,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
   const [muted, setMuted] = __useS_pc(false);
   const [hovBar, setHovBar] = __useS_pc(null);
   const [expanded, setExpanded] = __useS_pc(false);
+  const [compact, setCompact] = __useS_pc(true);
   const [speed, setSpeed] = __useS_pc(() => {
     try { const v = parseFloat(localStorage.getItem('jw_speed')); return [0.75,1,1.25,1.5,2].includes(v) ? v : 1; }
     catch { return 1; }
@@ -429,7 +430,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
 
   return (
     <>
-    <div className="player-grid" style={{
+    <div className={`player-grid${compact ? ' player-compact' : ''}`} style={{
       position:'fixed', bottom:0, left:0, right:0, zIndex:200,
       background:'color-mix(in srgb, var(--bg) 92%, transparent)', backdropFilter:'blur(28px)',
       borderTop:'1px solid var(--border)',
@@ -437,7 +438,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
       display:'grid', gridTemplateColumns:'1fr auto 1fr', alignItems:'center', gap:20,
       animation:'slideUp 0.35s ease',
     }}>
-      <div style={{ display:'flex', alignItems:'center', gap:14, minWidth:0 }}>
+      <div className="player-meta" style={{ display:'flex', alignItems:'center', gap:14, minWidth:0 }}>
         <div className="player-info" onClick={() => setExpanded(true)} style={{ display:'flex', alignItems:'center', gap:12, minWidth:0, cursor:'pointer' }} role="button" tabIndex={0} aria-label={`${track ? `${track.title} - ${album?.title || ''}. ` : ''}Expand player (E)`} title="Expand (E)"
           onKeyDown={(e) => { if (e.key === 'Enter') setExpanded(true); }}>
           <div className={restoring ? 'shimmer-fx' : ''} style={{ position:'relative', width:42, height:42, borderRadius:8, flexShrink:0, overflow:'hidden', backgroundImage: track ? `url("${trackArt(track, album)}")` : '', backgroundSize:'cover', display:'flex', alignItems:'center', justifyContent:'center' }}>
@@ -468,7 +469,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
       </div>
 
       <div className="player-controls" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+        <div className="player-transport" style={{ display:'flex', alignItems:'center', gap:14 }}>
           <button className="player-mute-mobile" onClick={() => setMuted(m => !m)} aria-label="Mute" style={{ color: muted ? 'var(--a1)' : 'var(--muted)', padding:6 }}>
             <VolIco />
           </button>
@@ -487,6 +488,11 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
           </button>
           <button className="player-mute-mobile" onClick={onClose} aria-label="Close" style={{ color:'var(--muted)', padding:6 }}>
             <CloseIco />
+          </button>
+          <button className="player-more-mobile" onClick={() => setCompact(v => !v)}
+            aria-expanded={!compact} aria-label={lang === 'cs' ? 'Další ovládání přehrávače' : 'More player controls'}
+            title={lang === 'cs' ? 'Další ovládání' : 'More controls'}>
+            <span aria-hidden="true">{compact ? '⋯' : '⌄'}</span>
           </button>
         </div>
         <div className="player-wave" style={{ display:'flex', alignItems:'center', gap:10, width:380 }}>
@@ -793,6 +799,10 @@ function ContactSection({ lang }) {
   return (
     <section id="contact" style={{ padding:'110px 24px', background:'transparent' }}>
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:660, margin:'0 auto', textAlign:'center' }}>
+        <div style={{ textAlign:'left', paddingBottom:48, marginBottom:64, borderBottom:'1px solid var(--border)' }}>
+          <h2 style={{ fontFamily:"'Syne',sans-serif", fontSize:28, marginBottom:18 }}>{tx(lang,'about_title')}</h2>
+          <p style={{ fontSize:18, lineHeight:1.8, color:'var(--muted)' }}>{tx(lang,'about_text')}</p>
+        </div>
         <SectionLabel color="a1" num="04">{tx(lang,'contact_title')}</SectionLabel>
         <p style={{ color:'var(--muted)', fontSize:18, lineHeight:1.65, marginBottom:36 }}>
           {tx(lang,'contact_desc')}

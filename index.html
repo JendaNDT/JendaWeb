@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jenda — Vibe Coder & AI Music</title>
-  <meta name="description" content="Tvořím mobilní aplikace a experimentální elektronickou hudbu pomocí AI. 5 dokončených aplikací a 20 případových studií, 5 skladeb fúzní etnické elektroniky.">
+  <meta name="description" content="Vlastní aplikace pro počítače, telefony i web a experimentální elektronická hudba s AI. Vyzkoušej moje aplikace nebo si poslechni hudbu.">
   <meta name="author" content="Jenda">
   <meta name="theme-color" content="#f97316">
   <meta name="color-scheme" content="dark">
@@ -21,7 +21,7 @@
   <meta property="og:type"        content="website">
   <meta property="og:url"         content="https://jenda.cool/">
   <meta property="og:title"       content="Jenda — Vibe Coder & AI Music">
-  <meta property="og:description" content="Mobilní aplikace a experimentální elektronická hudba s AI. 5 dokončených aplikací a 20 případových studií, 5 skladeb.">
+  <meta property="og:description" content="Vlastní aplikace a experimentální elektronická hudba s AI. Vyzkoušej, co tvořím, a poslechni si moji hudbu.">
   <meta property="og:image"       content="https://jenda.cool/og-image.png">
   <meta property="og:image:width"  content="1200">
   <meta property="og:image:height" content="630">
@@ -521,9 +521,33 @@
       .mesh-orb { animation: none !important; }
     }
 
-    /* Hide nav links on mobile */
+    /* Keep the three destinations visible on mobile, without an extra menu tap. */
+    section[id] { scroll-margin-top: 82px; }
+    .apps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)); gap:20px; }
+    .apps-grid .app-card p { font-size:15px !important; line-height:1.65 !important; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+    .apps-grid .app-card > div > div { flex-wrap:wrap; }
+    .apps-tools { display:flex; gap:16px; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:32px; }
+    .catalog-pill { padding:10px 16px; border:1px solid var(--border); border-radius:50px; color:var(--muted); font-size:14px; min-height:44px; }
+    .catalog-pill[aria-pressed="true"] { background:var(--a1); color:var(--bg); border-color:var(--a1); }
+    .catalog-search { min-width:0; width:280px; max-width:100%; padding:12px 16px; border-radius:24px; border:1px solid var(--border); background:var(--card); color:var(--text); font:inherit; }
+    .catalog-heading { font-family:'Syne',sans-serif; font-size:20px; margin-bottom:20px; }
+    .catalog-disclosure { margin-top:28px; border-top:1px solid var(--border); padding-top:12px; }
+    .catalog-disclosure > summary, .studies-toggle, .app-install-details > summary { padding:16px 0; min-height:48px; color:var(--text); font-size:16px; font-weight:600; cursor:pointer; text-align:left; }
+    .catalog-disclosure > summary { margin-bottom:8px; }
+    .studies-toggle { width:100%; display:flex; align-items:center; justify-content:space-between; }
+    .catalog-empty { padding:28px 0; color:var(--muted); }
+    .app-install-details { border-top:1px solid var(--border); }
+    .app-detail button:focus-visible, .ss-carousel:focus-visible { outline:2px solid var(--a1) !important; outline-offset:4px; }
     @media (max-width: 640px) {
-      .nav-desktop { display: none !important; }
+      .site-nav { height:auto !important; min-height:100px; padding:10px 16px 0 !important; flex-wrap:wrap; gap:4px; background:color-mix(in srgb, var(--bg) 94%, transparent) !important; backdrop-filter:blur(20px) !important; }
+      .nav-desktop { display:flex !important; order:3; width:100%; gap:0 !important; justify-content:space-around; }
+      .nav-desktop .nav-link { min-height:44px; padding:12px 8px !important; text-align:center; flex:1; }
+      .site-nav > a { font-size:18px !important; }
+      .nav-settings { margin-left:auto; }
+      .app-gallery-slide { height:auto !important; aspect-ratio:16 / 10; }
+      section[id] { scroll-margin-top:116px; }
+      #hero { padding-top:132px !important; }
+      .app-detail { padding:18px !important; max-height:90dvh !important; }
     }
 
     /* Mobile player layout */
@@ -531,16 +555,24 @@
       .player-grid {
         grid-template-columns: 1fr !important;
         grid-template-areas: 'info' 'controls' !important;
-        gap: 10px !important;
-        padding: 12px 16px !important;
+        gap: 8px !important;
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom)) !important;
       }
-      .player-info     { grid-area: info; }
+      .player-meta     { grid-area: info; }
       .player-controls { grid-area: controls; }
       .player-right    { display: none !important; }
       .player-wave     { width: 100% !important; }
       .player-mute-mobile { display: inline-flex !important; }
+      .player-more-mobile { display:inline-flex !important; align-items:center; justify-content:center; min-width:36px; min-height:44px; color:var(--muted); font-size:24px; }
+      .player-transport { gap:4px !important; }
+      .player-compact { grid-template-columns:minmax(0,1fr) auto !important; grid-template-areas:'info controls' !important; }
+      .player-compact .player-wave, .player-compact .player-meta > button { display:none !important; }
+      .player-compact .player-transport > button:not([aria-label^="Play"]):not([aria-label^="Pause"]):not([aria-label="Close"]):not(.player-more-mobile) { display:none !important; }
+      .player-compact .player-info { gap:8px !important; }
+      .player-compact .player-info > div:last-child > div { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     }
     .player-mute-mobile { display: none; }
+    .player-more-mobile { display: none; }
 
     /* Shortcuts overlay */
     @keyframes overlayIn  { from { opacity: 0; } to { opacity: 1; } }
@@ -630,7 +662,7 @@
   </div>
   <div id="root">
     <!-- Premium CSS Skeleton Loader (rendered instantly, zero layout shift) -->
-    <nav style="position: fixed; top: 0; left: 0; right: 0; height: 64px; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; z-index: 100; border-bottom: 1px solid transparent; background: transparent;">
+    <nav class="site-nav" style="position: fixed; top: 0; left: 0; right: 0; height: 64px; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; z-index: 100; border-bottom: 1px solid transparent; background: transparent;">
       <span style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; background: linear-gradient(135deg, var(--a1), var(--a2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.04em;">jenda.cool</span>
       <div class="nav-desktop" style="display: flex; gap: 36px; align-items: center;">
         <span style="font-size: 15px; font-weight: 500; color: var(--muted);">Hudba</span>
@@ -648,7 +680,7 @@
         <div style="display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--a1); padding: 7px 18px; border-radius: 30px; border: 1px solid color-mix(in srgb, var(--a1) 40%, transparent); background: color-mix(in srgb, var(--a1) 8%, transparent); margin-bottom: 36px;">
           Vibe Coder & AI Music
         </div>
-        <h1 style="font-family: 'Syne', sans-serif; font-size: clamp(80px, 16vw, 160px); font-weight: 800; line-height: 0.88; letter-spacing: -0.05em; background: linear-gradient(135deg, var(--text) 20%, var(--a1) 55%, var(--a2) 85%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 32px;">
+        <h1 style="font-family: 'Syne', sans-serif; font-size: clamp(48px, 16vw, 160px); font-weight: 800; line-height: 0.88; letter-spacing: -0.05em; background: linear-gradient(135deg, var(--text) 20%, var(--a1) 55%, var(--a2) 85%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 32px;">
           Jenda
         </h1>
         <p style="font-size: clamp(16px, 2.2vw, 20px); color: var(--muted); max-width: 500px; margin: 0 auto 52px; line-height: 1.65; font-weight: 300;">
@@ -675,7 +707,7 @@
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       (function() {
-        const VERSION = 'jw-v94'; // Match sw.js version
+        const VERSION = 'jw-v98'; // Match sw.js version
         const jsxFiles = [
           'combined.jsx'
         ];

@@ -1,11 +1,13 @@
 // apps-music.jsx — Apps + Music sections
-const { useState: __useS, useEffect: __useE, useMemo: __useM, useCallback: __useC, useRef: __useR } = React;function AppCard({ app, lang, mode = 'live' }) {
+const { useState: __useS, useEffect: __useE, useMemo: __useM, useCallback: __useC, useRef: __useR } = React;
+
+function AppCard({ app, lang, mode = 'live' }) {
   const [hov, setHov] = __useS(false);
   const isPWA = app.platform === 'PWA';
   const caseStudyUrl = window.CASE_STUDIES?.[app.id] || app.case_study_url;
   
   return (
-    <a href={'#app=' + slugify(app.name)} style={{
+    <a href={'#app=' + slugify(app.name)} className="app-card" style={{
       background: hov ? 'rgba(255,255,255,0.065)' : 'var(--card)',
       border:`1px solid ${hov ? 'color-mix(in srgb, var(--border) 100%, ' + app.color + ' 30%)' : 'var(--border)'}`,
       borderRadius:'var(--r)', padding:'22px',
@@ -53,7 +55,7 @@ const { useState: __useS, useEffect: __useE, useMemo: __useM, useCallback: __use
           }}>{app.platform}</span>
         </div>
         <p style={{ fontSize:13, color:'var(--muted)', lineHeight:1.5, textWrap:'pretty' }}>
-          {lang === 'cs' ? app.cs : app.en}
+          {appCopy(app, lang).intro}
         </p>
       </div>
       <div style={{
@@ -72,153 +74,82 @@ const { useState: __useS, useEffect: __useE, useMemo: __useM, useCallback: __use
 function AppsSection({ lang }) {
   const [filter, setFilter] = __useS('all');
   const [query, setQuery] = __useS('');
+  const [showStudies, setShowStudies] = __useS(false);
   const [ref, vis] = useInView();
   const apps = window.APPS_DATA || [];
-  
-  const filtered = __useM(() => {
-    const q = query.trim().toLowerCase();
-    return apps.filter(a => {
-      if (filter !== 'all' && a.platform !== filter) return false;
-      if (!q) return true;
-      return a.name.toLowerCase().includes(q) || a.cs.toLowerCase().includes(q) || a.en.toLowerCase().includes(q);
-    });
-  }, [filter, query, apps]);
-
-  const { liveApps, studyApps } = __useM(() => {
-    const live = [];
-    const study = [];
-    filtered.forEach(a => {
-      const isLive = a.link && a.link !== '#';
-      const isStudy = !!(window.CASE_STUDIES?.[a.id] || a.case_study_url);
-      if (isLive) live.push(a);
-      if (isStudy) study.push(a);
-    });
-    return { liveApps: live, studyApps: study };
-  }, [filtered]);
-
+  const live = apps.filter(isLiveApp);
+  const studies = apps.filter(a => !isLiveApp(a));
+  const q = query.trim().toLocaleLowerCase();
+  const matches = a => (!q || [a.name, a.cs, a.en].some(t => String(t || '').toLocaleLowerCase().includes(q)))
+    && (filter === 'all' || a.platform === filter);
+  const matchingLive = live.filter(matches);
+  const matchingStudies = studies.filter(matches);
+  const featured = featuredAppSlugs.map(slug => matchingLive.find(a => slugify(a.name) === slug)).filter(Boolean);
+  const otherLive = matchingLive.filter(a => !featured.includes(a));
+  const browsing = !q && filter === 'all';
   const pills = [
-    { k:'all',     lbl: tx(lang,'apps_all') },
-    { k:'PWA',     lbl: 'PWA',     count: apps.filter(a=>a.platform==='PWA').length },
-    { k:'Android', lbl: 'Android', count: apps.filter(a=>a.platform==='Android').length },
+    { key: 'all', label: lang === 'cs' ? 'Vše' : 'All', count: live.length },
+    ...['PWA', 'Android'].map(key => ({ key, label: key, count: live.filter(a => a.platform === key).length })),
   ];
+  const cards = (items, mode = 'live') => (
+    <div className="apps-grid">
+      {items.map(app => <AppCard key={app.id} app={app} lang={lang} mode={mode} />)}
+    </div>
+  );
 
   return (
-    <section id="apps" style={{ padding:'110px 24px', background:'transparent' }}>
+    <section id="apps" style={{ padding:'90px 24px' }}>
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:1200, margin:'0 auto' }}>
-        <SectionLabel color="a1" num="01">{tx(lang,'apps_title')}</SectionLabel>
+        <SectionLabel color="a1" num="02">{tx(lang,'apps_title')}</SectionLabel>
         <p style={{ color:'var(--muted)', fontSize:16, marginBottom:28 }}>
-          {lang==='cs' ? `${apps.length} aplikací · PWA & nativní Android` : `${apps.length} apps · PWA & native Android`}
+          {lang === 'cs' ? `${live.length} aplikací k vyzkoušení · Android a web` : `${live.length} apps to try · Android and web`}
         </p>
-        <div style={{ display:'flex', gap:14, marginBottom:38, flexWrap:'wrap', alignItems:'center', justifyContent:'space-between' }}>
-          <div style={{ display:'flex', gap:9, flexWrap:'wrap' }}>
+        <div className="apps-tools">
+          <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
             {pills.map(p => (
-              <button key={p.k} onClick={() => setFilter(p.k)} style={{
-                padding:'7px 18px', borderRadius:50, fontSize:13, fontWeight:600,
-                background: filter===p.k ? 'var(--a1)' : 'transparent',
-                color: filter===p.k ? '#fff' : 'var(--muted)',
-                border:`1px solid ${filter===p.k ? 'var(--a1)' : 'var(--border)'}`,
-                transition:'all 0.2s', display:'flex', alignItems:'center', gap:6,
-              }}>
-                {p.lbl}
-                {p.count !== undefined && <span style={{ opacity:0.65, fontSize:11 }}>{p.count}</span>}
+              <button key={p.key} className="catalog-pill" aria-pressed={filter === p.key}
+                onClick={() => setFilter(p.key)}>
+                {p.label} <span style={{ opacity:0.7 }}>{p.count}</span>
               </button>
             ))}
           </div>
-          <div style={{
-            display:'flex', alignItems:'center', gap:8,
-            padding:'7px 14px', borderRadius:50,
-            background:'var(--card)', border:'1px solid var(--border)',
-            minWidth:200, flex:'0 1 280px',
-            transition:'border-color 0.2s',
-          }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ color:'var(--muted)', flexShrink:0 }}>
-              <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
-            </svg>
-            <input
-              id="apps-search-input"
-              name="search"
-              type="text"
-              autoComplete="off"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder={tx(lang,'apps_search')}
-              aria-label={tx(lang,'apps_search')}
-              style={{
-                flex:1, minWidth:0, border:'none', outline:'none', background:'transparent',
-                color:'var(--text)', fontSize:13, fontFamily:'inherit',
-              }}
-            />
-            {query && (
-              <button onClick={() => setQuery('')} style={{ color:'var(--muted)', display:'flex', padding:2 }} aria-label="Clear">
-                <CloseIco />
-              </button>
-            )}
-          </div>
+          <input id="apps-search-input" name="search" type="search" autoComplete="off"
+            value={query} onChange={e => { setQuery(e.target.value); if (e.target.value.trim()) setShowStudies(true); }}
+            placeholder={tx(lang,'apps_search')} aria-label={tx(lang,'apps_search')}
+            className="catalog-search" />
         </div>
-        {filtered.length === 0 ? (
-          <div style={{
-            padding:'60px 24px', textAlign:'center',
-            border:'1px dashed var(--border)', borderRadius:'var(--r)',
-            color:'var(--muted)', fontSize:14,
-          }}>
-            <svg width="56" height="56" viewBox="0 0 64 64" fill="none" style={{ marginBottom:14, opacity:0.45 }}>
-              <circle cx="28" cy="28" r="16" stroke="currentColor" strokeWidth="2"/>
-              <line x1="40" y1="40" x2="54" y2="54" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              <line x1="22" y1="28" x2="34" y2="28" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.5"/>
-            </svg>
-            <div style={{ marginBottom:16 }}>{tx(lang,'apps_empty')}</div>
-            {(query || filter !== 'all') && (
-              <button onClick={() => { setQuery(''); setFilter('all'); }} style={{
-                padding:'8px 18px', borderRadius:50, fontSize:12, fontWeight:600,
-                background:'transparent', color:'var(--a1)',
-                border:'1px solid color-mix(in srgb, var(--a1) 40%, transparent)',
-              }}>
-                {lang === 'cs' ? 'Vymazat filtr' : 'Clear filter'}
-              </button>
-            )}
-          </div>
-        ) : (
-          <div style={{ display:'flex', flexDirection:'column', gap:44 }}>
-            {liveApps.length > 0 && (
-              <div>
-                <h3 style={{
-                  fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:18,
-                  marginBottom:18, color:'var(--text)', display:'flex', alignItems:'center', gap:8
-                }}>
-                  <span style={{ width:8, height:8, borderRadius:'50%', background:'var(--a1)' }}></span>
-                  {tx(lang, 'apps_live_title')}
-                  <span style={{ fontSize:12, fontWeight:500, color:'var(--muted)', opacity:0.75 }}>({liveApps.length})</span>
-                </h3>
-                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(230px,1fr))', gap:18 }}>
-                  {liveApps.map((app, i) => (
-                    <div key={'live-' + app.id} className="card-animate" style={{ animationDelay:`${Math.min(i,8)*35}ms` }}>
-                      <AppCard app={app} lang={lang} mode="live" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {studyApps.length > 0 && (
-              <div>
-                <h3 style={{
-                  fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:18,
-                  marginBottom:18, color:'var(--text)', display:'flex', alignItems:'center', gap:8,
-                  marginTop: liveApps.length > 0 ? 10 : 0
-                }}>
-                  <span style={{ width:8, height:8, borderRadius:'50%', background:'var(--a2)' }}></span>
-                  {tx(lang, 'apps_studies_title')}
-                  <span style={{ fontSize:12, fontWeight:500, color:'var(--muted)', opacity:0.75 }}>({studyApps.length})</span>
-                </h3>
-                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(230px,1fr))', gap:18 }}>
-                  {studyApps.map((app, i) => (
-                    <div key={'study-' + app.id} className="card-animate" style={{ animationDelay:`${Math.min(i,8)*35}ms` }}>
-                      <AppCard app={app} lang={lang} mode="study" />
-                    </div>
-                  ))}
-                </div>
-              </div>
+        {browsing && featured.length > 0 ? (
+          <>
+            <h3 className="catalog-heading">{lang === 'cs' ? 'Začni tady' : 'Start here'}</h3>
+            {cards(featured)}
+            {otherLive.length > 0 && (
+              <details className="catalog-disclosure">
+                <summary>{lang === 'cs' ? 'Další aplikace' : 'More apps'} ({otherLive.length})</summary>
+                {cards(otherLive)}
+              </details>
             )}
+          </>
+        ) : matchingLive.length > 0 ? cards(matchingLive) : (
+          <p role="status" className="catalog-empty">
+            {lang === 'cs' ? 'Tomuto hledání neodpovídá žádná dostupná aplikace.' : 'No available apps match your search.'}
+          </p>
+        )}
+
+        {matchingStudies.length > 0 && (
+          <div className="catalog-disclosure">
+            <button className="studies-toggle" aria-expanded={showStudies} aria-controls="app-studies"
+              onClick={() => setShowStudies(v => !v)}>
+              {lang === 'cs' ? 'Studie a koncepty' : 'Studies and concepts'} ({matchingStudies.length})
+              <span aria-hidden="true">{showStudies ? ' −' : ' +'}</span>
+            </button>
+            <div id="app-studies" hidden={!showStudies}>
+                <p style={{ color:'var(--muted)', margin:'0 0 20px', lineHeight:1.6 }}>
+                  {lang === 'cs' ? 'Návrhy a případové studie. Tyto projekty zde zatím nejsou ke spuštění ani ke stažení.'
+                    : 'Designs and case studies. These projects are not currently available to launch or download here.'}
+                </p>
+                {cards(matchingStudies, 'study')}
+              </div>
           </div>
         )}
       </div>
@@ -228,12 +159,18 @@ function AppsSection({ lang }) {
 
 function AppDetailModal({ app, lang, onClose, onShare }) {
   const isPWA = app.platform === 'PWA';
+  const copy = appCopy(app, lang);
+  const screenshots = [...(app.screenshots || [])];
+  // Lead with the existing playable water scene instead of toolbar settings.
+  const water = screenshots.findIndex(src => src.endsWith('/android-water.png'));
+  if (slugify(app.name) === 'fyzika-pastelkou' && water > 0) screenshots.unshift(screenshots.splice(water, 1)[0]);
   const caseStudyUrl = window.CASE_STUDIES?.[app.id] || app.case_study_url;
   const isDownload = app.link && (app.link.includes('/storage/v1/object/public/binaries/') || app.link.startsWith('[') || /\.(apk|zip|dmg|exe|tar\.gz|ipa|pkg)(?:\?.*)?$/i.test(app.link));
   
   const [liked, setLiked] = __useS(() => window.isItemLiked(window.LIKES_APPS_KEY, app.id));
   const [likeCount, setLikeCount] = __useS(app.likes || 0);
   const [downloading, setDownloading] = __useS(false);
+  const dialogRef = __useR(null);
 
   const handleLike = (e) => {
     e.stopPropagation();
@@ -248,9 +185,23 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
   };
 
   __useE(() => {
-    const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
+    const previousFocus = document.activeElement;
+    dialogRef.current?.focus();
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key !== 'Tab') return;
+      const controls = [...(dialogRef.current?.querySelectorAll('button, a[href], summary, [tabindex="0"]') || [])]
+        .filter(el => !el.disabled && el.getClientRects().length);
+      const first = controls[0], last = controls[controls.length - 1];
+      if (!first) { e.preventDefault(); return; }
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.current)) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
+    };
     window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
+    return () => { window.removeEventListener('keydown', handleEsc); if (previousFocus?.isConnected) previousFocus.focus(); };
   }, [onClose]);
 
   __useE(() => {
@@ -322,9 +273,9 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
       animation: 'jwFade 0.2s ease-out'
     }}>
-      <div style={{
+      <div ref={dialogRef} tabIndex={-1} className="app-detail" role="dialog" aria-modal="true" aria-labelledby="app-detail-title" style={{
         background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20,
-        width: '100%', maxWidth: 540, maxHeight: '90vh', overflowY: 'auto',
+        width: '100%', maxWidth: 760, maxHeight: '90vh', overflowY: 'auto',
         display: 'flex', flexDirection: 'column', gap: 20, padding: 24,
         position: 'relative', boxShadow: `0 20px 60px ${app.color}15`,
         animation: 'overlayPop 0.25s var(--ease-out)'
@@ -347,7 +298,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 20, margin: 0, color: 'var(--text)' }}>{app.name}</h2>
+                <h2 id="app-detail-title" style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 20, margin: 0, color: 'var(--text)' }}>{app.name}</h2>
                 <span style={{
                   fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 20,
                   textTransform: 'uppercase', letterSpacing: '0.06em',
@@ -357,7 +308,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
                 }}>{app.platform}</span>
               </div>
               <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
-                {isPWA ? (lang === 'cs' ? 'Webová PWA aplikace' : 'Web PWA App') : (lang === 'cs' ? 'Nativní Android aplikace' : 'Native Android App')}
+                {!isLiveApp(app) ? (lang === 'cs' ? 'Studie / koncept' : 'Study / concept') : isPWA ? (lang === 'cs' ? 'Webová aplikace' : 'Web app') : (lang === 'cs' ? 'Aplikace pro Android' : 'Android app')}
               </div>
             </div>
           </div>
@@ -368,48 +319,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
           }} onMouseEnter={(e) => e.target.style.color = 'var(--text)'} onMouseLeave={(e) => e.target.style.color = 'var(--muted)'}>✕</button>
         </div>
 
-        {app.screenshots && app.screenshots.length > 0 && (
-          <div style={{ position: 'relative', width: '100%' }}>
-            <div className="ss-carousel" style={{
-              display: 'flex', gap: 12, overflowX: 'auto',
-              scrollSnapType: 'x mandatory', webkitOverflowScrolling: 'touch',
-              borderRadius: 14, padding: '4px 0',
-              scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.1) transparent'
-            }}>
-              {app.screenshots.map((src, idx) => (
-                <div key={idx} style={{
-                  scrollSnapAlign: 'center', flex: '0 0 100%',
-                  display: 'flex', justifyContent: 'center', alignItems: 'center',
-                  background: '#070504', borderRadius: 10, overflow: 'hidden',
-                  border: '1px solid var(--border)', height: 260
-                }}>
-                  <img src={src} alt={`${app.name} screen ${idx + 1}`} style={{
-                    width: '100%', height: '100%', objectFit: 'contain'
-                  }} />
-                </div>
-              ))}
-            </div>
-            {app.screenshots.length > 1 && (
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 8 }}>
-                {app.screenshots.map((_, idx) => (
-                  <span key={idx} style={{
-                    width: 6, height: 6, borderRadius: '50%',
-                    background: app.color, opacity: 0.4
-                  }} />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div style={{ flex: 1 }}>
-          <p style={{
-            fontSize: 14, color: 'var(--text)', lineHeight: 1.6, margin: 0,
-            textWrap: 'pretty', whiteSpace: 'pre-line'
-          }}>
-            {lang === 'cs' ? app.cs : app.en}
-          </p>
-        </div>
+        <p style={{ fontSize:16, color:'var(--text)', lineHeight:1.65, margin:0 }}>{copy.intro}</p>
 
         <div style={{
           display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10,
@@ -482,6 +392,47 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
             </svg>
           </button>
         </div>
+        {screenshots && screenshots.length > 0 && (
+          <div style={{ position: 'relative', width: '100%' }}>
+            <div className="ss-carousel" aria-label={lang === 'cs' ? 'Ukázky aplikace' : 'App screenshots'} tabIndex={0} style={{
+              display: 'flex', gap: 12, overflowX: 'auto',
+              scrollSnapType: 'x mandatory', webkitOverflowScrolling: 'touch',
+              borderRadius: 14, padding: '4px 0',
+              scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.1) transparent'
+            }}>
+              {screenshots.map((src, idx) => (
+                <a key={idx} href={src} target="_blank" rel="noopener" className="app-gallery-slide"
+                  aria-label={`${lang === 'cs' ? 'Zvětšit ukázku' : 'Enlarge screenshot'} ${idx + 1}`} style={{
+                  scrollSnapAlign: 'center', flex: '0 0 100%',
+                  display: 'flex', justifyContent: 'center', alignItems: 'center',
+                  background: '#070504', borderRadius: 10, overflow: 'hidden',
+                  border: '1px solid var(--border)', height: 'clamp(240px, 48vh, 420px)'
+                }}>
+                  <img src={src} alt={`${app.name} — ${lang === 'cs' ? 'ukázka' : 'screenshot'} ${idx + 1}`} loading="lazy" style={{
+                    width: '100%', height: '100%', objectFit: 'contain'
+                  }} />
+                </a>
+              ))}
+            </div>
+            {screenshots.length > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 8 }}>
+                {screenshots.map((_, idx) => (
+                  <span key={idx} style={{
+                    width: 6, height: 6, borderRadius: '50%',
+                    background: app.color, opacity: 0.4
+                  }} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {copy.details && (
+          <details className="app-install-details">
+            <summary>{lang === 'cs' ? 'Instalace, požadavky a novinky' : 'Installation, requirements and updates'}</summary>
+            <p style={{ fontSize:15, lineHeight:1.7, whiteSpace:'pre-line', marginTop:16 }}>{copy.details}</p>
+          </details>
+        )}
       </div>
     </div>
   );
@@ -489,7 +440,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
 
 function AlbumCard({ album, lang, onPlay, onFilter, selected, nowPlaying }) {
   const [hov, setHov] = __useS(false);
-  const tracks = (window.TRACKS_DATA || []).filter(t => t.album === album.id);
+  const tracks = (window.TRACKS_DATA || []).filter(t => t.album === album.id && isPlayableTrack(t));
   const playAlbum = (e) => { e?.stopPropagation?.(); if (tracks.length) onPlay(tracks[0], tracks); };
   const showAlbum = (e) => { e?.stopPropagation?.(); onFilter && onFilter(album.id); };
   return (
@@ -631,9 +582,9 @@ function MusicSection({ lang, onPlay, currentTrack, playing }) {
   const [ref, vis] = useInView();
   const [albumFilter, setAlbumFilter] = __useS('all');
   const trackListRef = __useR(null);
-  const albums = window.ALBUMS || [];
-  const tracks = window.TRACKS_DATA || [];
-  const albumMap = __useM(() => Object.fromEntries(albums.map(a => [a.id, a])), []);
+  const albums = publishedAlbums();
+  const tracks = (window.TRACKS_DATA || []).filter(isPlayableTrack);
+  const albumMap = __useM(() => Object.fromEntries(albums.map(a => [a.id, a])), [albums]);
   const filteredTracks = __useM(
     () => albumFilter === 'all' ? tracks : tracks.filter(t => t.album === albumFilter),
     [albumFilter, tracks]
@@ -650,13 +601,13 @@ function MusicSection({ lang, onPlay, currentTrack, playing }) {
   return (
     <section id="music" style={{ padding:'110px 24px' }}>
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:1200, margin:'0 auto' }}>
-        <SectionLabel color="a2" num="02">{tx(lang,'music_title')}</SectionLabel>
+        <SectionLabel color="a2" num="01">{tx(lang,'music_title')}</SectionLabel>
         <p style={{ color:'var(--muted)', fontSize:16, marginBottom:52 }}>
           {tx(lang,'music_sub')}
         </p>
 
-        <SubLabel>{tx(lang,'music_albums')}</SubLabel>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(210px,1fr))', gap:18, marginBottom:64 }}>
+        {albums.length > 0 && <SubLabel>{tx(lang,'music_albums')}</SubLabel>}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,260px),1fr))', gap:18, marginBottom:64 }}>
           {albums.map(a => (
             <AlbumCard key={a.id} album={a} lang={lang} onPlay={onPlay} onFilter={filterByAlbum} selected={albumFilter === a.id} nowPlaying={!!(playing && currentTrack && currentTrack.album === a.id)} />
           ))}
@@ -697,6 +648,7 @@ function MusicSection({ lang, onPlay, currentTrack, playing }) {
           </div>
 
           <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
+            {tracks.length === 0 && <p style={{ color:'var(--muted)', lineHeight:1.6 }}>{lang === 'cs' ? 'Skladby teď nejsou dostupné. Zkus se sem vrátit s připojením k internetu.' : 'Tracks are currently unavailable. Please return with an internet connection.'}</p>}
             {filteredTracks.map((tr, i) => (
               <TrackRow key={tr.id} track={tr} album={albumMap[tr.album]} idx={i} active={currentTrack?.id === tr.id} playing={playing} onPlay={(t) => onPlay(t, filteredTracks)} />
             ))}

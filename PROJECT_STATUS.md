@@ -1,5 +1,17 @@
 # JendaWeb – Project Status
-*Naposled aktualizováno: 06. 09. 2026*
+
+## Úpravy portfolia — 08. 09. 2026 (jw-v98)
+
+- Mobilní navigace zůstává viditelná; úvod se vejde i na šířku 320 px.
+- Katalog počítá dostupné aplikace. Fyzika pastelkou, GeoReminder a EngiTab tvoří úvodní výběr; další aplikace a studie/koncepty jsou samostatně rozbalitelné. Hledání zahrnuje obě skupiny. Srovnání nezobrazuje nedostupné koncepty a netvrdí neověřenou popularitu.
+- Alba, seznamy skladeb, vyhledávání i čítače vycházejí ze skutečně přehratelných skladeb. Prázdné záznamy zůstávají v CMS, automaticky se zobrazí po doplnění audia.
+- Detail aplikace má kratší úvod a dříve dostupné stažení. Úplné požadavky, instalační pokyny a novinky zůstávají pod rozbalením. Fyzika začíná skutečnou ukázkou vodní mise; obrázky lze otevřít v plné velikosti. Dialog drží fokus a vrací jej po zavření.
+- Mobilní přehrávač začíná v malé podobě s možností rozbalit všechny dosavadní ovládací prvky.
+- Osobní odstavec česky i anglicky vychází z Jendova zadání; meta popisky již neobsahují zastarávající pevné počty.
+- `build_jsx.py` pracuje relativně ke své složce a při chybějícím zdroji skončí chybou. Před publikací spustit `python3 build_jsx.py`; měnit souhlasně verzi v `index.html` a `sw.js`.
+- Ověřeno lokálně: kompilace celého JSX; dostupnost alb/aplikací a zachování instalačních pokynů; prohlížeč se živým katalogem, desktop a šířky 390/320 px; spuštění/pauza hudby, rozbalení ovládání, detail aplikace, hledání RT Asistenta a konceptu MeditApp, přepnutí CZ/EN. Bez chyb JavaScriptu. Formuláře ani instalace APK nebyly odesílány/spouštěny.
+
+*Naposled aktualizováno: 08. 09. 2026*
 
 ## 🎯 Co to je
 Osobní portfolio web „Jenda — vibe-coder & AI hudebník". Prezentuje appky + AI hudbu, vč. plnohodnotného hudebního přehrávače.

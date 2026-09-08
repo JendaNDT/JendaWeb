@@ -43,11 +43,15 @@ const tx = (lang, key) => {
   if (custom !== undefined && custom !== null) return custom;
   const fallbacks = {
     cs: {
+      about_title: 'O mně',
+      about_text: 'Jsem Jenda a rád tvořím s AI. Vyvíjím aplikace pro počítače, telefony i web a experimentuji s vlastní hudbou. Tady sdílím, co z toho vzniká.',
       apps_live_title: 'Spustitelné aplikace & PWA',
       apps_studies_title: 'Případové studie & Koncepty',
       apps_read_study: 'Číst studii'
     },
     en: {
+      about_title: 'About me',
+      about_text: 'I’m Jenda, and I enjoy creating with AI. I build apps for computers, phones and the web, and experiment with my own music. This is where I share what I make.',
       apps_live_title: 'Runnable Apps & PWAs',
       apps_studies_title: 'Case Studies & Concepts',
       apps_read_study: 'Read study'
@@ -56,6 +60,18 @@ const tx = (lang, key) => {
   return fallbacks[lang]?.[key] ?? key;
 };
 const slugify = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+// Presentation uses the same availability rules for cards, filters and counters.
+const isLiveApp = app => !!(app.link && app.link.trim() && app.link.trim() !== '#');
+const isPlayableTrack = track => !!(track.audioUrl && track.audioUrl.trim() && track.audioUrl.trim() !== '#');
+const publishedAlbums = () => (window.ALBUMS || []).filter(album =>
+  (window.TRACKS_DATA || []).some(track => track.album === album.id && isPlayableTrack(track)));
+const appCopy = (app, lang) => {
+  const text = String((lang === 'cs' ? app.cs : app.en) || app.cs || app.en || '').trim();
+  const parts = text.split(/\n\s*\n|\s+(?=(?:Verze|Version) \d)/).filter(Boolean);
+  return { intro: parts[0] || '', details: parts.slice(1).join('\n\n') };
+};
+const featuredAppSlugs = ['fyzika-pastelkou', 'georeminder', 'engitab'];
 
 
 // ── Storage keys ────────────────────────────────────────────────────────
@@ -363,6 +379,7 @@ function SectionDivider() {
 
 Object.assign(window, {
   THEMES, applyTheme, resolveMode, applyMode, tx,
+  isLiveApp, isPlayableTrack, publishedAlbums, appCopy, featuredAppSlugs,
   PLAYER_STORAGE_KEY, VOL_STORAGE_KEY,
   LIKES_TRACKS_KEY, LIKES_APPS_KEY,
   getLikedItems, isItemLiked, toggleLikedItem, apiToggleLike,

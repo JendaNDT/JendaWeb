@@ -343,3 +343,13 @@ window.STRINGS = {
     footer:'Made with vibecoding & Suno AI',
   }
 };
+
+// Personal introduction; site_config.strings may override these alongside other copy.
+Object.assign(window.STRINGS.cs, {
+  about_title: 'O mně',
+  about_text: 'Jsem Jenda a rád tvořím s AI. Vyvíjím aplikace pro počítače, telefony i web a experimentuji s vlastní hudbou. Tady sdílím, co z toho vzniká.'
+});
+Object.assign(window.STRINGS.en, {
+  about_title: 'About me',
+  about_text: 'I’m Jenda, and I enjoy creating with AI. I build apps for computers, phones and the web, and experiment with my own music. This is where I share what I make.'
+});
