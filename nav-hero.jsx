@@ -258,7 +258,6 @@ function Nav({ lang, setLang, mode, setMode }) {
     logo: {
       fontFamily:"'Syne', sans-serif", fontWeight:800, fontSize:20,
       letterSpacing:'-0.04em',
-      backgroundImage:'linear-gradient(135deg, var(--brand-a1), var(--brand-a2))',
       WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
     },
     link: { fontSize:15, fontWeight:500, color:'var(--muted)', transition:'color 0.2s', padding:'4px 0' },
@@ -344,7 +343,6 @@ function Hero({ lang, onPlay }) {
           fontSize:'clamp(48px, 16vw, 160px)',
           fontWeight:800, lineHeight:0.88,
           letterSpacing:'-0.05em',
-          backgroundImage:'linear-gradient(135deg, var(--text) 20%, var(--a1) 55%, var(--a2) 85%)',
           WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
           marginBottom:32,
         }}>
