@@ -168,6 +168,9 @@ function ExpandMode({
   handlePointerDown, handlePointerMove, handlePointerUp, isDraggingRef,
 }) {
   const dialogRef = __useR_xp(null);
+  // Remember the entry path for this mount: removing the transition class must
+  // not restart expandIn after the snapshot hands over to the live player.
+  const [sharedEntry] = __useS_xp(() => document.documentElement.classList.contains('app-detail-transition'));
   __useE_xp(() => {
     const previousFocus = document.activeElement;
     dialogRef.current?.focus({ preventScroll:true });
@@ -339,7 +342,7 @@ function ExpandMode({
       style={{
         position:'fixed', inset:0, zIndex:350,
         background:'#000',
-        animation:'expandIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)',
+        animation:sharedEntry ? 'none' : 'expandIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)',
         overflow:'hidden',
       }}>
       {/* Blurred art background */}

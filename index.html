@@ -740,7 +740,8 @@
     .app-detail { view-transition-name:app-detail-panel; }
     #jw-expand-cover { view-transition-name:album-player-cover; }
     html.app-detail-transition .app-detail,html.app-detail-transition .modal-backdrop { animation:none !important; }
-    html.app-detail-transition [data-player-dialog],html.app-detail-transition #jw-expand-cover { animation:none !important; }
+    html.app-detail-transition [data-player-dialog] { animation:none !important; }
+    html.app-detail-transition #jw-expand-cover { animation-play-state:paused !important; }
     html.app-detail-transition::view-transition-group(root),
     html.app-detail-transition::view-transition-new(root) { animation:none; }
     html.app-detail-transition::view-transition-old(root) { display:none; }

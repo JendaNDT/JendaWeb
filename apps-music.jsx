@@ -190,6 +190,8 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
   const [likeCount, setLikeCount] = __useS(app.likes || 0);
   const [downloading, setDownloading] = __useS(false);
   const dialogRef = __useR(null);
+  // The shared transition replaces entrance animations for this entire mount.
+  const [sharedEntry] = __useS(() => document.documentElement.classList.contains('app-detail-transition'));
 
   const handleLike = (e) => {
     e.stopPropagation();
@@ -290,14 +292,14 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
       position: 'fixed', inset: 0, zIndex: 300,
       background: 'rgba(5, 3, 2, 0.75)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-      animation: 'jwFade 0.2s ease-out'
+      animation: sharedEntry ? 'none' : 'jwFade 0.2s ease-out'
     }}>
       <div ref={dialogRef} tabIndex={-1} className="app-detail" role="dialog" aria-modal="true" aria-labelledby="app-detail-title" style={{
         background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20,
         width: '100%', maxWidth: 760, maxHeight: '90vh', overflowY: 'auto',
         display: 'flex', flexDirection: 'column', gap: 20, padding: 24,
         position: 'relative', boxShadow: `0 20px 60px ${app.color}15`,
-        animation: 'overlayPop 0.25s var(--ease-out)'
+        animation: sharedEntry ? 'none' : 'overlayPop 0.25s var(--ease-out)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: 14 }}>
           <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
