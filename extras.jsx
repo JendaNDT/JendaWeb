@@ -23,7 +23,7 @@ function NewsletterSection({ lang }) {
 
   return (
     <section style={{ padding:'80px 24px', background:'transparent' }}>
-      <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{
+      <div ref={ref} className={`panel-sheen fade-up${vis?' in-view':''}`} onPointerMove={moveSurfaceLight} style={{
         maxWidth:680, margin:'0 auto',
         padding:'44px 36px',
         border:'1px solid var(--border)',
@@ -119,7 +119,7 @@ function StatsSection({ lang }) {
           ].map((m, i) => {
             const [r, v] = useCountUp(m.num || 0);
             return (
-              <div key={i} ref={r} style={{
+              <div key={i} ref={r} className="panel-sheen" onPointerMove={moveSurfaceLight} style={{
                 padding:'24px 22px',
                 background:'var(--card)',
                 border:'1px solid var(--border)',
@@ -138,7 +138,7 @@ function StatsSection({ lang }) {
         <p style={{ fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', color:'var(--muted)', marginBottom:14, opacity:0.7 }}>
           {tx(lang,'stats_recent')}
         </p>
-        <div style={{
+        <div className="panel-sheen" onPointerMove={moveSurfaceLight} style={{
           background:'var(--card)',
           border:'1px solid var(--border)',
           borderRadius:'var(--r)',
@@ -192,7 +192,8 @@ function ComparisonSection({ lang }) {
           {lang === 'cs' ? 'Porovnej dostupné aplikace' : 'Compare available apps'}
         </p>
 
-        <div style={{ overflowX:'auto', border:'1px solid var(--border)', borderRadius:'var(--r)', background:'var(--card)' }}>
+        <div className="panel-sheen" onPointerMove={moveSurfaceLight} style={{ overflow:'hidden', border:'1px solid var(--border)', borderRadius:'var(--r)', background:'var(--card)' }}>
+          <div style={{ overflowX:'auto' }}>
           <table style={{ width:'100%', borderCollapse:'collapse', minWidth:520 }}>
             <thead>
               <tr>
@@ -236,6 +237,7 @@ function ComparisonSection({ lang }) {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </section>

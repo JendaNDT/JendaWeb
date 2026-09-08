@@ -12,21 +12,14 @@ const APP_VISUALS = {
 };
 
 function AppCard({ app, lang, mode = 'live', onOpen }) {
-  const moveLight = (e) => {
-    if (e.pointerType === 'touch' || !window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return;
-    const card = e.currentTarget;
-    const rect = card.getBoundingClientRect();
-    card.style.setProperty('--spot-x', `${e.clientX - rect.left}px`);
-    card.style.setProperty('--spot-y', `${e.clientY - rect.top}px`);
-  };
   const visual = mode === 'live' ? (APP_VISUALS[slugify(app.name)] || {
     src: app.screenshots?.[0] || app.icon_url,
     kind: app.screenshots?.[0] ? 'phone' : 'icon',
     cs: app.name, en: app.name,
   }) : null;
   return (
-    <a href={'#app=' + slugify(app.name)} className={`app-card${visual ? ' app-showcase' : ''}`}
-       style={{ '--app-accent': app.color }} onPointerMove={visual ? moveLight : undefined}
+    <a href={'#app=' + slugify(app.name)} className={`app-card app-sheen ${visual ? 'app-showcase' : 'app-study'}`}
+       style={{ '--app-accent': app.color }} onPointerMove={moveSurfaceLight}
        onClick={e => {
          if (!onOpen || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
          e.preventDefault();
@@ -189,6 +182,8 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
   const [liked, setLiked] = __useS(() => window.isItemLiked(window.LIKES_APPS_KEY, app.id));
   const [likeCount, setLikeCount] = __useS(app.likes || 0);
   const [downloading, setDownloading] = __useS(false);
+  const [galleryIndex, setGalleryIndex] = __useS(null);
+  const closeGallery = __useC(() => setGalleryIndex(null), []);
   const dialogRef = __useR(null);
   // The shared transition replaces entrance animations for this entire mount.
   const [sharedEntry] = __useS(() => document.documentElement.classList.contains('app-detail-transition'));
@@ -209,6 +204,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
     const previousFocus = document.activeElement;
     dialogRef.current?.focus({ preventScroll:true });
     const handleEsc = (e) => {
+      if (e.defaultPrevented || document.querySelector('[data-gallery-dialog]')) return;
       if (e.key === 'Escape') { e.preventDefault(); onClose(); return; }
       if (e.key !== 'Tab') return;
       const controls = [...(dialogRef.current?.querySelectorAll('button, a[href], summary, [tabindex="0"]') || [])]
@@ -288,21 +284,21 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
   };
 
   return (
-    <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }} style={{
+    <><div className="modal-backdrop" inert={galleryIndex !== null ? '' : undefined} aria-hidden={galleryIndex !== null ? true : undefined} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }} style={{
       position: 'fixed', inset: 0, zIndex: 300,
       background: 'rgba(5, 3, 2, 0.75)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
       animation: sharedEntry ? 'none' : 'jwFade 0.2s ease-out'
     }}>
-      <div ref={dialogRef} tabIndex={-1} className="app-detail" role="dialog" aria-modal="true" aria-labelledby="app-detail-title" style={{
+      <div ref={dialogRef} tabIndex={-1} className="app-detail panel-sheen" onPointerMove={moveSurfaceLight} role="dialog" aria-modal="true" aria-labelledby="app-detail-title" style={{
         background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20,
-        width: '100%', maxWidth: 760, maxHeight: '90vh', overflowY: 'auto',
-        display: 'flex', flexDirection: 'column', gap: 20, padding: 24,
+        width: '100%', maxWidth: 760, maxHeight: '90vh', overflow: 'hidden',
         position: 'relative', boxShadow: `0 20px 60px ${app.color}15`,
         animation: sharedEntry ? 'none' : 'overlayPop 0.25s var(--ease-out)'
       }}>
+        <div className="app-detail-scroll" style={{ maxHeight:'calc(90vh - 2px)', overflowY:'auto', display:'flex', flexDirection:'column', gap:20, padding:24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: 14 }}>
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center', minWidth:0 }}>
             <div style={{
               width: 56, height: 56, borderRadius: 14, flexShrink: 0,
               background: `linear-gradient(135deg, ${app.color}28, ${app.color}50)`,
@@ -317,9 +313,9 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
                 app.name[0]
               )}
             </div>
-            <div>
+            <div style={{ minWidth:0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <h2 id="app-detail-title" style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 20, margin: 0, color: 'var(--text)' }}>{app.name}</h2>
+                <h2 id="app-detail-title" style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 20, margin: 0, color: 'var(--text)', overflowWrap:'anywhere' }}>{app.name}</h2>
                 <span style={{
                   fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 20,
                   textTransform: 'uppercase', letterSpacing: '0.06em',
@@ -334,7 +330,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
             </div>
           </div>
           <button onClick={onClose} aria-label={lang === 'cs' ? 'Zavřít' : 'Close'} style={{
-            background: 'none', border: 'none', color: 'var(--muted)', fontSize: 20,
+            background: 'none', border: 'none', color: 'var(--muted)', fontSize: 20, flexShrink:0,
             cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'color 0.2s', outline: 'none'
           }} onMouseEnter={(e) => e.target.style.color = 'var(--text)'} onMouseLeave={(e) => e.target.style.color = 'var(--muted)'}>✕</button>
@@ -422,7 +418,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
               scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.1) transparent'
             }}>
               {screenshots.map((src, idx) => (
-                <a key={idx} href={src} target="_blank" rel="noopener" className="app-gallery-slide"
+                <button type="button" key={idx} onClick={() => setGalleryIndex(idx)} className="app-gallery-slide"
                   aria-label={`${lang === 'cs' ? 'Zvětšit ukázku' : 'Enlarge screenshot'} ${idx + 1}`} style={{
                   scrollSnapAlign: 'center', flex: '0 0 100%',
                   display: 'flex', justifyContent: 'center', alignItems: 'center',
@@ -432,7 +428,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
                   <img src={src} alt={`${app.name} — ${lang === 'cs' ? 'ukázka' : 'screenshot'} ${idx + 1}`} loading="lazy" style={{
                     width: '100%', height: '100%', objectFit: 'contain'
                   }} />
-                </a>
+                </button>
               ))}
             </div>
             {screenshots.length > 1 && (
@@ -454,8 +450,10 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
             <p style={{ fontSize:15, lineHeight:1.7, whiteSpace:'pre-line', marginTop:16 }}>{copy.details}</p>
           </details>
         )}
+        </div>
       </div>
     </div>
+    {galleryIndex !== null && <ScreenshotGallery images={screenshots} initialIndex={galleryIndex} title={app.name} lang={lang} onClose={closeGallery} />}</>
   );
 }
 
@@ -597,7 +595,7 @@ function MusicSection({ lang, onPlay, onOpenAlbum, currentTrack, playing }) {
           </div>
         </div>
 
-        <div id="tracks" className="studio-track-list">
+        <div id="tracks" className="studio-track-list panel-sheen" onPointerMove={moveSurfaceLight}>
           <div ref={tracksRef} className={`fade-up${tracksVis?' in-view':''}`}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18, gap:12, flexWrap:'wrap' }}>
               <SubLabel>{tx(lang,'music_tracks')}</SubLabel>

@@ -6,6 +6,7 @@ PROJECT_DIR = Path(__file__).resolve().parent
 jsx_files = [
     'tweaks-panel.jsx',
     'shared.jsx',
+    'gallery.jsx',
     'nav-hero.jsx',
     'apps-music.jsx',
     'player-contact.jsx',

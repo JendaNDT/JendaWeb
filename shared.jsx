@@ -304,6 +304,13 @@ function trackArt(track, album) {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
+function moveSurfaceLight(e) {
+  if (e.pointerType === 'touch' || !window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return;
+  const surface = e.currentTarget, rect = surface.getBoundingClientRect();
+  surface.style.setProperty('--spot-x', `${e.clientX-rect.left}px`);
+  surface.style.setProperty('--spot-y', `${e.clientY-rect.top}px`);
+}
+
 function parseDur(s) {
   if (!s) return 0;
   const [m, x] = s.split(':').map(Number);

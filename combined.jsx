@@ -853,6 +853,13 @@ function trackArt(track, album) {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
+function moveSurfaceLight(e) {
+  if (e.pointerType === 'touch' || !window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return;
+  const surface = e.currentTarget, rect = surface.getBoundingClientRect();
+  surface.style.setProperty('--spot-x', `${e.clientX-rect.left}px`);
+  surface.style.setProperty('--spot-y', `${e.clientY-rect.top}px`);
+}
+
 function parseDur(s) {
   if (!s) return 0;
   const [m, x] = s.split(':').map(Number);
@@ -967,6 +974,140 @@ Object.assign(window, {
   EqBars, seededBars, fmtTime, parseDur, trackArt, albumArt, parseLRC,
   Btn, SectionLabel, SubLabel, SectionDivider, useCountUp,
 });
+
+// ==========================================
+// FILE: gallery.jsx
+// ==========================================
+// Fullscreen app screenshots with keyboard, swipe, pinch and bounded panning.
+function ScreenshotGallery({ images, initialIndex, title, lang, onClose }) {
+  const [index, setIndex] = React.useState(initialIndex);
+  const [view, setView] = React.useState({ scale:1, x:0, y:0 });
+  const [interacting, setInteracting] = React.useState(false);
+  const [failed, setFailed] = React.useState(false);
+  const dialog = React.useRef(null), stage = React.useRef(null), picture = React.useRef(null);
+  const points = React.useRef(new Map()), gesture = React.useRef(null), viewRef = React.useRef(view);
+  const actions = React.useRef(null);
+  const cs = lang === 'cs';
+  const constrain = React.useCallback(next => {
+    const scale = Math.max(1, Math.min(4, next.scale));
+    const xMax = Math.max(0, ((picture.current?.offsetWidth || 0) * scale - (stage.current?.clientWidth || 0)) / 2);
+    const yMax = Math.max(0, ((picture.current?.offsetHeight || 0) * scale - (stage.current?.clientHeight || 0)) / 2);
+    const bounded = { scale, x:Math.max(-xMax, Math.min(xMax, next.x)), y:Math.max(-yMax, Math.min(yMax, next.y)) };
+    viewRef.current = bounded; setView(bounded);
+  }, []);
+  const go = delta => {
+    if (images.length < 2) return;
+    setIndex(i => (i + delta + images.length) % images.length);
+    setFailed(false); constrain({ scale:1, x:0, y:0 });
+  };
+  const zoom = scale => constrain({ ...viewRef.current, scale });
+  actions.current = { go, zoom };
+
+  React.useEffect(() => {
+    const previous = document.activeElement;
+    dialog.current?.focus({ preventScroll:true });
+    const onKey = e => {
+      // Consume keys before player/global shortcuts behind the gallery see them.
+      e.stopPropagation();
+      if (e.key === 'Escape') { e.preventDefault(); onClose(); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); actions.current.go(1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); actions.current.go(-1); }
+      else if (e.key === '+' || e.key === '=') { e.preventDefault(); actions.current.zoom(viewRef.current.scale + .5); }
+      else if (e.key === '-') { e.preventDefault(); actions.current.zoom(viewRef.current.scale - .5); }
+      else if (e.key === '0') { e.preventDefault(); actions.current.zoom(1); }
+      else if (e.key === 'Tab') {
+        const controls = [...dialog.current.querySelectorAll('button:not(:disabled), a[href]')];
+        const first = controls[0], last = controls[controls.length - 1];
+        if (e.shiftKey && (document.activeElement === first || document.activeElement === dialog.current)) {
+          e.preventDefault(); last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+      }
+    };
+    window.addEventListener('keydown', onKey, true);
+    const resize = () => constrain({ scale:1, x:0, y:0 });
+    window.addEventListener('resize', resize);
+    return () => {
+      window.removeEventListener('keydown', onKey, true);
+      window.removeEventListener('resize', resize);
+      previous?.isConnected && previous.focus({ preventScroll:true });
+    };
+  }, [onClose, constrain]);
+  React.useEffect(() => {
+    for (const delta of [-1, 1]) { const img = new Image(); img.src = images[(index + delta + images.length) % images.length]; }
+  }, [index, images]);
+
+  const begin = () => {
+    const p = [...points.current.values()];
+    if (!p.length) { gesture.current = null; return; }
+    gesture.current = { start:p[0], view:{ ...viewRef.current }, multi:p.length > 1,
+      distance:p.length > 1 ? Math.hypot(p[1].x-p[0].x, p[1].y-p[0].y) : 0,
+      center:p.length > 1 ? { x:(p[0].x+p[1].x)/2, y:(p[0].y+p[1].y)/2 } : p[0] };
+  };
+  const down = e => {
+    if (e.button !== 0 && e.pointerType !== 'touch') return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    points.current.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    setInteracting(true); begin();
+  };
+  const move = e => {
+    if (!points.current.has(e.pointerId) || !gesture.current) return;
+    points.current.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    const p = [...points.current.values()], g = gesture.current;
+    if (p.length > 1 && g.distance > 0) {
+      const scale = Math.max(1, Math.min(4, g.view.scale * Math.hypot(p[1].x-p[0].x, p[1].y-p[0].y) / g.distance));
+      const rect = stage.current.getBoundingClientRect();
+      const anchor = { x:g.center.x-rect.left-rect.width/2, y:g.center.y-rect.top-rect.height/2 }, ratio = scale/g.view.scale;
+      constrain({ scale, x:g.view.x*ratio + anchor.x*(1-ratio) + (p[0].x+p[1].x)/2-g.center.x,
+        y:g.view.y*ratio + anchor.y*(1-ratio) + (p[0].y+p[1].y)/2-g.center.y });
+    } else if (g.view.scale > 1) constrain({ ...g.view, x:g.view.x+p[0].x-g.start.x, y:g.view.y+p[0].y-g.start.y });
+  };
+  const up = e => {
+    const g = gesture.current;
+    if (!points.current.has(e.pointerId)) return;
+    if (e.type === 'pointerup' && points.current.size === 1 && g && !g.multi && g.view.scale === 1) {
+      const dx=e.clientX-g.start.x, dy=e.clientY-g.start.y;
+      if (Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.25) go(dx<0 ? 1 : -1);
+    }
+    points.current.delete(e.pointerId);
+    e.currentTarget.hasPointerCapture(e.pointerId) && e.currentTarget.releasePointerCapture(e.pointerId);
+    if (!points.current.size) { setInteracting(false); gesture.current=null; }
+    else { begin(); gesture.current.multi=true; }
+  };
+
+  return ReactDOM.createPortal(
+    <div ref={dialog} className="screenshot-gallery" role="dialog" aria-modal="true" aria-labelledby="gallery-title" tabIndex={-1} data-gallery-dialog>
+      <header className="gallery-toolbar">
+        <div className="gallery-heading"><span>{cs ? 'UKÁZKY APLIKACE' : 'APP SCREENSHOTS'}</span><h2 id="gallery-title">{title}</h2></div>
+        <div className="gallery-zoom">
+          <button type="button" disabled={view.scale<=1} onClick={() => zoom(view.scale-.5)} aria-label={cs ? 'Oddálit' : 'Zoom out'}>−</button>
+          <button type="button" onClick={() => zoom(1)} aria-label={cs ? 'Obnovit velikost' : 'Reset zoom'}>{Math.round(view.scale*100)} %</button>
+          <button type="button" disabled={view.scale>=4} onClick={() => zoom(view.scale+.5)} aria-label={cs ? 'Přiblížit' : 'Zoom in'}>+</button>
+        </div>
+        <button type="button" className="gallery-close" onClick={onClose} aria-label={cs ? 'Zavřít galerii' : 'Close gallery'}>×</button>
+      </header>
+      <div className="gallery-viewer">
+        <div ref={stage} className={`gallery-stage${interacting ? ' is-interacting' : ''}${view.scale>1 ? ' is-zoomed' : ''}`}
+          onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onLostPointerCapture={up}
+          onDoubleClick={() => zoom(viewRef.current.scale>1 ? 1 : 2)}>
+          {failed ? <p>{cs ? 'Náhled se nepodařilo načíst.' : 'The screenshot could not be loaded.'}</p>
+            : <img key={index} ref={picture} src={images[index]} alt={`${title} — ${cs ? 'ukázka' : 'screenshot'} ${index+1}`}
+              draggable={false} onError={() => setFailed(true)} style={{ transform:`translate(${view.x}px, ${view.y}px) scale(${view.scale})` }} />}
+        </div>
+        {images.length>1 && <>
+          <button type="button" className="gallery-arrow gallery-prev" onClick={() => go(-1)} aria-label={cs ? 'Předchozí ukázka' : 'Previous screenshot'}>‹</button>
+          <button type="button" className="gallery-arrow gallery-next" onClick={() => go(1)} aria-label={cs ? 'Další ukázka' : 'Next screenshot'}>›</button>
+        </>}
+      </div>
+      <footer className="gallery-footer">
+        <div className="gallery-caption"><span aria-live="polite" aria-atomic="true">{index+1} / {images.length}</span><span className="gallery-hint">{cs ? 'Přejetím listuj · Přibliž tlačítkem nebo dvěma prsty' : 'Swipe to browse · Zoom with buttons or two fingers'}</span><a href={images[index]} target="_blank" rel="noopener">{cs ? 'Originál ↗' : 'Original ↗'}</a></div>
+        {images.length>1 && <div className="gallery-thumbnails">
+          {images.map((src,i) => <button type="button" key={src+i} aria-label={`${cs ? 'Ukázka' : 'Screenshot'} ${i+1}`} aria-current={i===index ? 'true' : undefined}
+            onClick={() => { setIndex(i); setFailed(false); constrain({ scale:1,x:0,y:0 }); }}><img src={src} alt="" loading="lazy" /></button>)}
+        </div>}
+      </footer>
+    </div>, document.body
+  );
+}
 
 // ==========================================
 // FILE: nav-hero.jsx
@@ -1403,21 +1544,14 @@ const APP_VISUALS = {
 };
 
 function AppCard({ app, lang, mode = 'live', onOpen }) {
-  const moveLight = (e) => {
-    if (e.pointerType === 'touch' || !window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return;
-    const card = e.currentTarget;
-    const rect = card.getBoundingClientRect();
-    card.style.setProperty('--spot-x', `${e.clientX - rect.left}px`);
-    card.style.setProperty('--spot-y', `${e.clientY - rect.top}px`);
-  };
   const visual = mode === 'live' ? (APP_VISUALS[slugify(app.name)] || {
     src: app.screenshots?.[0] || app.icon_url,
     kind: app.screenshots?.[0] ? 'phone' : 'icon',
     cs: app.name, en: app.name,
   }) : null;
   return (
-    <a href={'#app=' + slugify(app.name)} className={`app-card${visual ? ' app-showcase' : ''}`}
-       style={{ '--app-accent': app.color }} onPointerMove={visual ? moveLight : undefined}
+    <a href={'#app=' + slugify(app.name)} className={`app-card app-sheen ${visual ? 'app-showcase' : 'app-study'}`}
+       style={{ '--app-accent': app.color }} onPointerMove={moveSurfaceLight}
        onClick={e => {
          if (!onOpen || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
          e.preventDefault();
@@ -1580,6 +1714,8 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
   const [liked, setLiked] = __useS(() => window.isItemLiked(window.LIKES_APPS_KEY, app.id));
   const [likeCount, setLikeCount] = __useS(app.likes || 0);
   const [downloading, setDownloading] = __useS(false);
+  const [galleryIndex, setGalleryIndex] = __useS(null);
+  const closeGallery = __useC(() => setGalleryIndex(null), []);
   const dialogRef = __useR(null);
   // The shared transition replaces entrance animations for this entire mount.
   const [sharedEntry] = __useS(() => document.documentElement.classList.contains('app-detail-transition'));
@@ -1600,6 +1736,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
     const previousFocus = document.activeElement;
     dialogRef.current?.focus({ preventScroll:true });
     const handleEsc = (e) => {
+      if (e.defaultPrevented || document.querySelector('[data-gallery-dialog]')) return;
       if (e.key === 'Escape') { e.preventDefault(); onClose(); return; }
       if (e.key !== 'Tab') return;
       const controls = [...(dialogRef.current?.querySelectorAll('button, a[href], summary, [tabindex="0"]') || [])]
@@ -1679,21 +1816,21 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
   };
 
   return (
-    <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }} style={{
+    <><div className="modal-backdrop" inert={galleryIndex !== null ? '' : undefined} aria-hidden={galleryIndex !== null ? true : undefined} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }} style={{
       position: 'fixed', inset: 0, zIndex: 300,
       background: 'rgba(5, 3, 2, 0.75)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
       animation: sharedEntry ? 'none' : 'jwFade 0.2s ease-out'
     }}>
-      <div ref={dialogRef} tabIndex={-1} className="app-detail" role="dialog" aria-modal="true" aria-labelledby="app-detail-title" style={{
+      <div ref={dialogRef} tabIndex={-1} className="app-detail panel-sheen" onPointerMove={moveSurfaceLight} role="dialog" aria-modal="true" aria-labelledby="app-detail-title" style={{
         background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20,
-        width: '100%', maxWidth: 760, maxHeight: '90vh', overflowY: 'auto',
-        display: 'flex', flexDirection: 'column', gap: 20, padding: 24,
+        width: '100%', maxWidth: 760, maxHeight: '90vh', overflow: 'hidden',
         position: 'relative', boxShadow: `0 20px 60px ${app.color}15`,
         animation: sharedEntry ? 'none' : 'overlayPop 0.25s var(--ease-out)'
       }}>
+        <div className="app-detail-scroll" style={{ maxHeight:'calc(90vh - 2px)', overflowY:'auto', display:'flex', flexDirection:'column', gap:20, padding:24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: 14 }}>
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center', minWidth:0 }}>
             <div style={{
               width: 56, height: 56, borderRadius: 14, flexShrink: 0,
               background: `linear-gradient(135deg, ${app.color}28, ${app.color}50)`,
@@ -1708,9 +1845,9 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
                 app.name[0]
               )}
             </div>
-            <div>
+            <div style={{ minWidth:0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <h2 id="app-detail-title" style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 20, margin: 0, color: 'var(--text)' }}>{app.name}</h2>
+                <h2 id="app-detail-title" style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 20, margin: 0, color: 'var(--text)', overflowWrap:'anywhere' }}>{app.name}</h2>
                 <span style={{
                   fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 20,
                   textTransform: 'uppercase', letterSpacing: '0.06em',
@@ -1725,7 +1862,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
             </div>
           </div>
           <button onClick={onClose} aria-label={lang === 'cs' ? 'Zavřít' : 'Close'} style={{
-            background: 'none', border: 'none', color: 'var(--muted)', fontSize: 20,
+            background: 'none', border: 'none', color: 'var(--muted)', fontSize: 20, flexShrink:0,
             cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'color 0.2s', outline: 'none'
           }} onMouseEnter={(e) => e.target.style.color = 'var(--text)'} onMouseLeave={(e) => e.target.style.color = 'var(--muted)'}>✕</button>
@@ -1813,7 +1950,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
               scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.1) transparent'
             }}>
               {screenshots.map((src, idx) => (
-                <a key={idx} href={src} target="_blank" rel="noopener" className="app-gallery-slide"
+                <button type="button" key={idx} onClick={() => setGalleryIndex(idx)} className="app-gallery-slide"
                   aria-label={`${lang === 'cs' ? 'Zvětšit ukázku' : 'Enlarge screenshot'} ${idx + 1}`} style={{
                   scrollSnapAlign: 'center', flex: '0 0 100%',
                   display: 'flex', justifyContent: 'center', alignItems: 'center',
@@ -1823,7 +1960,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
                   <img src={src} alt={`${app.name} — ${lang === 'cs' ? 'ukázka' : 'screenshot'} ${idx + 1}`} loading="lazy" style={{
                     width: '100%', height: '100%', objectFit: 'contain'
                   }} />
-                </a>
+                </button>
               ))}
             </div>
             {screenshots.length > 1 && (
@@ -1845,8 +1982,10 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
             <p style={{ fontSize:15, lineHeight:1.7, whiteSpace:'pre-line', marginTop:16 }}>{copy.details}</p>
           </details>
         )}
+        </div>
       </div>
     </div>
+    {galleryIndex !== null && <ScreenshotGallery images={screenshots} initialIndex={galleryIndex} title={app.name} lang={lang} onClose={closeGallery} />}</>
   );
 }
 
@@ -1988,7 +2127,7 @@ function MusicSection({ lang, onPlay, onOpenAlbum, currentTrack, playing }) {
           </div>
         </div>
 
-        <div id="tracks" className="studio-track-list">
+        <div id="tracks" className="studio-track-list panel-sheen" onPointerMove={moveSurfaceLight}>
           <div ref={tracksRef} className={`fade-up${tracksVis?' in-view':''}`}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18, gap:12, flexWrap:'wrap' }}>
               <SubLabel>{tx(lang,'music_tracks')}</SubLabel>
@@ -3716,7 +3855,7 @@ function NewsletterSection({ lang }) {
 
   return (
     <section style={{ padding:'80px 24px', background:'transparent' }}>
-      <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{
+      <div ref={ref} className={`panel-sheen fade-up${vis?' in-view':''}`} onPointerMove={moveSurfaceLight} style={{
         maxWidth:680, margin:'0 auto',
         padding:'44px 36px',
         border:'1px solid var(--border)',
@@ -3812,7 +3951,7 @@ function StatsSection({ lang }) {
           ].map((m, i) => {
             const [r, v] = useCountUp(m.num || 0);
             return (
-              <div key={i} ref={r} style={{
+              <div key={i} ref={r} className="panel-sheen" onPointerMove={moveSurfaceLight} style={{
                 padding:'24px 22px',
                 background:'var(--card)',
                 border:'1px solid var(--border)',
@@ -3831,7 +3970,7 @@ function StatsSection({ lang }) {
         <p style={{ fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', color:'var(--muted)', marginBottom:14, opacity:0.7 }}>
           {tx(lang,'stats_recent')}
         </p>
-        <div style={{
+        <div className="panel-sheen" onPointerMove={moveSurfaceLight} style={{
           background:'var(--card)',
           border:'1px solid var(--border)',
           borderRadius:'var(--r)',
@@ -3885,7 +4024,8 @@ function ComparisonSection({ lang }) {
           {lang === 'cs' ? 'Porovnej dostupné aplikace' : 'Compare available apps'}
         </p>
 
-        <div style={{ overflowX:'auto', border:'1px solid var(--border)', borderRadius:'var(--r)', background:'var(--card)' }}>
+        <div className="panel-sheen" onPointerMove={moveSurfaceLight} style={{ overflow:'hidden', border:'1px solid var(--border)', borderRadius:'var(--r)', background:'var(--card)' }}>
+          <div style={{ overflowX:'auto' }}>
           <table style={{ width:'100%', borderCollapse:'collapse', minWidth:520 }}>
             <thead>
               <tr>
@@ -3929,6 +4069,7 @@ function ComparisonSection({ lang }) {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </section>
