@@ -1130,9 +1130,10 @@ function BackgroundFX() {
           const A = particles[i], B = particles[j];
           const dx = A._x-B._x, dy = A._y-B._y, d = Math.hypot(dx,dy);
           if (d < linkDist) {
-            const o = (1 - d/linkDist) * (col.dark ? 0.10 : 0.14) * (0.10 + (lvl*1.4 + env.flash*0.5)*colorGain);
+            const linkGain = col.dark ? 1.3 : 1.15;
+            const o = (1 - d/linkDist) * (col.dark ? 0.10 : 0.14) * (0.10 + (lvl*1.4 + env.flash*0.5)*colorGain*linkGain);
             ctx.strokeStyle = `rgba(${col.a1[0]},${col.a1[1]},${col.a1[2]},${Math.min(0.5,o)})`;
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 1 + Math.min(0.12, lvl*0.3);
             ctx.beginPath(); ctx.moveTo(A._x,A._y); ctx.lineTo(B._x,B._y); ctx.stroke();
           }
         }
