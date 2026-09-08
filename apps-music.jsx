@@ -1,5 +1,5 @@
 // apps-music.jsx — Apps + Music sections
-const { useState: __useS, useEffect: __useE, useMemo: __useM, useCallback: __useC, useRef: __useR } = React;
+const { useState: __useS, useEffect: __useE, useLayoutEffect: __useL, useMemo: __useM, useCallback: __useC, useRef: __useR } = React;
 
 const APP_VISUALS = {
   'fyzika-pastelkou': { src:'/screenshots/fyzika-pastelkou/android-water.png', kind:'landscape', cs:'Kresli. Zkoušej. Objevuj.', en:'Draw. Try. Discover.' },
@@ -12,6 +12,13 @@ const APP_VISUALS = {
 };
 
 function AppCard({ app, lang, mode = 'live' }) {
+  const moveLight = (e) => {
+    if (e.pointerType === 'touch' || !window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return;
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--spot-x', `${e.clientX - rect.left}px`);
+    card.style.setProperty('--spot-y', `${e.clientY - rect.top}px`);
+  };
   const visual = mode === 'live' ? (APP_VISUALS[slugify(app.name)] || {
     src: app.screenshots?.[0] || app.icon_url,
     kind: app.screenshots?.[0] ? 'phone' : 'icon',
@@ -19,7 +26,7 @@ function AppCard({ app, lang, mode = 'live' }) {
   }) : null;
   return (
     <a href={'#app=' + slugify(app.name)} className={`app-card${visual ? ' app-showcase' : ''}`}
-       style={{ '--app-accent': app.color }}>
+       style={{ '--app-accent': app.color }} onPointerMove={visual ? moveLight : undefined}>
       {visual && <div className={`app-stage app-stage-${visual.kind}`}>
         <span className="app-stage-caption">{lang === 'cs' ? visual.cs : visual.en}</span>
         {visual.src ? <img src={visual.src} alt={visual.kind === 'icon' ? '' : (lang === 'cs' ? `Ukázka aplikace ${app.name}` : `${app.name} screenshot`)}
@@ -37,6 +44,58 @@ function AppCard({ app, lang, mode = 'live' }) {
       </div>
     </a>
   );
+}
+
+function AppGrid({ items, mode = 'live', lang }) {
+  const gridRef = __useR(null);
+  const previous = __useR(null);
+  const order = items.map(app => app.id).join(',');
+
+  __useL(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const nodes = [...grid.children];
+    const positions = new Map(nodes.map(node => [node.dataset.appKey, {
+      x: node.offsetLeft, y: node.offsetTop,
+    }]));
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const animations = [];
+    if (previous.current && !motion.matches) {
+      nodes.forEach((node, index) => {
+        if (!node.animate) return;
+        const before = previous.current.get(node.dataset.appKey);
+        const after = positions.get(node.dataset.appKey);
+        const dx = before ? before.x - after.x : 0;
+        const dy = before ? before.y - after.y : 0;
+        if (before && !dx && !dy) return;
+        // Nearby cards travel to their new slot; distant ones enter gently.
+        const nearby = before && Math.hypot(dx, dy) < 650;
+        animations.push(node.animate([
+          { transform: nearby ? `translate(${dx}px, ${dy}px)` : 'translateY(18px) scale(.985)', opacity: nearby ? 1 : 0 },
+          { transform: 'none', opacity: 1 },
+        ], { duration: 360, delay: nearby ? 0 : Math.min(index * 25, 100), easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' }));
+      });
+    }
+    previous.current = positions;
+    const cancelMotion = () => { if (motion.matches) animations.forEach(a => a.cancel()); };
+    motion.addEventListener?.('change', cancelMotion);
+    // Update stored geometry after responsive layout changes, without animating resize.
+    const resize = new ResizeObserver(() => {
+      previous.current = new Map(nodes.map(node => [node.dataset.appKey, { x:node.offsetLeft, y:node.offsetTop }]));
+    });
+    resize.observe(grid);
+    return () => {
+      animations.forEach(a => a.cancel());
+      motion.removeEventListener?.('change', cancelMotion);
+      resize.disconnect();
+    };
+  }, [order, mode]);
+
+  return <div ref={gridRef} className="apps-grid">
+    {items.map(app => <div className="app-slot" data-app-key={app.id} key={app.id}>
+      <AppCard app={app} lang={lang} mode={mode} />
+    </div>)}
+  </div>;
 }
 
 function AppsSection({ lang }) {
@@ -59,11 +118,7 @@ function AppsSection({ lang }) {
     { key: 'all', label: lang === 'cs' ? 'Vše' : 'All', count: live.length },
     ...['PWA', 'Android'].map(key => ({ key, label: key, count: live.filter(a => a.platform === key).length })),
   ];
-  const cards = (items, mode = 'live') => (
-    <div className="apps-grid">
-      {items.map(app => <AppCard key={app.id} app={app} lang={lang} mode={mode} />)}
-    </div>
-  );
+  const cards = (items, mode = 'live') => <AppGrid items={items} mode={mode} lang={lang} />;
 
   return (
     <section id="apps" className="studio-section">

@@ -636,9 +636,29 @@
       box-shadow:0 20px 34px -12px rgba(0,0,0,0.65), 0 0 0 1px var(--depth-edge);
     }
     .app-stage img { transform-origin:50% 25%; transition:transform .42s var(--ease-out); }
+    .app-showcase { position:relative; isolation:isolate; --spot-x:50%; --spot-y:20%; }
+    .app-showcase::after {
+      content:''; position:absolute; inset:0; padding:1px; border-radius:inherit; pointer-events:none;
+      background:radial-gradient(260px circle at var(--spot-x) var(--spot-y),var(--app-accent),transparent 75%);
+      -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+      mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+      -webkit-mask-composite:xor; mask-composite:exclude;
+      opacity:0; transition:opacity .3s ease; z-index:3;
+    }
+    .app-showcase .app-stage::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background:radial-gradient(300px circle at var(--spot-x) var(--spot-y),color-mix(in srgb,var(--app-accent) 24%,transparent),transparent 75%);
+      opacity:0; transition:opacity .3s ease;
+    }
+    .app-showcase .app-stage > img { position:relative; }
+    .app-stage-caption { z-index:1; }
+    .app-showcase:focus-visible::after,.app-showcase:focus-visible .app-stage::before { opacity:.8; }
+    .app-card-action > span:last-child { transition:transform .3s var(--ease-out); }
     .app-showcase:focus-visible .app-stage img { transform:scale(1.035); }
     @media (hover:hover) and (pointer:fine) {
       .app-showcase:hover .app-stage img { transform:scale(1.035); }
+      .app-showcase:hover::after,.app-showcase:hover .app-stage::before { opacity:1; }
+      .app-showcase:hover .app-card-action > span:last-child { transform:translate(3px,-3px); }
     }
     .app-card:focus-visible, .album-cover-button:focus-visible, .hero-sleeve:focus-visible { outline:3px solid var(--a1); outline-offset:5px; }
     .mesh-orb { animation:none; }
@@ -693,11 +713,15 @@
       .hero-sleeve,.album-cover-button > img,.album-play,.app-card,.app-stage img { transition:none !important; }
       .album-cover-button:hover > img,.app-card:hover { transform:none; }
       .app-showcase:hover .app-stage img,.app-showcase:focus-visible .app-stage img { transform:none !important; }
+      .app-showcase::after,.app-showcase .app-stage::before,.app-card-action > span:last-child { transition:none !important; }
+      .app-showcase:hover .app-card-action > span:last-child { transform:none; }
     }
 
     /* Keep the three destinations visible on mobile, without an extra menu tap. */
     section[id], #tracks { scroll-margin-top: 82px; }
-    .apps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:20px; }
+    .apps-grid { position:relative; display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr)); gap:20px; }
+    .app-slot { min-width:0; display:flex; }
+    .app-slot > .app-card { width:100%; }
     .apps-grid .app-card p { font-size:15px !important; line-height:1.65 !important; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
 
     .apps-tools { display:flex; gap:16px; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:32px; }
