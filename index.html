@@ -242,12 +242,12 @@
     }
 
     :root {
-      --bg:     #000000;
-      --bg2:    #080604;
-      --card:   rgba(255,255,255,0.04);
-      --border: rgba(255,255,255,0.08);
+      --bg:     #101110;
+      --bg2:    #181a17;
+      --card:   #1b1d1a;
+      --border: rgba(245,240,234,0.14);
       --text:   #f5f0ea;
-      --muted:  #a89684;
+      --muted:  #bcb9ad;
       --a1:     #f97316;
       --a2:     #fbbf24;
       --a3:     #4ade80;
@@ -277,7 +277,7 @@
     html[data-mode="light"] {
       --bg:     #fbf7f2;
       --bg2:    #f4ece1;
-      --card:   rgba(20,12,5,0.04);
+      --card:   #fffaf4;
       --border: rgba(20,12,5,0.10);
       --text:   #1a1108;
       --muted:  #6b5847;
@@ -460,34 +460,34 @@
       position: absolute;
       border-radius: 50%;
       filter: blur(90px) saturate(1.25);
-      will-change: transform;
+      will-change: auto;
     }
     .mesh-1 {
       width: 40vw; height: 40vw;
       background: #06b6d4;
       top: -18%; left: -14%;
-      opacity: 0.07;
+      opacity: 0.025;
       animation: meshDrift1 72s ease-in-out infinite alternate;
     }
     .mesh-2 {
       width: 56vw; height: 56vw;
       background: #4f46e5;
       bottom: -22%; right: -18%;
-      opacity: 0.105;
+      opacity: 0.02;
       animation: meshDrift2 94s ease-in-out infinite alternate;
     }
     .mesh-3 {
       width: 54vw; height: 54vw;
       background: var(--a2);
       top: 22%; left: 26%;
-      opacity: 0.17;
+      opacity: 0.04;
       animation: meshDrift3 116s ease-in-out infinite alternate;
     }
     .mesh-4 {
       width: 36vw; height: 36vw;
       background: #a855f7;
       top: 55%; right: 18%;
-      opacity: 0.11;
+      opacity: 0.02;
       animation: meshDrift4 84s ease-in-out infinite alternate;
     }
     /* Fine noise overlay — dithers gradient banding */
@@ -496,7 +496,7 @@
       inset: 0;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
       background-size: 160px 160px;
-      opacity: 0.04;
+      opacity: 0.02;
       pointer-events: none;
     }
     /* Jen jemný pohyb — opacity konstantní (jako v originále), ať pozadí v čase nesvětlá */
@@ -521,11 +521,123 @@
       .mesh-orb { animation: none !important; }
     }
 
+    /* Creative studio — artwork, quiet surfaces, real product previews. */
+    .studio-section { padding:72px 32px; }
+    .studio-hero { min-height:760px; padding:140px 40px 90px; position:relative; overflow:hidden; display:flex; align-items:center; }
+    .hero-layout { max-width:1200px; margin:auto; width:100%; display:grid; grid-template-columns:1.15fr 1fr; align-items:center; gap:64px; }
+    .hero-copy { min-width:0; position:relative; z-index:1; }
+    .hero-name { font-size:clamp(70px,8.8vw,116px) !important; letter-spacing:-0.055em !important; }
+    .hero-description { margin:0 0 30px !important; font-weight:400 !important; max-width:440px !important; }
+    .hero-actions { display:flex; gap:12px; flex-wrap:wrap; }
+    .hero-actions > * { padding:13px 21px !important; }
+    .hero-stats { display:flex; gap:34px; margin-top:40px; flex-wrap:wrap; }
+    .hero-stats > a { text-align:left !important; }
+    .hero-stats > a > div:first-child { font-size:27px !important; }
+    .hero-stats > a > div:last-child { font-size:11px !important; }
+    .hero-sleeves { position:relative; height:470px; min-width:0; }
+    .hero-sleeve { position:absolute; display:block; width:69%; padding:9px; background:#e5dfd1; color:#252720; box-shadow:0 20px 60px #0005; transition:transform .3s ease; }
+    .hero-sleeve img { width:100%; height:auto; aspect-ratio:1; object-fit:cover; display:block; }
+    .hero-sleeve > span { display:flex; justify-content:space-between; align-items:center; padding:9px 4px 2px; font-size:13px; }
+    .hero-sleeve-1 { top:0; left:0; transform:rotate(-7deg); }
+    .hero-sleeve-2 { top:100px; width:63%; right:-4px; transform:rotate(8deg); }
+    .hero-sleeve:hover { transform:translateY(-6px) rotate(0); z-index:2; }
+    .hero-art-note { position:absolute; bottom:-18px; left:0; font-size:12px; color:var(--muted); letter-spacing:.04em; }
+    .studio-hero .scroll-cue { animation:none !important; bottom:16px !important; }
+    .albums-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:32px; margin-bottom:46px; }
+    .album-card { min-width:0; }
+    .album-cover-button { width:100%; aspect-ratio:1; display:block; border-radius:12px; overflow:hidden; position:relative; background:var(--card); border:1px solid var(--border); cursor:pointer; }
+    .album-cover-button > img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease; }
+    .album-cover-button:hover > img { transform:scale(1.025); }
+    .album-cover-mark { position:absolute; top:20px; left:20px; font-size:12px; color:#fff; letter-spacing:.16em; text-shadow:0 1px 6px #000; }
+    .album-play { position:absolute; right:20px; bottom:20px; width:54px; height:54px; border-radius:50%; display:grid; place-items:center; background:#f8f4eb; color:#171c18; box-shadow:0 4px 20px #0003; transition:background .2s, transform .2s; }
+    .album-cover-button:hover .album-play { background:var(--a1); transform:scale(1.08); }
+    .album-info { padding:22px 0 0; position:relative; }
+    .album-heading { display:flex; justify-content:space-between; align-items:baseline; gap:14px; }
+    .album-heading h3 { font-family:'Syne',sans-serif; font-size:26px; line-height:1.25; }
+    .album-heading > span { color:var(--muted); font-size:13px; white-space:nowrap; }
+    .album-genre { font-size:11px; text-transform:uppercase; letter-spacing:.13em; color:var(--a2); margin-top:7px; }
+    .album-description { color:var(--muted); font-size:15px; margin-top:12px; line-height:1.6; }
+    .album-tracks-link { display:flex; gap:14px; align-items:center; color:var(--text); min-height:44px; font-size:14px; font-weight:600; margin-top:6px; }
+    .album-now { position:absolute; bottom:24px; left:20px; display:flex; align-items:center; gap:12px; color:#fff; padding:6px 12px; border-radius:20px; background:#101510c9; font-size:12px; }
+    .album-selected .album-cover-button { outline:2px solid var(--a1); outline-offset:4px; }
+    .album-playing { animation:none; }
+    .album-playing .album-play { animation:studioPulse 2.6s ease-in-out infinite; }
+    @keyframes studioPulse { 50% { box-shadow:0 0 0 8px #ffffff26; } }
+    .studio-track-list { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; }
+    .apps-grid .app-card { display:flex; flex-direction:column; background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden; color:var(--text); min-width:0; transition:transform .22s ease,border-color .22s ease; }
+    .app-card:hover { transform:translateY(-4px); border-color:color-mix(in srgb,var(--app-accent) 65%,var(--border)); }
+    .app-card-body { padding:24px; display:flex; flex-direction:column; flex:1; gap:18px; }
+    .app-card-heading { display:flex; gap:12px; align-items:center; }
+    .app-card-heading h3 { font-family:'DM Sans',sans-serif; font-size:19px; line-height:1.3; font-weight:700; }
+    .app-icon { width:40px; height:40px; border-radius:10px; object-fit:cover; flex-shrink:0; }
+    .app-letter { display:grid; place-items:center; background:color-mix(in srgb,var(--app-accent) 18%,transparent); color:var(--app-accent); font-weight:700; }
+    .app-platform { color:var(--muted); font-size:12px; }
+    .app-card-body p { color:var(--muted); }
+    .app-card-action { margin-top:auto; padding-top:16px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:600; }
+    .app-card-action > span:last-child { color:var(--a1); font-size:21px; }
+    .app-stage { position:relative; height:288px; overflow:hidden; display:flex; align-items:flex-end; justify-content:center; background:color-mix(in srgb,var(--app-accent) 12%,var(--bg2)); padding:56px 20px 0; border-bottom:1px solid var(--border); }
+    .app-stage-caption { position:absolute; top:22px; left:20px; right:20px; text-align:center; font-size:13px; font-weight:600; color:var(--text); }
+    .app-stage-phone { align-items:flex-start; }
+    .app-stage-phone img { width:214px; height:auto; max-width:82%; object-fit:contain; border:6px solid #333931; border-radius:24px; box-shadow:0 12px 30px #0004; }
+    .app-stage-landscape { align-items:center; background:#d8dfc5; }
+    .app-stage-landscape .app-stage-caption { color:#34402e; }
+    .app-stage-landscape img { width:100%; height:auto; object-fit:contain; border-radius:8px; box-shadow:0 10px 24px #0002; }
+    .app-card:focus-visible, .album-cover-button:focus-visible, .hero-sleeve:focus-visible { outline:3px solid var(--a1); outline-offset:5px; }
+    .mesh-orb { animation:none; }
+    @media (max-width:1000px) {
+      .studio-hero { padding-left:28px; padding-right:28px; min-height:720px; }
+      .hero-layout { gap:30px; }
+      .hero-sleeves { height:390px; }
+      .hero-sleeve-2 { top:95px; }
+      .hero-art-note { bottom:-14px; }
+      .hero-actions { gap:10px; }
+      .hero-actions > * { padding:12px 17px !important; font-size:14px !important; }
+      .app-card-body { padding:20px; }
+    }
+    @media (max-width:760px) {
+      .studio-hero { padding:140px 24px 54px; min-height:0; }
+      .hero-layout { grid-template-columns:1fr; gap:44px; }
+      .hero-copy { text-align:center; }
+      .hero-name { font-size:clamp(48px,16.6vw,112px) !important; }
+      .hero-description { margin:0 auto 26px !important; }
+      .hero-actions,.hero-stats { justify-content:center; }
+      .hero-stats { margin-top:30px; }
+      .hero-stats > a { text-align:center !important; }
+      .hero-sleeves { height:360px; max-width:410px; width:100%; margin:0 auto; }
+      .hero-sleeve { width:59%; }
+      .hero-sleeve-1 { left:6%; }
+      .hero-sleeve-2 { right:6%; top:80px; width:59%; }
+      .hero-art-note { bottom:-2px; text-align:center; width:100%; }
+      .studio-hero .scroll-cue { display:none !important; }
+      .studio-section { padding:52px 20px; }
+      .albums-grid { gap:24px; }
+      .album-heading { display:block; }
+      .album-heading > span { display:block; margin-top:5px; }
+      .album-heading h3 { font-size:23px; }
+      .studio-track-list { padding:18px 10px; }
+      .app-stage { height:290px; }
+    }
+    @media (max-width:480px) {
+      .hero-sleeves { height:300px; }
+      .hero-stats { gap:30px; }
+      .albums-grid { grid-template-columns:1fr; gap:38px; }
+      .album-cover-button { max-height:460px; }
+      .album-heading { display:flex; }
+      .album-heading > span { margin-top:0; }
+      .album-cover-mark { top:16px; left:16px; }
+      .app-stage { height:270px; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      .album-playing .album-play,.hero-name { animation:none !important; }
+      .hero-sleeve,.album-cover-button > img,.album-play,.app-card { transition:none !important; }
+      .album-cover-button:hover > img,.app-card:hover { transform:none; }
+    }
+
     /* Keep the three destinations visible on mobile, without an extra menu tap. */
     section[id] { scroll-margin-top: 82px; }
     .apps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)); gap:20px; }
     .apps-grid .app-card p { font-size:15px !important; line-height:1.65 !important; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
-    .apps-grid .app-card > div > div { flex-wrap:wrap; }
+
     .apps-tools { display:flex; gap:16px; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:32px; }
     .catalog-pill { padding:10px 16px; border:1px solid var(--border); border-radius:50px; color:var(--muted); font-size:14px; min-height:44px; }
     .catalog-pill[aria-pressed="true"] { background:var(--a1); color:var(--bg); border-color:var(--a1); }
@@ -675,27 +787,26 @@
         <div style="padding: 4px 11px; border-radius: 6px; font-size: 13px; font-weight: 700; background: transparent; color: var(--muted); border: 1px solid var(--border);">EN</div>
       </div>
     </nav>
-    <section style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 90px 24px 80px; position: relative; overflow: hidden;">
-      <div style="max-width: 820px; width: 100%; display: flex; flex-direction: column; align-items: center;">
-        <div style="display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--a1); padding: 7px 18px; border-radius: 30px; border: 1px solid color-mix(in srgb, var(--a1) 40%, transparent); background: color-mix(in srgb, var(--a1) 8%, transparent); margin-bottom: 36px;">
-          Vibe Coder & AI Music
+    <section class="studio-hero" aria-label="Načítání webu">
+      <div class="hero-layout">
+        <div class="hero-copy">
+          <div style="color:var(--a1); font-size:12px; letter-spacing:.14em; margin-bottom:36px;">VIBE CODER & AI MUSIC</div>
+          <h1 class="hero-name" style="font-family:'Syne',sans-serif; font-weight:800; line-height:.88; margin-bottom:32px;">Jenda</h1>
+          <p class="hero-description" style="font-size:20px; color:var(--muted); line-height:1.65;">Tvořím experimentální elektronickou hudbu pomocí AI — a k tomu vlastní appky.</p>
+          <div class="hero-actions"><a href="#music" style="background:var(--a1); color:var(--bg); border-radius:50px;">Poslechnout hudbu</a><a href="#apps" style="border:1px solid var(--border); border-radius:50px;">Prozkoumat aplikace</a></div>
+          <div class="hero-stats" style="color:var(--muted); font-size:13px;">Načítám tvorbu…</div>
         </div>
-        <h1 style="font-family: 'Syne', sans-serif; font-size: clamp(48px, 16vw, 160px); font-weight: 800; line-height: 0.88; letter-spacing: -0.05em; background: linear-gradient(135deg, var(--text) 20%, var(--a1) 55%, var(--a2) 85%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 32px;">
-          Jenda
-        </h1>
-        <p style="font-size: clamp(16px, 2.2vw, 20px); color: var(--muted); max-width: 500px; margin: 0 auto 52px; line-height: 1.65; font-weight: 300;">
-          Tvořím mobilní aplikace a experimentální elektronickou hudbu pomocí AI.
-        </p>
-        <div style="display: flex; gap: 14px; justify-content: center;">
-          <div style="padding: 14px 28px; border-radius: 12px; background: var(--a1); color: var(--bg); font-weight: 700; font-size: 15px; border: 1px solid var(--a1); cursor: pointer;">Poslouchat hudbu</div>
-          <div style="padding: 14px 28px; border-radius: 12px; background: transparent; color: var(--text); font-weight: 700; font-size: 15px; border: 1px solid var(--border); cursor: pointer;">Zobrazit aplikace</div>
+        <div class="hero-sleeves" aria-hidden="true">
+          <div class="hero-sleeve hero-sleeve-1"><img src="/artwork/relax-v1.png" alt="" width="1024" height="1024"><span><strong>Relax</strong>↗</span></div>
+          <div class="hero-sleeve hero-sleeve-2"><img src="/artwork/celtic-code-v1.png" alt="" width="1024" height="1024"><span><strong>Celtic Code</strong>↗</span></div>
+          <div class="hero-art-note">Vlastní hudba. Vlastní svět.</div>
         </div>
       </div>
     </section>
   </div>
   <script>
     // PWA service worker registration
-    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    if ('serviceWorker' in navigator && location.protocol !== 'file:' && !['localhost', '127.0.0.1'].includes(location.hostname)) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js').catch(() => {});
       });
@@ -707,14 +818,15 @@
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       (function() {
-        const VERSION = 'jw-v98'; // Match sw.js version
+        const VERSION = 'jw-v99'; // Match sw.js version
         const jsxFiles = [
           'combined.jsx'
         ];
 
-        let cacheValid = true;
+        const localPreview = ['localhost', '127.0.0.1'].includes(location.hostname);
+        let cacheValid = !localPreview;
         try {
-          if (localStorage.getItem('jw_jsx_version') !== VERSION) {
+          if (localPreview || localStorage.getItem('jw_jsx_version') !== VERSION) {
             cacheValid = false;
           } else {
             for (const file of jsxFiles) {

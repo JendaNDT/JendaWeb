@@ -113,13 +113,13 @@ function BackgroundFX() {
       env.flash *= 0.90; env.surge *= 0.90;
       env.treble += (treble - env.treble) * 0.15;  // dolnopropust na výšky → klidnější, ne tak roztřesené
 
-      const idle = playing ? 0 : 0.10*(0.5 + 0.5*Math.sin(t*0.6)); // jemné dýchání v klidu
+      const idle = 0; // jemné dýchání v klidu
       const drive = Math.max(env.bass, idle);
       const lvl   = Math.max(env.level, idle);
       const cx = W/2, cy = H*0.5;
       const scroll = window.scrollY || window.pageYOffset || 0; // paralaxa: posun pozadí dle scrollu
       const bloom = drive*0.13;                       // basy „nadechnou" celé pole
-      const speedM = 1 + env.surge*1.8 + env.treble*0.5;  // beat mírně zrychlí pohyb
+      const speedM = (playing ? 1 : 0.08) + env.surge*1.8 + env.treble*0.5;  // beat mírně zrychlí pohyb
       const linkDist = (playing ? 116 : 96) + lvl*64;
 
       ctx.globalCompositeOperation = col.dark ? 'lighter' : 'source-over';
@@ -147,7 +147,7 @@ function BackgroundFX() {
         const sizeD = 0.6 + p.depth*0.55, alphaD = 0.62 + p.depth*0.38; // blízké větší/jasnější
         const rr = Math.max(0.3, p.r*sizeD*(1 + drive*0.6 + be*2.1 + env.flash*0.6) + Math.sin(p.ph)*0.3);
         const c = p.warm < 0.5 ? col.a1 : col.a2;
-        const al = Math.min(0.9, ((col.dark ? 0.13 : 0.18) + be*0.6 + env.flash*0.22) * alphaD);
+        const al = Math.min(0.9, ((col.dark ? 0.055 : 0.08) + be*0.6 + env.flash*0.22) * alphaD);
         ctx.beginPath();
         ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${al})`;
         ctx.arc(dx, dy, rr, 0, Math.PI*2); ctx.fill();
@@ -159,7 +159,7 @@ function BackgroundFX() {
           const A = particles[i], B = particles[j];
           const dx = A._x-B._x, dy = A._y-B._y, d = Math.hypot(dx,dy);
           if (d < linkDist) {
-            const o = (1 - d/linkDist) * (col.dark ? 0.10 : 0.14) * (0.45 + lvl*1.4 + env.flash*0.5);
+            const o = (1 - d/linkDist) * (col.dark ? 0.10 : 0.14) * (0.10 + lvl*1.4 + env.flash*0.5);
             ctx.strokeStyle = `rgba(${col.a1[0]},${col.a1[1]},${col.a1[2]},${Math.min(0.5,o)})`;
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.moveTo(A._x,A._y); ctx.lineTo(B._x,B._y); ctx.stroke();
@@ -325,13 +325,9 @@ function Hero({ lang, onPlay }) {
     if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 64, behavior: 'smooth' });
   };
   return (
-    <section id="hero" style={{
-      minHeight:'100vh', display:'flex', flexDirection:'column',
-      alignItems:'center', justifyContent:'center',
-      textAlign:'center', padding:'90px 24px 80px',
-      position:'relative', overflow:'hidden',
-    }}>
-      <div style={{ position:'relative', zIndex:1, maxWidth:820, width:'100%' }}>
+    <section id="hero" className="studio-hero">
+      <div className="hero-layout">
+      <div className="hero-copy">
         <div style={{
           display:'inline-flex', alignItems:'center', gap:8,
           fontSize:12, fontWeight:600, letterSpacing:'0.14em', textTransform:'uppercase',
@@ -343,7 +339,7 @@ function Hero({ lang, onPlay }) {
           {tx(lang, 'hero_tag')}
         </div>
 
-        <h1 style={{
+        <h1 className="hero-name" style={{
           fontFamily:"'Syne', sans-serif",
           fontSize:'clamp(48px, 16vw, 160px)',
           fontWeight:800, lineHeight:0.88,
@@ -351,25 +347,25 @@ function Hero({ lang, onPlay }) {
           background:'linear-gradient(135deg, var(--text) 20%, var(--a1) 55%, var(--a2) 85%)',
           WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
           backgroundSize:'200% 200%',
-          animation:'gradShift 9s ease-in-out infinite',
+          animation:'none',
           marginBottom:32,
         }}>
           Jenda
         </h1>
 
-        <p style={{
+        <p className="hero-description" style={{
           fontSize:'clamp(16px, 2.2vw, 20px)', color:'var(--muted)',
           maxWidth:500, margin:'0 auto 52px', lineHeight:1.65, fontWeight:300,
         }}>
           {tx(lang, 'hero_desc')}
         </p>
 
-        <div style={{ display:'flex', gap:14, justifyContent:'center', flexWrap:'wrap' }}>
+        <div className="hero-actions">
           <Btn primary onClick={playFeatured}>{tx(lang, 'cta_music')}</Btn>
           <Btn href="#apps" outline>{tx(lang, 'cta_apps')}</Btn>
         </div>
 
-        <div style={{ display:'flex', gap:56, justifyContent:'center', marginTop:80, flexWrap:'wrap' }}>
+        <div className="hero-stats">
           {[
             (() => {
               const count = (window.APPS_DATA || []).filter(isLiveApp).length;
@@ -396,6 +392,16 @@ function Hero({ lang, onPlay }) {
         </div>
       </div>
 
+      <div className="hero-sleeves" aria-label={lang === 'cs' ? 'Moje alba' : 'My albums'}>
+        {publishedAlbums().slice(0, 2).map((album, i) => (
+          <a className={`hero-sleeve hero-sleeve-${i + 1}`} href="#music" key={album.id}>
+            <img src={albumArt(album)} alt={album.title} width="1024" height="1024" decoding="async" />
+            <span><strong>{album.title}</strong><span aria-hidden="true">↗</span></span>
+          </a>
+        ))}
+        <div className="hero-art-note">{lang === 'cs' ? 'Vlastní hudba. Vlastní svět.' : 'My music. My world.'}</div>
+      </div>
+      </div>
       <a href="#music" className="scroll-cue" aria-label="Scroll" style={{
         position:'absolute', bottom:30, left:'50%', transform:'translateX(-50%)',
         zIndex:1, color:'var(--muted)', display:'flex',

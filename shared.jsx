@@ -4,7 +4,7 @@ const { useState, useEffect, useRef, useCallback, useMemo } = React;
 
 // ── Themes ─────────────────────────────────────────────────────────────
 const THEMES = {
-  ember:  { bg:'#0d0805', bg2:'#160d07', a1:'#f97316', a2:'#fbbf24', glow:'rgba(249,115,22,0.25)' },
+  ember:  { bg:'#101110', bg2:'#181a17', a1:'#f9974f', a2:'#e9c48b', glow:'rgba(249,151,79,0.16)' },
   velvet: { bg:'#0e0508', bg2:'#180a0f', a1:'#e11d48', a2:'#f59e0b', glow:'rgba(225,29,72,0.22)' },
   desert: { bg:'#0c0905', bg2:'#150e07', a1:'#d97706', a2:'#f97316', glow:'rgba(217,119,6,0.25)' },
 };
@@ -16,6 +16,13 @@ function applyTheme(key, mode) {
   r.style.setProperty('--a2',   th.a2);
   r.style.setProperty('--glow', th.glow);
   if (mode === 'light') {
+    const accents = {
+      ember: ['#a8491c', '#916018'],
+      velvet: ['#b3193c', '#92560b'],
+      desert: ['#945509', '#ae4214'],
+    }[key] || ['#a8491c', '#916018'];
+    r.style.setProperty('--a1', accents[0]);
+    r.style.setProperty('--a2', accents[1]);
     r.style.removeProperty('--bg');
     r.style.removeProperty('--bg2');
   } else {
@@ -34,7 +41,7 @@ function applyMode(modePref) {
   const actual = resolveMode(modePref);
   document.documentElement.dataset.mode = actual;
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', actual === 'light' ? '#fbf7f2' : '#0d0805');
+  if (meta) meta.setAttribute('content', actual === 'light' ? '#fbf7f2' : '#101110');
   return actual;
 }
 
@@ -195,9 +202,22 @@ const fmtTime = (s) => {
   return `${m}:${x < 10 ? '0' : ''}${x}`;
 };
 
-// Larger procedural cover for albums — mesh gradient + noise + faint geometric overlay.
+// Local artwork is shared by the catalog, hero, track list and player.
+// An explicit CMS cover remains authoritative for future releases.
+function albumCover(album) {
+  if (!album) return '';
+  if (album.cover_url) return album.cover_url;
+  const covers = {
+    relax: '/artwork/relax-v1.png',
+    'celtic-code': '/artwork/celtic-code-v1.png',
+  };
+  return covers[slugify(album.title)] || '';
+}
+
+// Procedural fallback for albums that have no artwork yet.
 function albumArt(album) {
   if (!album) return '';
+  if (albumCover(album)) return albumCover(album);
   let h = 0;
   for (let i = 0; i < album.id.length; i++) h = ((h << 5) - h + album.id.charCodeAt(i)) | 0;
   const seed = Math.abs(h);
@@ -253,6 +273,8 @@ function parseLRC(text) {
 // Deterministic procedural artwork for a track. Returns a data: URI SVG.
 function trackArt(track, album) {
   if (track && typeof track === 'object' && track.cover) return track.cover;
+  const release = album || (window.ALBUMS || []).find(a => a.id === track?.album);
+  if (albumCover(release)) return albumCover(release);
   const seed = (track && typeof track === 'object') ? track.id : track;
   const sid = (Number(seed) || 1) * 9301 + 49297;
   const rand = (n) => {

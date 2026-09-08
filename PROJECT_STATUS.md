@@ -1,3 +1,16 @@
+## 2026-09-08 — Visual studio preview (LOCAL ONLY)
+
+Prepared on `codex/visual-studio-preview`, based on deployed commit `a917807`.
+The user explicitly requires seeing and approving the preview before deployment.
+**Do not push to main or deploy this visual change until the user approves it.**
+
+- New two-column hero with original Relax/Celtic Code artwork; square album cards.
+- Real app screenshots on featured cards. GeoReminder 2.7 CI196 and EngiTab 0.2.0 captured from their public APKs in a disposable read-only API35 emulator; no reminder was saved.
+- App screenshot fallback in the detail dialog, stronger body contrast, neutral backgrounds, light-mode accent contrast, quieter animation and reduced-motion support.
+- Native separate album play/filter buttons; existing custom CMS and track cover overrides preserved.
+- `jw-v99` prepared; localhost skips JSX cache and new service-worker registration so the preview refreshes reliably.
+- Validation: JSX compile, artwork/theme checks, Chrome desktop/light/dark/390px/320px screenshots, app detail/Escape, album play/pause and filtering; no captured JS errors. No form submission or release deployment.
+
 # JendaWeb – Project Status
 
 ## Úpravy portfolia — 08. 09. 2026 (jw-v98)
