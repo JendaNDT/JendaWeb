@@ -553,7 +553,7 @@ const { useState, useEffect, useRef, useCallback, useMemo } = React;
 
 // ── Themes ─────────────────────────────────────────────────────────────
 const THEMES = {
-  ember:  { bg:'#101110', bg2:'#181a17', a1:'#f9974f', a2:'#e9c48b', glow:'rgba(249,151,79,0.16)' },
+  ember:  { bg:'#0a0f17', bg2:'#131b26', a1:'#f97316', a2:'#fbbf24', glow:'rgba(249,115,22,0.25)' },
   velvet: { bg:'#0e0508', bg2:'#180a0f', a1:'#e11d48', a2:'#f59e0b', glow:'rgba(225,29,72,0.22)' },
   desert: { bg:'#0c0905', bg2:'#150e07', a1:'#d97706', a2:'#f97316', glow:'rgba(217,119,6,0.25)' },
 };
@@ -564,12 +564,14 @@ function applyTheme(key, mode) {
   r.style.setProperty('--a1',   th.a1);
   r.style.setProperty('--a2',   th.a2);
   r.style.setProperty('--glow', th.glow);
+  r.style.setProperty('--brand-a1', th.a1);
+  r.style.setProperty('--brand-a2', th.a2);
   if (mode === 'light') {
     const accents = {
-      ember: ['#a8491c', '#916018'],
+      ember: ['#c2410c', '#b45309'],
       velvet: ['#b3193c', '#92560b'],
       desert: ['#945509', '#ae4214'],
-    }[key] || ['#a8491c', '#916018'];
+    }[key] || ['#c2410c', '#b45309'];
     r.style.setProperty('--a1', accents[0]);
     r.style.setProperty('--a2', accents[1]);
     r.style.removeProperty('--bg');
@@ -590,7 +592,7 @@ function applyMode(modePref) {
   const actual = resolveMode(modePref);
   document.documentElement.dataset.mode = actual;
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', actual === 'light' ? '#fbf7f2' : '#101110');
+  if (meta) meta.setAttribute('content', actual === 'light' ? '#fbf7f2' : '#0a0f17');
   return actual;
 }
 
@@ -1225,15 +1227,15 @@ function Nav({ lang, setLang, mode, setMode }) {
     logo: {
       fontFamily:"'Syne', sans-serif", fontWeight:800, fontSize:20,
       letterSpacing:'-0.04em',
-      background:'linear-gradient(135deg, var(--a1), var(--a2))',
+      background:'linear-gradient(135deg, var(--brand-a1), var(--brand-a2))',
       WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
     },
     link: { fontSize:15, fontWeight:500, color:'var(--muted)', transition:'color 0.2s', padding:'4px 0' },
     langBtn: (active) => ({
       padding:'4px 11px', borderRadius:6, fontSize:13, fontWeight:700, letterSpacing:'0.04em',
-      background: active ? 'var(--a1)' : 'transparent',
-      color: active ? 'var(--bg)' : 'var(--muted)',
-      border:`1px solid ${active ? 'var(--a1)' : 'var(--border)'}`,
+      background: active ? 'var(--brand-a1)' : 'transparent',
+      color: active ? '#17110b' : 'var(--muted)',
+      border:`1px solid ${active ? 'var(--brand-a1)' : 'var(--border)'}`,
       transition:'all 0.2s',
     }),
   };
@@ -3902,8 +3904,8 @@ function MostPlayedSection({ lang, onPlay, currentTrack, playing }) {
     <section style={{ padding:'80px 24px', background:'transparent' }}>
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:760, margin:'0 auto' }}>
         <SubLabel>{lang === 'cs' ? 'Nejvíce poslouchané' : 'Most played'}</SubLabel>
-        <div style={{
-          background:'var(--card)', border:'1px solid var(--border)',
+        <div className="studio-surface" style={{
+          border:'1px solid var(--border)',
           borderRadius:'var(--r)', padding:'6px',
         }}>
           {top.map((row, i) => {

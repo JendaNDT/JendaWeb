@@ -4,7 +4,7 @@ const { useState, useEffect, useRef, useCallback, useMemo } = React;
 
 // ── Themes ─────────────────────────────────────────────────────────────
 const THEMES = {
-  ember:  { bg:'#101110', bg2:'#181a17', a1:'#f9974f', a2:'#e9c48b', glow:'rgba(249,151,79,0.16)' },
+  ember:  { bg:'#0a0f17', bg2:'#131b26', a1:'#f97316', a2:'#fbbf24', glow:'rgba(249,115,22,0.25)' },
   velvet: { bg:'#0e0508', bg2:'#180a0f', a1:'#e11d48', a2:'#f59e0b', glow:'rgba(225,29,72,0.22)' },
   desert: { bg:'#0c0905', bg2:'#150e07', a1:'#d97706', a2:'#f97316', glow:'rgba(217,119,6,0.25)' },
 };
@@ -15,12 +15,14 @@ function applyTheme(key, mode) {
   r.style.setProperty('--a1',   th.a1);
   r.style.setProperty('--a2',   th.a2);
   r.style.setProperty('--glow', th.glow);
+  r.style.setProperty('--brand-a1', th.a1);
+  r.style.setProperty('--brand-a2', th.a2);
   if (mode === 'light') {
     const accents = {
-      ember: ['#a8491c', '#916018'],
+      ember: ['#c2410c', '#b45309'],
       velvet: ['#b3193c', '#92560b'],
       desert: ['#945509', '#ae4214'],
-    }[key] || ['#a8491c', '#916018'];
+    }[key] || ['#c2410c', '#b45309'];
     r.style.setProperty('--a1', accents[0]);
     r.style.setProperty('--a2', accents[1]);
     r.style.removeProperty('--bg');
@@ -41,7 +43,7 @@ function applyMode(modePref) {
   const actual = resolveMode(modePref);
   document.documentElement.dataset.mode = actual;
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', actual === 'light' ? '#fbf7f2' : '#101110');
+  if (meta) meta.setAttribute('content', actual === 'light' ? '#fbf7f2' : '#0a0f17');
   return actual;
 }
 

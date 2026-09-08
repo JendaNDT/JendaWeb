@@ -303,8 +303,8 @@ function MostPlayedSection({ lang, onPlay, currentTrack, playing }) {
     <section style={{ padding:'80px 24px', background:'transparent' }}>
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:760, margin:'0 auto' }}>
         <SubLabel>{lang === 'cs' ? 'Nejvíce poslouchané' : 'Most played'}</SubLabel>
-        <div style={{
-          background:'var(--card)', border:'1px solid var(--border)',
+        <div className="studio-surface" style={{
+          border:'1px solid var(--border)',
           borderRadius:'var(--r)', padding:'6px',
         }}>
           {top.map((row, i) => {
