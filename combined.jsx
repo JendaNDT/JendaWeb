@@ -1395,14 +1395,19 @@ const APP_VISUALS = {
 };
 
 function AppCard({ app, lang, mode = 'live' }) {
-  const visual = mode === 'live' ? APP_VISUALS[slugify(app.name)] : null;
+  const visual = mode === 'live' ? (APP_VISUALS[slugify(app.name)] || {
+    src: app.screenshots?.[0] || app.icon_url,
+    kind: app.screenshots?.[0] ? 'phone' : 'icon',
+    cs: app.name, en: app.name,
+  }) : null;
   return (
     <a href={'#app=' + slugify(app.name)} className={`app-card${visual ? ' app-showcase' : ''}`}
        style={{ '--app-accent': app.color }}>
       {visual && <div className={`app-stage app-stage-${visual.kind}`}>
         <span className="app-stage-caption">{lang === 'cs' ? visual.cs : visual.en}</span>
-        <img src={visual.src} alt={lang === 'cs' ? `Ukázka aplikace ${app.name}` : `${app.name} screenshot`}
-          loading="lazy" decoding="async" width={visual.kind === 'phone' ? 1080 : 1920} height={visual.kind === 'phone' ? 1920 : 1080} />
+        {visual.src ? <img src={visual.src} alt={visual.kind === 'icon' ? '' : (lang === 'cs' ? `Ukázka aplikace ${app.name}` : `${app.name} screenshot`)}
+          loading="lazy" decoding="async" width={visual.kind === 'icon' ? 192 : visual.kind === 'phone' ? 1080 : 1920} height={visual.kind === 'phone' ? 1920 : visual.kind === 'icon' ? 192 : 1080} />
+          : <span className="app-stage-letter" aria-hidden="true">{app.name[0]}</span>}
       </div>}
       <div className="app-card-body">
         <div className="app-card-heading">
@@ -1432,7 +1437,7 @@ function AppsSection({ lang }) {
   const matchingStudies = studies.filter(matches);
   const featured = featuredAppSlugs.map(slug => matchingLive.find(a => slugify(a.name) === slug)).filter(Boolean);
   const otherLive = matchingLive.filter(a => !featured.includes(a));
-  const browsing = !q && filter === 'all';
+  const orderedLive = [...featured, ...otherLive];
   const pills = [
     { key: 'all', label: lang === 'cs' ? 'Vše' : 'All', count: live.length },
     ...['PWA', 'Android'].map(key => ({ key, label: key, count: live.filter(a => a.platform === key).length })),
@@ -1465,18 +1470,7 @@ function AppsSection({ lang }) {
             className="catalog-search" />
         </div>
 
-        {browsing && featured.length > 0 ? (
-          <>
-            <h3 className="catalog-heading">{lang === 'cs' ? 'Začni tady' : 'Start here'}</h3>
-            {cards(featured)}
-            {otherLive.length > 0 && (
-              <details className="catalog-disclosure">
-                <summary>{lang === 'cs' ? 'Další aplikace' : 'More apps'} ({otherLive.length})</summary>
-                {cards(otherLive)}
-              </details>
-            )}
-          </>
-        ) : matchingLive.length > 0 ? cards(matchingLive) : (
+        {orderedLive.length > 0 ? cards(orderedLive) : (
           <p role="status" className="catalog-empty">
             {lang === 'cs' ? 'Tomuto hledání neodpovídá žádná dostupná aplikace.' : 'No available apps match your search.'}
           </p>
