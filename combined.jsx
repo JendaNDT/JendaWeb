@@ -1534,6 +1534,7 @@ Object.assign(window, { Nav, Hero, BackgroundFX });
 const { useState: __useS, useEffect: __useE, useLayoutEffect: __useL, useMemo: __useM, useCallback: __useC, useRef: __useR } = React;
 
 const APP_VISUALS = {
+  rocker: { src:'/screenshots/rocker/metronome-desktop-v1.jpg', kind:'desktop', cs:'Metronom pro tvoje cvičení.', en:'A metronome for your practice.' },
   bomberman: { src:'/screenshots/bomberman-2.0.5/gameplay.png', kind:'desktop', cs:'Bomby, bludiště a arkádová akce.', en:'Bombs, mazes and arcade action.' },
   'fyzika-pastelkou': { src:'/screenshots/fyzika-pastelkou/android-water.png', kind:'landscape', cs:'Kresli. Zkoušej. Objevuj.', en:'Draw. Try. Discover.' },
   georeminder: { src:'/screenshots/showcase/georeminder-dark-v1.png', kind:'phone', cs:'Připomínka na správném místě.', en:'A reminder in the right place.' },
