@@ -612,8 +612,9 @@
     .app-stage-landscape { align-items:center; background:#d8dfc5; }
     .app-stage-landscape .app-stage-caption { color:#34402e; }
     .app-stage-landscape img { width:100%; height:auto; object-fit:contain; border-radius:8px; box-shadow:0 10px 24px #0002; }
-    .app-stage-desktop { align-items:center; padding:46px 14px 14px; }
-    .app-stage-desktop img { width:100%; height:auto; border-radius:8px; border:1px solid var(--border); box-shadow:0 10px 24px #0003; }
+    .app-stage-desktop { display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); gap:14px; align-items:start; justify-items:center; padding:22px 14px 14px; }
+    .app-stage-desktop .app-stage-caption { position:static; width:100%; }
+    .app-stage-desktop img { width:auto; height:auto; max-width:100%; max-height:100%; min-width:0; min-height:0; border-radius:8px; border:1px solid var(--border); box-shadow:0 10px 24px #0003; }
     .app-stage-icon { align-items:center; padding-bottom:22px; }
     .app-stage-icon img { width:112px; height:112px; object-fit:contain; border-radius:25px; box-shadow:0 14px 36px #0003; }
     .app-stage-letter { font-family:'Syne',sans-serif; font-size:80px; font-weight:800; color:var(--app-accent); }
@@ -988,7 +989,7 @@
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       (function() {
-        const VERSION = 'jw-v101'; // Match sw.js version
+        const VERSION = 'jw-v102'; // Match sw.js version
         const jsxFiles = [
           'combined.jsx'
         ];
