@@ -19,7 +19,7 @@
 | Tabulka | Klíč | Řádků | Pozn. |
 |---|---|---|---|
 | `albums` | `id` text | 5 | id, title, genre, year, g1, g2, tracks, cs, en, **cover_url**, sort, created_at |
-| `apps` | `id` bigint | 20 | name, platform (`PWA`/`Android`), color, cs, en, link, icon_url, case_study_url, **likes** (bigint, počet lajků), sort |
+| `apps` | `id` bigint | 20 | name, platform (`PWA`/`Android`/`Windows`), color, cs, en, link, icon_url, case_study_url, **likes** (bigint, počet lajků), sort |
 | `tracks` | `id` bigint | 15 | title, album_id→albums, duration, audio_url, download_url, lyrics_cs, lyrics_en, **plays** (bigint, počty přehrání), **likes** (bigint, počet lajků), sort (3 mají texty) |
 | `socials` | `id` text | 5 | label, url, sort |
 | `site_config` | `key` text | 10 | value jsonb: contact_email, contact_endpoint, newsletter_endpoint, kofi_username, giscus_config, public_stats, build_log, comparison, case_studies, **strings** (editovatelné UI texty CZ/EN jako override) |

@@ -1,5 +1,5 @@
 // sw.js — Service worker for offline-first PWA
-const VERSION = 'jw-v99';
+const VERSION = 'jw-v100';
 const SHELL = [
   '/',
   '/index.html',
@@ -60,6 +60,8 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  // Large app downloads belong to the browser, not the offline page cache.
+  if (url.origin === location.origin && url.pathname.startsWith('/binaries/')) return;
   // RT Asistent owns its scoped worker and cache; portfolio updates must not touch it.
   if (url.origin === location.origin && (url.pathname === '/rt-asistent' || url.pathname.startsWith('/rt-asistent/'))) return;
   // Admin je online-only — nikdy neservíruj starou verzi z cache (vždy ze sítě)

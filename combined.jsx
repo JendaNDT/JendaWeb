@@ -1534,6 +1534,7 @@ Object.assign(window, { Nav, Hero, BackgroundFX });
 const { useState: __useS, useEffect: __useE, useLayoutEffect: __useL, useMemo: __useM, useCallback: __useC, useRef: __useR } = React;
 
 const APP_VISUALS = {
+  bomberman: { src:'/screenshots/bomberman-2.0.5/gameplay.png', kind:'desktop', cs:'Bomby, bludiště a arkádová akce.', en:'Bombs, mazes and arcade action.' },
   'fyzika-pastelkou': { src:'/screenshots/fyzika-pastelkou/android-water.png', kind:'landscape', cs:'Kresli. Zkoušej. Objevuj.', en:'Draw. Try. Discover.' },
   georeminder: { src:'/screenshots/showcase/georeminder-dark-v1.png', kind:'phone', cs:'Připomínka na správném místě.', en:'A reminder in the right place.' },
   engitab: { src:'/screenshots/showcase/engitab-dark-v1.png', kind:'phone', cs:'Celá dílna v kapse.', en:'Your workshop, in your pocket.' },
@@ -1646,7 +1647,7 @@ function AppsSection({ lang, onOpen }) {
   const orderedLive = [...featured, ...otherLive];
   const pills = [
     { key: 'all', label: lang === 'cs' ? 'Vše' : 'All', count: live.length },
-    ...['PWA', 'Android'].map(key => ({ key, label: key, count: live.filter(a => a.platform === key).length })),
+    ...['PWA', 'Android', 'Windows'].map(key => ({ key, label: key, count: live.filter(a => a.platform === key).length })),
   ];
   const cards = (items, mode = 'live') => <AppGrid items={items} mode={mode} lang={lang} onOpen={onOpen} />;
 
@@ -1655,7 +1656,7 @@ function AppsSection({ lang, onOpen }) {
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:1200, margin:'0 auto' }}>
         <SectionLabel color="a1" num="02">{tx(lang,'apps_title')}</SectionLabel>
         <p style={{ color:'var(--muted)', fontSize:16, marginBottom:28 }}>
-          {lang === 'cs' ? `${live.length} aplikací k vyzkoušení · Android a web` : `${live.length} apps to try · Android and web`}
+          {lang === 'cs' ? `${live.length} aplikací k vyzkoušení · Android, Windows a web` : `${live.length} apps to try · Android, Windows and web`}
         </p>
         <div className="apps-tools">
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
@@ -1857,7 +1858,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
                 }}>{app.platform}</span>
               </div>
               <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
-                {!isLiveApp(app) ? (lang === 'cs' ? 'Studie / koncept' : 'Study / concept') : isPWA ? (lang === 'cs' ? 'Webová aplikace' : 'Web app') : (lang === 'cs' ? 'Aplikace pro Android' : 'Android app')}
+                {!isLiveApp(app) ? (lang === 'cs' ? 'Studie / koncept' : 'Study / concept') : isPWA ? (lang === 'cs' ? 'Webová aplikace' : 'Web app') : (lang === 'cs' ? `Aplikace pro ${app.platform}` : `${app.platform} app`)}
               </div>
             </div>
           </div>
