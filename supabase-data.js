@@ -9,7 +9,7 @@
   // Veřejný anon klíč — patří do frontendu; zápis blokuje RLS (tady jen čteme).
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbWRnYmFlYXJ3aGtodWxreXRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0ODUzNzAsImV4cCI6MjA5NzA2MTM3MH0.5X4X-FVXlwukKWOlx3kIqazaBBeJJMCNMiEmdNPM8lk';
   var REST = SUPABASE_URL + '/rest/v1/';
-  var CACHE_KEY = 'jw_content_v1';
+  var CACHE_KEY = 'jw_content_v2';
 
   window.__jwContentVersion = window.__jwContentVersion || 0;
   // Vystavit přístup k Supabase i pro ostatní skripty (počítání přehrání atd.)
@@ -20,7 +20,9 @@
     return rows.map(function (a) {
       return { id: a.id, name: a.name, platform: a.platform, color: a.color,
                cs: a.cs, en: a.en, link: a.link || '#', case_study_url: a.case_study_url || null,
-               screenshots: a.screenshots || [], downloads: a.downloads || [], likes: a.likes || 0, icon_url: a.icon_url || null };
+               screenshots: a.screenshots || [], downloads: a.downloads || [], likes: a.likes || 0, icon_url: a.icon_url || null,
+               download_count: a.download_count ?? null, download_count_started_at:a.download_count_started_at || null,
+               release_stage:a.release_stage || null };
     });
   }
   function mapAlbums(rows) {

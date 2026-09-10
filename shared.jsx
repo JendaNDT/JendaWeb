@@ -79,6 +79,29 @@ const isLiveApp = app => !!(app.link && app.link.trim() && app.link.trim() !== '
 const appSupportsPlatform = (app, platform) => String(app.platform || '').split(' / ').includes(platform);
 const appDownloads = app => Array.isArray(app.downloads) ? app.downloads.filter(d =>
   d && typeof d.url === 'string' && /^(?:\/[^/]|https:\/\/)/.test(d.url)) : [];
+const isDownloadLink = link => typeof link === 'string' &&
+  (link.includes('/storage/v1/object/public/binaries/') || link.startsWith('[') || /\.(apk|zip|dmg|exe|tar\.gz|ipa|pkg)(?:[?#].*)?$/i.test(link));
+const appHasDownloads = app => app.platform !== 'PWA' && isLiveApp(app) &&
+  (isDownloadLink(app.link) || appDownloads(app).some(d => isDownloadLink(d.url)));
+const apiRecordDownload = async (app, url) => {
+  const supa = window.__jwSupa;
+  if (!supa || !appHasDownloads(app)) return null;
+  try {
+    // Fire once per activation. Do not retry an ambiguous response or delay the file.
+    const response = await fetch(`${supa.url}/rest/v1/rpc/record_app_download`, {
+      method:'POST', keepalive:true,
+      headers:{ apikey:supa.key, Authorization:`Bearer ${supa.key}`, 'Content-Type':'application/json' },
+      body:JSON.stringify({ p_app_id:app.id, p_download_url:url }),
+    });
+    if (!response.ok) return null;
+    const count = await response.json();
+    if (!Number.isSafeInteger(count) || count < 0) return null;
+    const current = (window.APPS_DATA || []).find(a => a.id === app.id);
+    if (current) current.download_count = count;
+    window.dispatchEvent(new CustomEvent('jw-download-count-updated', { detail:{ id:app.id, count } }));
+    return count;
+  } catch { return null; }
+};
 const isPlayableTrack = track => !!(track.audioUrl && track.audioUrl.trim() && track.audioUrl.trim() !== '#');
 const publishedAlbums = () => (window.ALBUMS || []).filter(album =>
   (window.TRACKS_DATA || []).some(track => track.album === album.id && isPlayableTrack(track)));
@@ -87,7 +110,7 @@ const appCopy = (app, lang) => {
   const parts = text.split(/\n\s*\n|\s+(?=(?:Verze|Version) \d)/).filter(Boolean);
   return { intro: parts[0] || '', details: parts.slice(1).join('\n\n') };
 };
-const featuredAppSlugs = ['fyzika-pastelkou', 'georeminder', 'engitab'];
+const featuredAppSlugs = ['georeminder', 'engitab'];
 
 
 // ── Storage keys ────────────────────────────────────────────────────────

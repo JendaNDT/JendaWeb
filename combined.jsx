@@ -628,6 +628,29 @@ const isLiveApp = app => !!(app.link && app.link.trim() && app.link.trim() !== '
 const appSupportsPlatform = (app, platform) => String(app.platform || '').split(' / ').includes(platform);
 const appDownloads = app => Array.isArray(app.downloads) ? app.downloads.filter(d =>
   d && typeof d.url === 'string' && /^(?:\/[^/]|https:\/\/)/.test(d.url)) : [];
+const isDownloadLink = link => typeof link === 'string' &&
+  (link.includes('/storage/v1/object/public/binaries/') || link.startsWith('[') || /\.(apk|zip|dmg|exe|tar\.gz|ipa|pkg)(?:[?#].*)?$/i.test(link));
+const appHasDownloads = app => app.platform !== 'PWA' && isLiveApp(app) &&
+  (isDownloadLink(app.link) || appDownloads(app).some(d => isDownloadLink(d.url)));
+const apiRecordDownload = async (app, url) => {
+  const supa = window.__jwSupa;
+  if (!supa || !appHasDownloads(app)) return null;
+  try {
+    // Fire once per activation. Do not retry an ambiguous response or delay the file.
+    const response = await fetch(`${supa.url}/rest/v1/rpc/record_app_download`, {
+      method:'POST', keepalive:true,
+      headers:{ apikey:supa.key, Authorization:`Bearer ${supa.key}`, 'Content-Type':'application/json' },
+      body:JSON.stringify({ p_app_id:app.id, p_download_url:url }),
+    });
+    if (!response.ok) return null;
+    const count = await response.json();
+    if (!Number.isSafeInteger(count) || count < 0) return null;
+    const current = (window.APPS_DATA || []).find(a => a.id === app.id);
+    if (current) current.download_count = count;
+    window.dispatchEvent(new CustomEvent('jw-download-count-updated', { detail:{ id:app.id, count } }));
+    return count;
+  } catch { return null; }
+};
 const isPlayableTrack = track => !!(track.audioUrl && track.audioUrl.trim() && track.audioUrl.trim() !== '#');
 const publishedAlbums = () => (window.ALBUMS || []).filter(album =>
   (window.TRACKS_DATA || []).some(track => track.album === album.id && isPlayableTrack(track)));
@@ -636,7 +659,7 @@ const appCopy = (app, lang) => {
   const parts = text.split(/\n\s*\n|\s+(?=(?:Verze|Version) \d)/).filter(Boolean);
   return { intro: parts[0] || '', details: parts.slice(1).join('\n\n') };
 };
-const featuredAppSlugs = ['fyzika-pastelkou', 'georeminder', 'engitab'];
+const featuredAppSlugs = ['georeminder', 'engitab'];
 
 
 // ── Storage keys ────────────────────────────────────────────────────────
@@ -1548,6 +1571,28 @@ const APP_VISUALS = {
   'rt-asistent': { src:'/screenshots/showcase/rt-asistent-v1.jpg', kind:'desktop', cs:'Radiografické výpočty přehledně.', en:'Radiography calculations, clearly.' },
 };
 
+function AppReleaseStage({ app, lang }) {
+  return app.release_stage === 'alpha' ? <span className="app-release-stage">{lang === 'cs' ? 'Alfa verze' : 'Alpha version'}</span> : null;
+}
+
+function AppDownloadCount({ app, lang }) {
+  const [count, setCount] = __useS(app.download_count ?? null);
+  __useE(() => { setCount(app.download_count ?? null); }, [app.id, app.download_count]);
+  __useE(() => {
+    const update = e => { if (e.detail.id === app.id) setCount(e.detail.count); };
+    window.addEventListener('jw-download-count-updated', update);
+    return () => window.removeEventListener('jw-download-count-updated', update);
+  }, [app.id]);
+  if (!appHasDownloads(app)) return null;
+  const label = lang === 'cs' ? 'Zahájená stažení' : 'Downloads started';
+  const number = Number.isSafeInteger(count) && count >= 0 ? count.toLocaleString(lang === 'cs' ? 'cs-CZ' : 'en-US') : '—';
+  const date = app.download_count_started_at ? new Date(app.download_count_started_at).toLocaleDateString(lang === 'cs' ? 'cs-CZ' : 'en-GB') : null;
+  const explanation = lang === 'cs' ? 'Počet zahájení stažení souborů, ne dokončených stažení ani instalací.' : 'File download starts, not completed downloads or installations.';
+  return <div className="app-download-count" title={explanation + (date ? (lang === 'cs' ? ' Měříme od ' : ' Counted since ') + date : '')}>
+    <DlIco /><span>{label}: <strong>{number}</strong></span>
+  </div>;
+}
+
 function AppDownloads({ app, lang }) {
   const downloads = appDownloads(app);
   const primary = downloads.filter(d => d.primary);
@@ -1556,14 +1601,14 @@ function AppDownloads({ app, lang }) {
   return <div className="app-downloads">
     {primary[0].version && <div className="app-download-version">{lang === 'cs' ? 'Verze ' : 'Version '}{primary[0].version}</div>}
     <div className="app-download-primary">
-      {primary.map(d => <a key={d.url} href={d.url} download className="app-download-button">
+      {primary.map(d => <a key={d.url} href={d.url} download className="app-download-button" onClick={() => { void apiRecordDownload(app, d.url); }}>
         <span><DlIco />{lang === 'cs' ? d.label_cs : d.label_en}</span>
         <small>{lang === 'cs' ? d.note_cs : d.note_en}</small>
       </a>)}
     </div>
     {extra.length > 0 && <div className="app-download-extra">
       <span>{lang === 'cs' ? 'Další balíčky:' : 'Other packages:'}</span>
-      {extra.map(d => <a key={d.url} href={d.url} download>{lang === 'cs' ? d.label_cs : d.label_en}</a>)}
+      {extra.map(d => <a key={d.url} href={d.url} download onClick={() => { void apiRecordDownload(app, d.url); }}>{lang === 'cs' ? d.label_cs : d.label_en}</a>)}
     </div>}
   </div>;
 }
@@ -1593,9 +1638,10 @@ function AppCard({ app, lang, mode = 'live', onOpen }) {
         <div className="app-card-heading">
           {app.icon_url ? <img className="app-icon" src={app.icon_url} alt="" width="40" height="40" loading="lazy" />
             : <span className="app-icon app-letter" aria-hidden="true">{app.name[0]}</span>}
-          <div><h3>{app.name}</h3><span className="app-platform">{app.platform}</span></div>
+          <div><h3>{app.name}</h3><span className="app-platform">{app.platform}</span> <AppReleaseStage app={app} lang={lang} /></div>
         </div>
         <p>{appCopy(app, lang).intro}</p>
+        <AppDownloadCount app={app} lang={lang} />
         <div className="app-card-action"><span>{lang === 'cs' ? 'Prohlédnout aplikaci' : 'Explore the app'}</span><span aria-hidden="true">↗</span></div>
       </div>
     </a>
@@ -1737,7 +1783,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
   const water = screenshots.findIndex(src => src.endsWith('/android-water.png'));
   if (slugify(app.name) === 'fyzika-pastelkou' && water > 0) screenshots.unshift(screenshots.splice(water, 1)[0]);
   const caseStudyUrl = window.CASE_STUDIES?.[app.id] || app.case_study_url;
-  const isDownload = app.link && (app.link.includes('/storage/v1/object/public/binaries/') || app.link.startsWith('[') || /\.(apk|zip|dmg|exe|tar\.gz|ipa|pkg)(?:\?.*)?$/i.test(app.link));
+  const isDownload = isDownloadLink(app.link);
   
   const [liked, setLiked] = __useS(() => window.isItemLiked(window.LIKES_APPS_KEY, app.id));
   const [likeCount, setLikeCount] = __useS(app.likes || 0);
@@ -1801,6 +1847,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
         urls = [app.link];
       }
 
+      void apiRecordDownload(app, app.link);
       if (urls.length > 1) {
         setDownloading(true);
         try {
@@ -1883,6 +1930,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
                   color: isPWA ? 'var(--a1)' : '#4ade80',
                   border: `1px solid ${isPWA ? 'color-mix(in srgb, var(--a1) 35%, transparent)' : 'rgba(34,197,94,0.3)'}`,
                 }}>{app.platform}</span>
+                <AppReleaseStage app={app} lang={lang} />
               </div>
               <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
                 {!isLiveApp(app) ? (lang === 'cs' ? 'Studie / koncept' : 'Study / concept') : isPWA ? (lang === 'cs' ? 'Webová aplikace' : 'Web app') : (lang === 'cs' ? `Aplikace pro ${app.platform}` : `${app.platform} app`)}
