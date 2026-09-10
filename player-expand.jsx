@@ -191,6 +191,7 @@ function ExpandMode({
           e.preventDefault(); first.focus();
         }
       }
+      if (e.key !== 'Escape' && e.target?.closest?.('input, textarea, select, [role="slider"]')) return;
       if (e.key === 'Escape' || (e.key === 'ArrowDown' && !e.shiftKey && !showLyrics)) { e.preventDefault(); onClose(); }
     };
     window.addEventListener('keydown', onKey);
@@ -239,8 +240,7 @@ function ExpandMode({
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
       onPointerLeave={() => { if (!isDraggingRef?.current) setHovBar?.(null); }}
-      role="slider" aria-label="Seek"
-      aria-valuemin={0} aria-valuemax={duration || 0} aria-valuenow={currentTime}
+      {...seekSliderProps(currentTime, duration, onSeekTo, lang)}
       style={{
         height:54, display:'flex', alignItems:'center', justifyContent:'space-between',
         gap:1, cursor:'pointer', position:'relative', touchAction:'none',
@@ -267,7 +267,7 @@ function ExpandMode({
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
-      role="slider" aria-label="Seek"
+      {...seekSliderProps(currentTime, duration, onSeekTo, lang)}
       style={{ height:72, position:'relative', cursor:'pointer', touchAction:'none' }}>
       {/* Top half */}
       <div style={{ position:'absolute', top:0, left:0, right:0, height:'50%', display:'flex', alignItems:'flex-end', gap:1 }}>
@@ -297,7 +297,7 @@ function ExpandMode({
     const cx = size/2, cy = size/2;
     const inner = 36, maxOuter = 90;
     return (
-      <div style={{ display:'flex', justifyContent:'center', height:size, position:'relative' }}>
+      <div {...seekSliderProps(currentTime, duration, onSeekTo, lang)} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} style={{ display:'flex', justifyContent:'center', height:size, position:'relative', touchAction:'none' }}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ overflow:'visible' }}>
           {bars.map((h, i) => {
             const angle = (i / N) * Math.PI * 2 - Math.PI / 2;
@@ -367,7 +367,7 @@ function ExpandMode({
         display:'flex', alignItems:'center', justifyContent:'space-between',
         padding:'22px 28px',
       }}>
-        <button onClick={onClose} aria-label="Collapse" title="Collapse (Esc)" style={{
+        <button onClick={onClose} aria-label={playerLabel(lang, 'collapse')} title="Collapse (Esc)" style={{
           display:'flex', alignItems:'center', gap:8,
           padding:'10px 16px', borderRadius:50,
           background:'rgba(0,0,0,0.35)', color:'#fff',
@@ -453,7 +453,7 @@ function ExpandMode({
               display: 'flex', alignItems: 'center', gap: 4,
               cursor: 'pointer', padding: '4px 8px', borderRadius: 8,
               fontSize: 13, transition: 'all 0.15s', outline: 'none'
-            }} title={lang === 'cs' ? 'Líbí se mi' : 'Like'}
+            }} aria-label={`${playerLabel(lang, 'like')}: ${track.title}`} aria-pressed={liked} title={playerLabel(lang, 'like')}
                onMouseEnter={(e) => { if (!liked) e.currentTarget.style.color = '#fff'; }}
                onMouseLeave={(e) => { if (!liked) e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" style={{ transition: 'transform 0.15s', transform: liked ? 'scale(1.2)' : 'none' }}>
@@ -502,15 +502,15 @@ function ExpandMode({
 
         {/* Controls */}
         <div style={{ display:'flex', alignItems:'center', gap:28 }}>
-          <button onClick={() => setShuffle(s => !s)} aria-label="Shuffle" title="Shuffle"
+          <button onClick={() => setShuffle(s => !s)} aria-label={playerLabel(lang, 'shuffle')} aria-pressed={shuffle} title={playerLabel(lang, 'shuffle')}
             style={{ color: shuffle ? 'var(--a2)' : 'rgba(255,255,255,0.5)', display:'flex', padding:8 }}>
             <ShuffleIco />
           </button>
-          <button onClick={onPrev} aria-label="Previous" title="Previous (←)"
+          <button onClick={onPrev} aria-label={playerLabel(lang, 'previous')} title={`${playerLabel(lang, 'previous')} (←)`}
             style={{ color:'rgba(255,255,255,0.85)', display:'flex', padding:8 }}>
             <PrevIco />
           </button>
-          <button onClick={() => setIsPlaying(!isPlaying)} aria-label={isPlaying ? 'Pause' : 'Play'} title={isPlaying ? 'Pause' : 'Play'}
+          <button onClick={() => setIsPlaying(p => !p)} aria-label={`${playerLabel(lang, isPlaying ? 'pause' : 'play')}: ${track.title}`} title={playerLabel(lang, isPlaying ? 'pause' : 'play')}
             style={{
               width:72, height:72, borderRadius:'50%',
               background:'#fff', color:'#000',
@@ -527,12 +527,12 @@ function ExpandMode({
               )}
             </div>
           </button>
-          <button onClick={onNext} aria-label="Next" title="Next (→)"
+          <button onClick={onNext} aria-label={playerLabel(lang, 'next')} title={`${playerLabel(lang, 'next')} (→)`}
             style={{ color:'rgba(255,255,255,0.85)', display:'flex', padding:8 }}>
             <NextIco />
           </button>
           <button onClick={() => setRepeat(r => r === 'off' ? 'all' : r === 'all' ? 'one' : 'off')}
-            aria-label={`Repeat: ${repeat}`} title={`Repeat: ${repeat}`}
+            aria-label={playerLabel(lang, 'repeat_' + repeat)} title={playerLabel(lang, 'repeat_' + repeat)}
             style={{ color: repeat !== 'off' ? 'var(--a2)' : 'rgba(255,255,255,0.5)', display:'flex', padding:8 }}>
             {repeat === 'one' ? <RepeatOneIco /> : <RepeatIco />}
           </button>
@@ -540,12 +540,12 @@ function ExpandMode({
 
         {/* Volume */}
         <div style={{ display:'flex', alignItems:'center', gap:12, width:'min(280px, 80vw)', color:'rgba(255,255,255,0.7)' }}>
-          <button onClick={() => setMuted(m => !m)} aria-label="Mute" style={{ color: muted ? 'var(--a2)' : 'inherit', display:'flex' }}>
+          <button onClick={() => setMuted(m => !m)} aria-label={playerLabel(lang, muted ? 'unmute' : 'mute')} aria-pressed={muted} style={{ color: muted ? 'var(--a2)' : 'inherit', display:'flex' }}>
             {muted ? <MuteIco /> : <VolIco />}
           </button>
           <input id="expanded-player-volume" name="volume" type="range" min="0" max="1" step="0.01" value={muted ? 0 : vol}
             onChange={e => { setVol(+e.target.value); setMuted(false); }}
-            style={{ flex:1 }} aria-label="Volume" />
+            style={{ flex:1 }} aria-label={playerLabel(lang, 'volume')} />
         </div>
       </div>
 

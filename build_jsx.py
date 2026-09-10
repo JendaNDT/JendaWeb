@@ -1,37 +1,6 @@
-import os
+"""Compatibility entry point: rebuild all production outputs, not just combined.jsx."""
+import subprocess
 from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parent
-
-jsx_files = [
-    'tweaks-panel.jsx',
-    'shared.jsx',
-    'gallery.jsx',
-    'nav-hero.jsx',
-    'apps-music.jsx',
-    'player-contact.jsx',
-    'player-expand.jsx',
-    'queue.jsx',
-    'extras.jsx',
-    'search.jsx',
-    'app.jsx'
-]
-
-combined_path = str(PROJECT_DIR / "combined.jsx")
-
-print("Combining JSX files...")
-combined_code = []
-for file in jsx_files:
-    path = PROJECT_DIR / file
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-            code = f.read()
-        combined_code.append(f"\n// ==========================================\n// FILE: {file}\n// ==========================================\n")
-        combined_code.append(code)
-    else:
-        raise FileNotFoundError(path)
-
-with open(combined_path, "w", encoding="utf-8") as f:
-    f.write("".join(combined_code))
-
-print(f"Successfully created combined.jsx ({os.path.getsize(combined_path)} bytes)!")
+subprocess.run(['node', str(PROJECT_DIR / 'build_site.cjs')], cwd=PROJECT_DIR, check=True)

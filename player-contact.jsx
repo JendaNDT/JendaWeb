@@ -361,7 +361,8 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
     const onKey = (e) => {
       if (e.defaultPrevented) return;
       const t = e.target;
-      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+      if (e.code === 'Space' && t?.closest?.('button, a[href], summary, [role="button"]')) return;
       // Modal interactions must not also trigger the player behind them.
       if (document.querySelector('[role="dialog"][aria-modal="true"]:not([data-player-dialog])')) return;
       const a = audioRef.current;
@@ -408,8 +409,9 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
   };
   const seekTo = (sec) => {
     if (!isFinite(sec)) return;
-    const s = Math.max(0, sec);
     const a = audioRef.current;
+    const max = Number.isFinite(a?.duration) ? a.duration : duration;
+    const s = Math.max(0, Math.min(max || 0, sec));
     if (a) { try { a.currentTime = s; } catch (e) {} }
     setCurrentTime(s);
   };
@@ -417,6 +419,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
   const isDraggingRef = __useR_pc(false);
 
   const handlePointerDown = (e) => {
+    e.currentTarget.focus({ preventScroll:true });
     try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
     isDraggingRef.current = true;
     seekFromEvent(e);
@@ -442,8 +445,8 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
       animation:'slideUp 0.35s ease',
     }}>
       <div className="player-meta" style={{ display:'flex', alignItems:'center', gap:14, minWidth:0 }}>
-        <div className="player-info" onClick={() => setExpanded(true)} style={{ display:'flex', alignItems:'center', gap:12, minWidth:0, cursor:'pointer' }} role="button" tabIndex={0} aria-label={`${track ? `${track.title} - ${album?.title || ''}. ` : ''}Expand player (E)`} title="Expand (E)"
-          onKeyDown={(e) => { if (e.key === 'Enter') setExpanded(true); }}>
+        <div className="player-info" onClick={() => setExpanded(true)} style={{ display:'flex', alignItems:'center', gap:12, minWidth:0, cursor:'pointer' }} role="button" tabIndex={0} aria-label={`${track ? `${track.title} - ${album?.title || ''}. ` : ''}${playerLabel(lang, 'expand')} (E)`} title={playerLabel(lang, 'expand')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setExpanded(true); } }}>
           <div className={restoring ? 'shimmer-fx' : ''} style={{ position:'relative', width:42, height:42, borderRadius:8, flexShrink:0, overflow:'hidden', backgroundImage: track ? `url("${trackArt(track, album)}")` : '', backgroundSize:'cover', display:'flex', alignItems:'center', justifyContent:'center' }}>
             {isPlaying && <EqBars color="#fff" />}
           </div>
@@ -460,7 +463,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
             display: 'flex', alignItems: 'center', gap: 4,
             cursor: 'pointer', padding: '6px 8px', borderRadius: 8,
             fontSize: 13, transition: 'all 0.15s', outline: 'none', flexShrink: 0
-          }} title={lang === 'cs' ? 'Líbí se mi' : 'Like'}
+          }} aria-label={`${playerLabel(lang, 'like')}: ${track.title}`} aria-pressed={liked} title={playerLabel(lang, 'like')}
              onMouseEnter={(e) => { if (!liked) e.currentTarget.style.color = 'var(--text)'; }}
              onMouseLeave={(e) => { if (!liked) e.currentTarget.style.color = 'var(--muted)'; }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" style={{ transition: 'transform 0.15s', transform: liked ? 'scale(1.2)' : 'none' }}>
@@ -473,23 +476,23 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
 
       <div className="player-controls" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
         <div className="player-transport" style={{ display:'flex', alignItems:'center', gap:14 }}>
-          <button className="player-mute-mobile" onClick={() => setMuted(m => !m)} aria-label="Mute" style={{ color: muted ? 'var(--a1)' : 'var(--muted)', padding:6 }}>
+          <button className="player-mute-mobile" onClick={() => setMuted(m => !m)} aria-label={playerLabel(lang, muted ? 'unmute' : 'mute')} aria-pressed={muted} style={{ color: muted ? 'var(--a1)' : 'var(--muted)', padding:6 }}>
             <VolIco />
           </button>
-          <button onClick={() => setShuffle(s => !s)} aria-label="Shuffle" title="Shuffle" style={{ color: shuffle ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:6 }}><ShuffleIco /></button>
-          <button onClick={onPrev} aria-label="Previous (←)" title="Previous (←)" style={{ color:'var(--muted)', display:'flex', padding:6, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><PrevIco /></button>
-          <button onClick={() => setIsPlaying(!isPlaying)} aria-label={isPlaying ? 'Pause (Space)' : 'Play (Space)'} title={isPlaying ? 'Pause (Space)' : 'Play (Space)'} style={{
+          <button onClick={() => setShuffle(s => !s)} aria-label={playerLabel(lang, 'shuffle')} aria-pressed={shuffle} title={playerLabel(lang, 'shuffle')} style={{ color: shuffle ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:6 }}><ShuffleIco /></button>
+          <button onClick={onPrev} aria-label={playerLabel(lang, 'previous')} title={`${playerLabel(lang, 'previous')} (←)`} style={{ color:'var(--muted)', display:'flex', padding:6, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><PrevIco /></button>
+          <button data-player-action="play" onClick={() => setIsPlaying(p => !p)} aria-label={`${playerLabel(lang, isPlaying ? 'pause' : 'play')}: ${track?.title || ''}`} title={`${playerLabel(lang, isPlaying ? 'pause' : 'play')} (Space)`} style={{
             width:48, height:48, borderRadius:'50%', background:'var(--a1)', color:'#fff',
             display:'flex', alignItems:'center', justifyContent:'center',
             boxShadow:'0 0 20px var(--glow)', transition:'transform 0.1s',
           }} onMouseEnter={e=>e.currentTarget.style.transform='scale(1.08)'} onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>
             {isPlaying ? <PauseIco /> : <PlayIco />}
           </button>
-          <button onClick={onNext} aria-label="Next (→)" title="Next (→)" style={{ color:'var(--muted)', display:'flex', padding:6, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><NextIco /></button>
-          <button onClick={() => setRepeat(r => r === 'off' ? 'all' : r === 'all' ? 'one' : 'off')} aria-label={`Repeat: ${repeat}`} title={`Repeat: ${repeat}`} style={{ color: repeat !== 'off' ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:6 }}>
+          <button onClick={onNext} aria-label={playerLabel(lang, 'next')} title={`${playerLabel(lang, 'next')} (→)`} style={{ color:'var(--muted)', display:'flex', padding:6, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><NextIco /></button>
+          <button onClick={() => setRepeat(r => r === 'off' ? 'all' : r === 'all' ? 'one' : 'off')} aria-label={playerLabel(lang, 'repeat_' + repeat)} title={playerLabel(lang, 'repeat_' + repeat)} style={{ color: repeat !== 'off' ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:6 }}>
             {repeat === 'one' ? <RepeatOneIco /> : <RepeatIco />}
           </button>
-          <button className="player-mute-mobile" onClick={onClose} aria-label="Close" style={{ color:'var(--muted)', padding:6 }}>
+          <button className="player-mute-mobile" data-player-action="close" onClick={onClose} aria-label={playerLabel(lang, 'close')} style={{ color:'var(--muted)', padding:6 }}>
             <CloseIco />
           </button>
           <button className="player-more-mobile" onClick={() => setCompact(v => !v)}
@@ -513,8 +516,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
             onPointerLeave={() => { if (!isDraggingRef.current) setHovBar(null); }}
-            role="slider" aria-label="Seek"
-            aria-valuemin={0} aria-valuemax={duration || 0} aria-valuenow={currentTime}
+            {...seekSliderProps(currentTime, duration, seekTo, lang)}
             style={{ flex:1, height:28, display:'flex', alignItems:'center', justifyContent:'space-between', gap:1, cursor:'pointer', position:'relative', touchAction:'none' }}
           >
             {bars.map((h, i) => {
@@ -576,11 +578,11 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
             onMouseEnter={e=>e.currentTarget.style.color='var(--a1)'}
             onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><ShareIco /></button>
         )}
-        <button onClick={() => setMuted(m => !m)} aria-label="Mute (M)" title="Mute (M)" style={{ color: muted ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:4 }}>
+        <button onClick={() => setMuted(m => !m)} aria-label={playerLabel(lang, muted ? 'unmute' : 'mute')} aria-pressed={muted} title={`${playerLabel(lang, muted ? 'unmute' : 'mute')} (M)`} style={{ color: muted ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:4 }}>
           {muted ? <MuteIco /> : <VolIco />}
         </button>
-        <input id="player-volume" name="volume" type="range" min="0" max="1" step="0.01" value={muted ? 0 : vol} onChange={e => { setVol(+e.target.value); setMuted(false); }} style={{ width:80 }} aria-label="Volume" />
-        <button onClick={onClose} aria-label="Close player" title="Close" style={{ color:'var(--muted)', display:'flex', padding:6, marginLeft:8, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><CloseIco /></button>
+        <input id="player-volume" name="volume" type="range" min="0" max="1" step="0.01" value={muted ? 0 : vol} onChange={e => { setVol(+e.target.value); setMuted(false); }} style={{ width:80 }} aria-label={playerLabel(lang, 'volume')} />
+        <button onClick={onClose} aria-label={playerLabel(lang, 'close')} title={playerLabel(lang, 'close')} style={{ color:'var(--muted)', display:'flex', padding:6, marginLeft:8, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><CloseIco /></button>
       </div>
     </div>
 
@@ -681,8 +683,22 @@ function ContactForm({ lang }) {
   const [msg, setMsg] = __useS_pc('');
   const [touched, setTouched] = __useS_pc({ name:false, email:false, msg:false });
   const [status, setStatus] = __useS_pc('idle');
+  const submitting = __useR_pc(false);
+  const statusRef = __useR_pc(null);
   const endpoint = window.CONTACT_ENDPOINT;
-  const mailto = window.CONTACT_EMAIL || 'jenda@example.com';
+  const mailto = window.CONTACT_EMAIL;
+  const en = lang === 'en';
+  const statusText = {
+    invalid: en ? 'Please correct the marked fields.' : 'Oprav prosím označená pole.',
+    sending: tx(lang, 'contact_sending'),
+    ok: tx(lang, 'contact_ok'),
+    err: en ? 'The message was not sent. Your text is still here; please try again.' : 'Zprávu se nepodařilo odeslat. Text zůstal vyplněný, zkus to prosím znovu.',
+    handoff: en ? 'Continue in your email app and send the message there. This page cannot confirm sending.' : 'Pokračuj v e-mailové aplikaci a zprávu odešli tam. Tato stránka nemůže potvrdit odeslání.',
+    unavailable: en ? 'The contact form is temporarily unavailable. Please use the contact links below.' : 'Kontaktní formulář je dočasně nedostupný. Použij prosím kontaktní odkazy níže.',
+  }[status] || '';
+  __useE_pc(() => {
+    if (status === 'ok') statusRef.current?.focus();
+  }, [status]);
 
   const errors = {
     name:  name.trim().length === 0 ? tx(lang,'err_name') : null,
@@ -693,15 +709,26 @@ function ContactForm({ lang }) {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (submitting.current || status === 'ok') return;
     setTouched({ name:true, email:true, msg:true });
-    if (hasError) return;
+    if (hasError) {
+      setStatus('invalid');
+      const first = ['name', 'email', 'msg'].find(key => errors[key]);
+      e.currentTarget.querySelector('#cf-' + first)?.focus();
+      return;
+    }
     if (!endpoint) {
+      if (!mailto || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mailto) || /@example\.(com|org|net)$/i.test(mailto)) {
+        setStatus('unavailable');
+        return;
+      }
       const subject = encodeURIComponent(`Zpráva od ${name}`);
       const body = encodeURIComponent(`${msg}\n\n— ${name} (${email})`);
       window.location.href = `mailto:${mailto}?subject=${subject}&body=${body}`;
-      setStatus('ok');
+      setStatus('handoff');
       return;
     }
+    submitting.current = true;
     setStatus('sending');
     try {
       const res = await fetch(endpoint, {
@@ -712,77 +739,45 @@ function ContactForm({ lang }) {
       if (res.ok) { setStatus('ok'); setName(''); setEmail(''); setMsg(''); }
       else { setStatus('err'); }
     } catch { setStatus('err'); }
+    finally { submitting.current = false; }
   };
-
-  const fieldStyle = (hasErr) => ({
-    width:'100%', padding:'13px 16px', borderRadius:10,
-    background:'var(--card)',
-    border:`1px solid ${hasErr ? '#f87171' : 'var(--border)'}`,
-    color:'var(--text)', fontFamily:'inherit', fontSize:14,
-    outline:'none', resize:'vertical', transition:'border-color 0.2s, background 0.2s',
-  });
-  const onFocus = e => { e.currentTarget.style.borderColor='var(--a1)'; e.currentTarget.style.background='color-mix(in srgb, var(--text) 6%, transparent)'; };
-  const onBlurField = (key) => (e) => {
-    setTouched(t => ({ ...t, [key]: true }));
-    const hasErr = !!errors[key];
-    e.currentTarget.style.borderColor = hasErr ? '#f87171' : 'var(--border)';
-    e.currentTarget.style.background = 'var(--card)';
-  };
-
-  if (status === 'ok') {
-    return (
-      <div style={{
-        padding:'40px 24px', textAlign:'center',
-        border:'1px solid color-mix(in srgb, var(--a1) 40%, transparent)',
-        background:'color-mix(in srgb, var(--a1) 8%, transparent)',
-        borderRadius:'var(--r)', color:'var(--a1)',
-      }}>
-        <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom:14 }}>
-          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/>
-        </svg>
-        <div style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:18, color:'var(--text)' }}>
-          {tx(lang,'contact_ok')}
-        </div>
-      </div>
-    );
-  }
-
-  const errStyle = { fontSize:12, color:'#f87171', margin:'4px 2px 0', minHeight:14, textAlign:'left' };
 
   return (
-    <form onSubmit={onSubmit} noValidate style={{ display:'flex', flexDirection:'column', gap:14, textAlign:'left' }}>
+    <div>
+      <div id="cf-status" ref={statusRef} role="status" aria-live="polite" aria-atomic="true" tabIndex={-1}
+        className={`contact-status${['invalid', 'err', 'unavailable'].includes(status) ? ' contact-status-error' : ''}`}>
+        {statusText}
+      </div>
+      {status !== 'ok' && <form onSubmit={onSubmit} noValidate aria-busy={status === 'sending'} aria-describedby="cf-status"  style={{ display:'flex', flexDirection:'column', gap:14, textAlign:'left' }}>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
         <div>
           <div className={`field${touched.name && errors.name ? ' err' : ''}`}>
             <input id="cf-name" name="name" type="text" autoComplete="name" placeholder=" " value={name}
               onChange={e=>setName(e.target.value)} onBlur={() => setTouched(t => ({ ...t, name:true }))}
-              aria-invalid={!!(touched.name && errors.name)} />
+              disabled={status === 'sending'} required aria-describedby="cf-name-error" aria-invalid={!!(touched.name && errors.name)} />
             <label htmlFor="cf-name">{tx(lang,'contact_name')}</label>
           </div>
-          <div className="field-err">{touched.name && errors.name}</div>
+          <div id="cf-name-error" className="field-err" aria-live="polite">{touched.name && errors.name}</div>
         </div>
         <div>
           <div className={`field${touched.email && errors.email ? ' err' : ''}`}>
             <input id="cf-email" name="email" type="email" autoComplete="email" placeholder=" " value={email}
               onChange={e=>setEmail(e.target.value)} onBlur={() => setTouched(t => ({ ...t, email:true }))}
-              aria-invalid={!!(touched.email && errors.email)} />
+              disabled={status === 'sending'} required aria-describedby="cf-email-error" aria-invalid={!!(touched.email && errors.email)} />
             <label htmlFor="cf-email">{tx(lang,'contact_email_lbl')}</label>
           </div>
-          <div className="field-err">{touched.email && errors.email}</div>
+          <div id="cf-email-error" className="field-err" aria-live="polite">{touched.email && errors.email}</div>
         </div>
       </div>
       <div>
         <div className={`field${touched.msg && errors.msg ? ' err' : ''}`}>
           <textarea id="cf-msg" name="message" placeholder=" " value={msg} rows={5}
             onChange={e=>setMsg(e.target.value)} onBlur={() => setTouched(t => ({ ...t, msg:true }))}
-            aria-invalid={!!(touched.msg && errors.msg)} />
+            disabled={status === 'sending'} required aria-describedby="cf-msg-error" aria-invalid={!!(touched.msg && errors.msg)} />
           <label htmlFor="cf-msg">{tx(lang,'contact_msg')}</label>
         </div>
-        <div className="field-err">{touched.msg && errors.msg}</div>
+        <div id="cf-msg-error" className="field-err" aria-live="polite">{touched.msg && errors.msg}</div>
       </div>
-      {status === 'err' && (
-        <div style={{ fontSize:13, color:'#f87171', padding:'4px 2px' }}>{tx(lang,'contact_err')}</div>
-      )}
       <button type="submit" disabled={status==='sending'} style={{
         padding:'13px 30px', borderRadius:50, marginTop:8,
         background: status==='sending' ? 'var(--border)' : 'var(--a1)',
@@ -792,7 +787,8 @@ function ContactForm({ lang }) {
       }}>
         {status==='sending' ? tx(lang,'contact_sending') : tx(lang,'contact_send')}
       </button>
-    </form>
+    </form>}
+    </div>
   );
 }
 

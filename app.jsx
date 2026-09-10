@@ -400,7 +400,7 @@ function App() {
       <Nav lang={lang} setLang={setLang} mode={tw.mode || 'auto'} setMode={(v) => setTweak('mode', v)} />
       <main>
         <Hero lang={lang} onPlay={handlePlay} />
-        <MusicSection lang={lang} onPlay={handlePlay} onOpenAlbum={handleOpenAlbum} currentTrack={playerTrack} playing={playing} />
+        <MusicSection lang={lang} onPlay={handlePlay} onToggle={() => setPlaying(p => !p)} onOpenAlbum={handleOpenAlbum} currentTrack={playerTrack} playing={playing} />
         <AppsSection lang={lang} onOpen={handleOpenAppModal} />
         <ComparisonSection lang={lang} />
         <StatsSection lang={lang} />
@@ -474,6 +474,7 @@ function App() {
 function Root() {
   const [v, setV] = __useS_app(() => window.__jwContentVersion || 0);
   __useE_app(() => {
+    window.__jwAppReady?.();
     const onUpd = () => setV(window.__jwContentVersion || 0);
     window.addEventListener('jw-data-updated', onUpd);
     // Pojistka: data mohla dorazit mezi prvním renderem a připojením listeneru.
@@ -483,4 +484,10 @@ function Root() {
   return <App key={v} />;
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<Root />);
+class StartupBoundary extends React.Component {
+  constructor(props) { super(props); this.state = {failed:false}; }
+  static getDerivedStateFromError() { return {failed:true}; }
+  componentDidCatch(error) { console.error('[App]', error); window.__jwBootFailed?.(); }
+  render() { return this.state.failed ? null : this.props.children; }
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<StartupBoundary><Root /></StartupBoundary>);

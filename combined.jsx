@@ -618,6 +618,40 @@ const tx = (lang, key) => {
   return fallbacks[lang]?.[key] ?? key;
 };
 const slugify = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+// Player controls share names and keyboard behavior in every visualizer mode.
+function playerLabel(lang, key) {
+  const labels = {
+    play:['Přehrát','Play'], pause:['Pozastavit','Pause'], previous:['Předchozí skladba','Previous track'],
+    next:['Další skladba','Next track'], seek:['Pozice ve skladbě','Track position'],
+    volume:['Hlasitost','Volume'], mute:['Ztlumit','Mute'], unmute:['Zapnout zvuk','Unmute'],
+    shuffle:['Náhodné pořadí','Shuffle'], expand:['Rozbalit přehrávač','Expand player'],
+    collapse:['Sbalit přehrávač','Collapse player'], close:['Zavřít přehrávač','Close player'],
+    like:['Líbí se mi','Like'], download:['Stáhnout','Download'],
+    repeat_off:['Opakování vypnuto','Repeat off'], repeat_all:['Opakovat seznam','Repeat all'], repeat_one:['Opakovat skladbu','Repeat track'],
+  };
+  return labels[key]?.[lang === 'cs' ? 0 : 1] || key;
+}
+
+function seekSliderProps(currentTime, duration, onSeek, lang) {
+  const total = Number.isFinite(duration) ? Math.max(0, duration) : 0;
+  const position = Math.max(0, Math.min(total, Number.isFinite(currentTime) ? currentTime : 0));
+  return {
+    role:'slider', tabIndex:total > 0 ? 0 : -1, 'aria-disabled':total === 0,
+    'aria-label':playerLabel(lang, 'seek'), 'aria-orientation':'horizontal',
+    'aria-valuemin':0, 'aria-valuemax':total, 'aria-valuenow':position,
+    'aria-valuetext':`${fmtTime(position)} ${lang === 'cs' ? 'z' : 'of'} ${fmtTime(total)}`,
+    onKeyDown(e) {
+      if (e.altKey || e.ctrlKey || e.metaKey) return;
+      const targets = { ArrowLeft:position - 5, ArrowDown:position - 5, ArrowRight:position + 5, ArrowUp:position + 5,
+        Home:0, End:total, PageDown:position - total / 10, PageUp:position + total / 10 };
+      if (!(e.key in targets)) return;
+      e.preventDefault(); e.stopPropagation();
+      if (total > 0) onSeek(Math.max(0, Math.min(total, targets[e.key])));
+    },
+  };
+}
+
 const preferredScrollBehavior = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
 function scrollToSection(id) {
   document.getElementById(id)?.scrollIntoView({ behavior:preferredScrollBehavior(), block:'start' });
@@ -2087,7 +2121,7 @@ function AlbumCard({ album, lang, onPlay, onOpenAlbum, onFilter, selected, nowPl
   );
 }
 
-function TrackRow({ track, album, idx, active, playing, onPlay }) {
+function TrackRow({ track, album, idx, active, playing, onPlay, onToggle, lang }) {
   const [hov, setHov] = __useS(false);
   const [liked, setLiked] = __useS(() => window.isItemLiked(window.LIKES_TRACKS_KEY, track.id));
   const [likeCount, setLikeCount] = __useS(track.likes || 0);
@@ -2121,54 +2155,42 @@ function TrackRow({ track, album, idx, active, playing, onPlay }) {
     try { window.dispatchEvent(new CustomEvent('jw-track-like-toggled', { detail: { trackId: track.id, liked: nextLiked, likes: globalTrack?.likes || 0 } })); } catch (e) {}
   };
 
+  const playLabel = `${playerLabel(lang, active && playing ? 'pause' : 'play')}: ${track.title}`;
   return (
-    <div style={{
-      display:'flex', alignItems:'center', gap:14,
-      padding:'10px 14px', borderRadius:10,
-      background: active ? 'color-mix(in srgb, var(--a1) 12%, transparent)' : hov ? 'var(--card)' : 'transparent',
-      border:`1px solid ${active ? 'color-mix(in srgb, var(--a1) 40%, transparent)' : 'transparent'}`,
-      transition:'all 0.15s', cursor:'pointer',
-    }}
-    onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-    onClick={() => onPlay(track, window.TRACKS_DATA || [])}>
-      <div style={{ width:28, textAlign:'center', color: active ? 'var(--a1)' : 'var(--muted)', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-        {active && playing ? <EqBars /> : (hov || active) ? <PlayIco /> : <span style={{ fontSize:13 }}>{idx + 1}</span>}
-      </div>
-      <div style={{ width:38, height:38, borderRadius:7, flexShrink:0, backgroundImage:`url("${trackArt(track, album)}")`, backgroundSize:'cover' }} />
-      <div style={{ flex:1, minWidth:0 }}>
-        <div style={{ fontSize:14, fontWeight:600, color: active?'var(--a1)':'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{track.title}</div>
-        <div style={{ fontSize:12, color:'var(--muted)', marginTop:1 }}>{album?.title || ''}</div>
-      </div>
-      <div style={{ display:'flex', alignItems:'center', gap:10, flexShrink:0 }}>
-        {track.plays > 0 && (
-          <span title={`${track.plays}× přehráno`} style={{ fontSize:12, color:'var(--muted)', opacity:0.7, fontVariantNumeric:'tabular-nums', display:'flex', alignItems:'center', gap:3 }}>
-            <span style={{ fontSize:8 }}>▶</span>{track.plays >= 1000 ? (track.plays/1000).toFixed(1).replace('.0','')+'k' : track.plays}
-          </span>
-        )}
-        <button onClick={handleLike} style={{
-          background: 'none', border: 'none',
-          color: liked ? 'var(--a1)' : 'var(--muted)',
-          opacity: liked ? 1 : 0.6,
-          display: 'flex', alignItems: 'center', gap: 4,
-          cursor: 'pointer', padding: '4px 6px', borderRadius: 6,
-          fontSize: 12, transition: 'all 0.15s', outline: 'none'
-        }} onMouseEnter={(e) => { if (!liked) e.currentTarget.style.color = 'var(--text)'; }}
-           onMouseLeave={(e) => { if (!liked) e.currentTarget.style.color = 'var(--muted)'; }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2.5" style={{ transition: 'transform 0.15s', transform: liked ? 'scale(1.2)' : 'none' }}>
+    <div className="track-row" data-active={active || undefined}
+      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}>
+      <button type="button" className="track-play" aria-label={playLabel}
+        onClick={() => active ? onToggle() : onPlay(track)}>
+        <span className="track-number" aria-hidden="true">
+          {active && playing ? <EqBars /> : (hov || active) ? <PlayIco /> : idx + 1}
+        </span>
+        <span className="track-art" aria-hidden="true" style={{ backgroundImage:`url("${trackArt(track, album)}")` }} />
+        <span className="track-copy">
+          <span className="track-title">{track.title}</span>
+          <span className="track-album">{album?.title || ''}</span>
+        </span>
+      </button>
+      <div className="track-actions">
+        <span className="track-plays" title={lang === 'cs' ? `${track.plays || 0}× přehráno` : `${track.plays || 0} plays`}>
+          {track.plays > 0 && <><span aria-hidden="true">▶ </span>{track.plays >= 1000 ? (track.plays/1000).toFixed(1).replace('.0','')+'k' : track.plays}</>}
+        </span>
+        <button type="button" className="track-action" onClick={handleLike}
+          aria-label={`${playerLabel(lang, 'like')}: ${track.title}`} aria-pressed={liked}
+          style={{ color:liked ? 'var(--a1)' : 'var(--muted)' }}>
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
-          {likeCount > 0 && <span style={{ fontVariantNumeric: 'tabular-nums' }}>{likeCount}</span>}
+          {likeCount > 0 && <span>{likeCount}</span>}
         </button>
-        {track.downloadUrl && (
-          <a href={track.downloadUrl} onClick={e => e.stopPropagation()} aria-label="Download" style={{ color:'var(--muted)', opacity:0.6, display:'flex' }}><DlIco /></a>
-        )}
-        <span style={{ fontSize:13, color:'var(--muted)' }}>{track.duration}</span>
+        {track.downloadUrl && <a className="track-action" href={track.downloadUrl}
+          aria-label={`${playerLabel(lang, 'download')}: ${track.title}`}><DlIco /></a>}
+        <span className="track-duration">{track.duration}</span>
       </div>
     </div>
   );
 }
 
-function MusicSection({ lang, onPlay, onOpenAlbum, currentTrack, playing }) {
+function MusicSection({ lang, onPlay, onToggle, onOpenAlbum, currentTrack, playing }) {
   const [ref, vis] = useInView();
   const [tracksRef, tracksVis] = useInView();
   const [albumFilter, setAlbumFilter] = __useS('all');
@@ -2242,7 +2264,7 @@ function MusicSection({ lang, onPlay, onOpenAlbum, currentTrack, playing }) {
             <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
               {tracks.length === 0 && <p style={{ color:'var(--muted)', lineHeight:1.6 }}>{lang === 'cs' ? 'Skladby teď nejsou dostupné. Zkus se sem vrátit s připojením k internetu.' : 'Tracks are currently unavailable. Please return with an internet connection.'}</p>}
               {filteredTracks.map((tr, i) => (
-                <TrackRow key={tr.id} track={tr} album={albumMap[tr.album]} idx={i} active={currentTrack?.id === tr.id} playing={playing} onPlay={(t) => onPlay(t, filteredTracks)} />
+                <TrackRow key={tr.id} lang={lang} onToggle={onToggle} track={tr} album={albumMap[tr.album]} idx={i} active={currentTrack?.id === tr.id} playing={playing} onPlay={(t) => onPlay(t, filteredTracks)} />
               ))}
             </div>
           </div>
@@ -2620,7 +2642,8 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
     const onKey = (e) => {
       if (e.defaultPrevented) return;
       const t = e.target;
-      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+      if (e.code === 'Space' && t?.closest?.('button, a[href], summary, [role="button"]')) return;
       // Modal interactions must not also trigger the player behind them.
       if (document.querySelector('[role="dialog"][aria-modal="true"]:not([data-player-dialog])')) return;
       const a = audioRef.current;
@@ -2667,8 +2690,9 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
   };
   const seekTo = (sec) => {
     if (!isFinite(sec)) return;
-    const s = Math.max(0, sec);
     const a = audioRef.current;
+    const max = Number.isFinite(a?.duration) ? a.duration : duration;
+    const s = Math.max(0, Math.min(max || 0, sec));
     if (a) { try { a.currentTime = s; } catch (e) {} }
     setCurrentTime(s);
   };
@@ -2676,6 +2700,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
   const isDraggingRef = __useR_pc(false);
 
   const handlePointerDown = (e) => {
+    e.currentTarget.focus({ preventScroll:true });
     try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
     isDraggingRef.current = true;
     seekFromEvent(e);
@@ -2701,8 +2726,8 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
       animation:'slideUp 0.35s ease',
     }}>
       <div className="player-meta" style={{ display:'flex', alignItems:'center', gap:14, minWidth:0 }}>
-        <div className="player-info" onClick={() => setExpanded(true)} style={{ display:'flex', alignItems:'center', gap:12, minWidth:0, cursor:'pointer' }} role="button" tabIndex={0} aria-label={`${track ? `${track.title} - ${album?.title || ''}. ` : ''}Expand player (E)`} title="Expand (E)"
-          onKeyDown={(e) => { if (e.key === 'Enter') setExpanded(true); }}>
+        <div className="player-info" onClick={() => setExpanded(true)} style={{ display:'flex', alignItems:'center', gap:12, minWidth:0, cursor:'pointer' }} role="button" tabIndex={0} aria-label={`${track ? `${track.title} - ${album?.title || ''}. ` : ''}${playerLabel(lang, 'expand')} (E)`} title={playerLabel(lang, 'expand')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setExpanded(true); } }}>
           <div className={restoring ? 'shimmer-fx' : ''} style={{ position:'relative', width:42, height:42, borderRadius:8, flexShrink:0, overflow:'hidden', backgroundImage: track ? `url("${trackArt(track, album)}")` : '', backgroundSize:'cover', display:'flex', alignItems:'center', justifyContent:'center' }}>
             {isPlaying && <EqBars color="#fff" />}
           </div>
@@ -2719,7 +2744,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
             display: 'flex', alignItems: 'center', gap: 4,
             cursor: 'pointer', padding: '6px 8px', borderRadius: 8,
             fontSize: 13, transition: 'all 0.15s', outline: 'none', flexShrink: 0
-          }} title={lang === 'cs' ? 'Líbí se mi' : 'Like'}
+          }} aria-label={`${playerLabel(lang, 'like')}: ${track.title}`} aria-pressed={liked} title={playerLabel(lang, 'like')}
              onMouseEnter={(e) => { if (!liked) e.currentTarget.style.color = 'var(--text)'; }}
              onMouseLeave={(e) => { if (!liked) e.currentTarget.style.color = 'var(--muted)'; }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" style={{ transition: 'transform 0.15s', transform: liked ? 'scale(1.2)' : 'none' }}>
@@ -2732,23 +2757,23 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
 
       <div className="player-controls" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
         <div className="player-transport" style={{ display:'flex', alignItems:'center', gap:14 }}>
-          <button className="player-mute-mobile" onClick={() => setMuted(m => !m)} aria-label="Mute" style={{ color: muted ? 'var(--a1)' : 'var(--muted)', padding:6 }}>
+          <button className="player-mute-mobile" onClick={() => setMuted(m => !m)} aria-label={playerLabel(lang, muted ? 'unmute' : 'mute')} aria-pressed={muted} style={{ color: muted ? 'var(--a1)' : 'var(--muted)', padding:6 }}>
             <VolIco />
           </button>
-          <button onClick={() => setShuffle(s => !s)} aria-label="Shuffle" title="Shuffle" style={{ color: shuffle ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:6 }}><ShuffleIco /></button>
-          <button onClick={onPrev} aria-label="Previous (←)" title="Previous (←)" style={{ color:'var(--muted)', display:'flex', padding:6, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><PrevIco /></button>
-          <button onClick={() => setIsPlaying(!isPlaying)} aria-label={isPlaying ? 'Pause (Space)' : 'Play (Space)'} title={isPlaying ? 'Pause (Space)' : 'Play (Space)'} style={{
+          <button onClick={() => setShuffle(s => !s)} aria-label={playerLabel(lang, 'shuffle')} aria-pressed={shuffle} title={playerLabel(lang, 'shuffle')} style={{ color: shuffle ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:6 }}><ShuffleIco /></button>
+          <button onClick={onPrev} aria-label={playerLabel(lang, 'previous')} title={`${playerLabel(lang, 'previous')} (←)`} style={{ color:'var(--muted)', display:'flex', padding:6, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><PrevIco /></button>
+          <button data-player-action="play" onClick={() => setIsPlaying(p => !p)} aria-label={`${playerLabel(lang, isPlaying ? 'pause' : 'play')}: ${track?.title || ''}`} title={`${playerLabel(lang, isPlaying ? 'pause' : 'play')} (Space)`} style={{
             width:48, height:48, borderRadius:'50%', background:'var(--a1)', color:'#fff',
             display:'flex', alignItems:'center', justifyContent:'center',
             boxShadow:'0 0 20px var(--glow)', transition:'transform 0.1s',
           }} onMouseEnter={e=>e.currentTarget.style.transform='scale(1.08)'} onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>
             {isPlaying ? <PauseIco /> : <PlayIco />}
           </button>
-          <button onClick={onNext} aria-label="Next (→)" title="Next (→)" style={{ color:'var(--muted)', display:'flex', padding:6, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><NextIco /></button>
-          <button onClick={() => setRepeat(r => r === 'off' ? 'all' : r === 'all' ? 'one' : 'off')} aria-label={`Repeat: ${repeat}`} title={`Repeat: ${repeat}`} style={{ color: repeat !== 'off' ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:6 }}>
+          <button onClick={onNext} aria-label={playerLabel(lang, 'next')} title={`${playerLabel(lang, 'next')} (→)`} style={{ color:'var(--muted)', display:'flex', padding:6, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><NextIco /></button>
+          <button onClick={() => setRepeat(r => r === 'off' ? 'all' : r === 'all' ? 'one' : 'off')} aria-label={playerLabel(lang, 'repeat_' + repeat)} title={playerLabel(lang, 'repeat_' + repeat)} style={{ color: repeat !== 'off' ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:6 }}>
             {repeat === 'one' ? <RepeatOneIco /> : <RepeatIco />}
           </button>
-          <button className="player-mute-mobile" onClick={onClose} aria-label="Close" style={{ color:'var(--muted)', padding:6 }}>
+          <button className="player-mute-mobile" data-player-action="close" onClick={onClose} aria-label={playerLabel(lang, 'close')} style={{ color:'var(--muted)', padding:6 }}>
             <CloseIco />
           </button>
           <button className="player-more-mobile" onClick={() => setCompact(v => !v)}
@@ -2772,8 +2797,7 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
             onPointerLeave={() => { if (!isDraggingRef.current) setHovBar(null); }}
-            role="slider" aria-label="Seek"
-            aria-valuemin={0} aria-valuemax={duration || 0} aria-valuenow={currentTime}
+            {...seekSliderProps(currentTime, duration, seekTo, lang)}
             style={{ flex:1, height:28, display:'flex', alignItems:'center', justifyContent:'space-between', gap:1, cursor:'pointer', position:'relative', touchAction:'none' }}
           >
             {bars.map((h, i) => {
@@ -2835,11 +2859,11 @@ function AudioPlayer({ track, playlist, isPlaying, setIsPlaying, onPrev, onNext,
             onMouseEnter={e=>e.currentTarget.style.color='var(--a1)'}
             onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><ShareIco /></button>
         )}
-        <button onClick={() => setMuted(m => !m)} aria-label="Mute (M)" title="Mute (M)" style={{ color: muted ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:4 }}>
+        <button onClick={() => setMuted(m => !m)} aria-label={playerLabel(lang, muted ? 'unmute' : 'mute')} aria-pressed={muted} title={`${playerLabel(lang, muted ? 'unmute' : 'mute')} (M)`} style={{ color: muted ? 'var(--a1)' : 'var(--muted)', display:'flex', padding:4 }}>
           {muted ? <MuteIco /> : <VolIco />}
         </button>
-        <input id="player-volume" name="volume" type="range" min="0" max="1" step="0.01" value={muted ? 0 : vol} onChange={e => { setVol(+e.target.value); setMuted(false); }} style={{ width:80 }} aria-label="Volume" />
-        <button onClick={onClose} aria-label="Close player" title="Close" style={{ color:'var(--muted)', display:'flex', padding:6, marginLeft:8, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><CloseIco /></button>
+        <input id="player-volume" name="volume" type="range" min="0" max="1" step="0.01" value={muted ? 0 : vol} onChange={e => { setVol(+e.target.value); setMuted(false); }} style={{ width:80 }} aria-label={playerLabel(lang, 'volume')} />
+        <button onClick={onClose} aria-label={playerLabel(lang, 'close')} title={playerLabel(lang, 'close')} style={{ color:'var(--muted)', display:'flex', padding:6, marginLeft:8, transition:'color 0.15s' }} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--muted)'}><CloseIco /></button>
       </div>
     </div>
 
@@ -2940,8 +2964,22 @@ function ContactForm({ lang }) {
   const [msg, setMsg] = __useS_pc('');
   const [touched, setTouched] = __useS_pc({ name:false, email:false, msg:false });
   const [status, setStatus] = __useS_pc('idle');
+  const submitting = __useR_pc(false);
+  const statusRef = __useR_pc(null);
   const endpoint = window.CONTACT_ENDPOINT;
-  const mailto = window.CONTACT_EMAIL || 'jenda@example.com';
+  const mailto = window.CONTACT_EMAIL;
+  const en = lang === 'en';
+  const statusText = {
+    invalid: en ? 'Please correct the marked fields.' : 'Oprav prosím označená pole.',
+    sending: tx(lang, 'contact_sending'),
+    ok: tx(lang, 'contact_ok'),
+    err: en ? 'The message was not sent. Your text is still here; please try again.' : 'Zprávu se nepodařilo odeslat. Text zůstal vyplněný, zkus to prosím znovu.',
+    handoff: en ? 'Continue in your email app and send the message there. This page cannot confirm sending.' : 'Pokračuj v e-mailové aplikaci a zprávu odešli tam. Tato stránka nemůže potvrdit odeslání.',
+    unavailable: en ? 'The contact form is temporarily unavailable. Please use the contact links below.' : 'Kontaktní formulář je dočasně nedostupný. Použij prosím kontaktní odkazy níže.',
+  }[status] || '';
+  __useE_pc(() => {
+    if (status === 'ok') statusRef.current?.focus();
+  }, [status]);
 
   const errors = {
     name:  name.trim().length === 0 ? tx(lang,'err_name') : null,
@@ -2952,15 +2990,26 @@ function ContactForm({ lang }) {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (submitting.current || status === 'ok') return;
     setTouched({ name:true, email:true, msg:true });
-    if (hasError) return;
+    if (hasError) {
+      setStatus('invalid');
+      const first = ['name', 'email', 'msg'].find(key => errors[key]);
+      e.currentTarget.querySelector('#cf-' + first)?.focus();
+      return;
+    }
     if (!endpoint) {
+      if (!mailto || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mailto) || /@example\.(com|org|net)$/i.test(mailto)) {
+        setStatus('unavailable');
+        return;
+      }
       const subject = encodeURIComponent(`Zpráva od ${name}`);
       const body = encodeURIComponent(`${msg}\n\n— ${name} (${email})`);
       window.location.href = `mailto:${mailto}?subject=${subject}&body=${body}`;
-      setStatus('ok');
+      setStatus('handoff');
       return;
     }
+    submitting.current = true;
     setStatus('sending');
     try {
       const res = await fetch(endpoint, {
@@ -2971,77 +3020,45 @@ function ContactForm({ lang }) {
       if (res.ok) { setStatus('ok'); setName(''); setEmail(''); setMsg(''); }
       else { setStatus('err'); }
     } catch { setStatus('err'); }
+    finally { submitting.current = false; }
   };
-
-  const fieldStyle = (hasErr) => ({
-    width:'100%', padding:'13px 16px', borderRadius:10,
-    background:'var(--card)',
-    border:`1px solid ${hasErr ? '#f87171' : 'var(--border)'}`,
-    color:'var(--text)', fontFamily:'inherit', fontSize:14,
-    outline:'none', resize:'vertical', transition:'border-color 0.2s, background 0.2s',
-  });
-  const onFocus = e => { e.currentTarget.style.borderColor='var(--a1)'; e.currentTarget.style.background='color-mix(in srgb, var(--text) 6%, transparent)'; };
-  const onBlurField = (key) => (e) => {
-    setTouched(t => ({ ...t, [key]: true }));
-    const hasErr = !!errors[key];
-    e.currentTarget.style.borderColor = hasErr ? '#f87171' : 'var(--border)';
-    e.currentTarget.style.background = 'var(--card)';
-  };
-
-  if (status === 'ok') {
-    return (
-      <div style={{
-        padding:'40px 24px', textAlign:'center',
-        border:'1px solid color-mix(in srgb, var(--a1) 40%, transparent)',
-        background:'color-mix(in srgb, var(--a1) 8%, transparent)',
-        borderRadius:'var(--r)', color:'var(--a1)',
-      }}>
-        <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom:14 }}>
-          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/>
-        </svg>
-        <div style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:18, color:'var(--text)' }}>
-          {tx(lang,'contact_ok')}
-        </div>
-      </div>
-    );
-  }
-
-  const errStyle = { fontSize:12, color:'#f87171', margin:'4px 2px 0', minHeight:14, textAlign:'left' };
 
   return (
-    <form onSubmit={onSubmit} noValidate style={{ display:'flex', flexDirection:'column', gap:14, textAlign:'left' }}>
+    <div>
+      <div id="cf-status" ref={statusRef} role="status" aria-live="polite" aria-atomic="true" tabIndex={-1}
+        className={`contact-status${['invalid', 'err', 'unavailable'].includes(status) ? ' contact-status-error' : ''}`}>
+        {statusText}
+      </div>
+      {status !== 'ok' && <form onSubmit={onSubmit} noValidate aria-busy={status === 'sending'} aria-describedby="cf-status"  style={{ display:'flex', flexDirection:'column', gap:14, textAlign:'left' }}>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
         <div>
           <div className={`field${touched.name && errors.name ? ' err' : ''}`}>
             <input id="cf-name" name="name" type="text" autoComplete="name" placeholder=" " value={name}
               onChange={e=>setName(e.target.value)} onBlur={() => setTouched(t => ({ ...t, name:true }))}
-              aria-invalid={!!(touched.name && errors.name)} />
+              disabled={status === 'sending'} required aria-describedby="cf-name-error" aria-invalid={!!(touched.name && errors.name)} />
             <label htmlFor="cf-name">{tx(lang,'contact_name')}</label>
           </div>
-          <div className="field-err">{touched.name && errors.name}</div>
+          <div id="cf-name-error" className="field-err" aria-live="polite">{touched.name && errors.name}</div>
         </div>
         <div>
           <div className={`field${touched.email && errors.email ? ' err' : ''}`}>
             <input id="cf-email" name="email" type="email" autoComplete="email" placeholder=" " value={email}
               onChange={e=>setEmail(e.target.value)} onBlur={() => setTouched(t => ({ ...t, email:true }))}
-              aria-invalid={!!(touched.email && errors.email)} />
+              disabled={status === 'sending'} required aria-describedby="cf-email-error" aria-invalid={!!(touched.email && errors.email)} />
             <label htmlFor="cf-email">{tx(lang,'contact_email_lbl')}</label>
           </div>
-          <div className="field-err">{touched.email && errors.email}</div>
+          <div id="cf-email-error" className="field-err" aria-live="polite">{touched.email && errors.email}</div>
         </div>
       </div>
       <div>
         <div className={`field${touched.msg && errors.msg ? ' err' : ''}`}>
           <textarea id="cf-msg" name="message" placeholder=" " value={msg} rows={5}
             onChange={e=>setMsg(e.target.value)} onBlur={() => setTouched(t => ({ ...t, msg:true }))}
-            aria-invalid={!!(touched.msg && errors.msg)} />
+            disabled={status === 'sending'} required aria-describedby="cf-msg-error" aria-invalid={!!(touched.msg && errors.msg)} />
           <label htmlFor="cf-msg">{tx(lang,'contact_msg')}</label>
         </div>
-        <div className="field-err">{touched.msg && errors.msg}</div>
+        <div id="cf-msg-error" className="field-err" aria-live="polite">{touched.msg && errors.msg}</div>
       </div>
-      {status === 'err' && (
-        <div style={{ fontSize:13, color:'#f87171', padding:'4px 2px' }}>{tx(lang,'contact_err')}</div>
-      )}
       <button type="submit" disabled={status==='sending'} style={{
         padding:'13px 30px', borderRadius:50, marginTop:8,
         background: status==='sending' ? 'var(--border)' : 'var(--a1)',
@@ -3051,7 +3068,8 @@ function ContactForm({ lang }) {
       }}>
         {status==='sending' ? tx(lang,'contact_sending') : tx(lang,'contact_send')}
       </button>
-    </form>
+    </form>}
+    </div>
   );
 }
 
@@ -3322,6 +3340,7 @@ function ExpandMode({
           e.preventDefault(); first.focus();
         }
       }
+      if (e.key !== 'Escape' && e.target?.closest?.('input, textarea, select, [role="slider"]')) return;
       if (e.key === 'Escape' || (e.key === 'ArrowDown' && !e.shiftKey && !showLyrics)) { e.preventDefault(); onClose(); }
     };
     window.addEventListener('keydown', onKey);
@@ -3370,8 +3389,7 @@ function ExpandMode({
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
       onPointerLeave={() => { if (!isDraggingRef?.current) setHovBar?.(null); }}
-      role="slider" aria-label="Seek"
-      aria-valuemin={0} aria-valuemax={duration || 0} aria-valuenow={currentTime}
+      {...seekSliderProps(currentTime, duration, onSeekTo, lang)}
       style={{
         height:54, display:'flex', alignItems:'center', justifyContent:'space-between',
         gap:1, cursor:'pointer', position:'relative', touchAction:'none',
@@ -3398,7 +3416,7 @@ function ExpandMode({
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
-      role="slider" aria-label="Seek"
+      {...seekSliderProps(currentTime, duration, onSeekTo, lang)}
       style={{ height:72, position:'relative', cursor:'pointer', touchAction:'none' }}>
       {/* Top half */}
       <div style={{ position:'absolute', top:0, left:0, right:0, height:'50%', display:'flex', alignItems:'flex-end', gap:1 }}>
@@ -3428,7 +3446,7 @@ function ExpandMode({
     const cx = size/2, cy = size/2;
     const inner = 36, maxOuter = 90;
     return (
-      <div style={{ display:'flex', justifyContent:'center', height:size, position:'relative' }}>
+      <div {...seekSliderProps(currentTime, duration, onSeekTo, lang)} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} style={{ display:'flex', justifyContent:'center', height:size, position:'relative', touchAction:'none' }}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ overflow:'visible' }}>
           {bars.map((h, i) => {
             const angle = (i / N) * Math.PI * 2 - Math.PI / 2;
@@ -3498,7 +3516,7 @@ function ExpandMode({
         display:'flex', alignItems:'center', justifyContent:'space-between',
         padding:'22px 28px',
       }}>
-        <button onClick={onClose} aria-label="Collapse" title="Collapse (Esc)" style={{
+        <button onClick={onClose} aria-label={playerLabel(lang, 'collapse')} title="Collapse (Esc)" style={{
           display:'flex', alignItems:'center', gap:8,
           padding:'10px 16px', borderRadius:50,
           background:'rgba(0,0,0,0.35)', color:'#fff',
@@ -3584,7 +3602,7 @@ function ExpandMode({
               display: 'flex', alignItems: 'center', gap: 4,
               cursor: 'pointer', padding: '4px 8px', borderRadius: 8,
               fontSize: 13, transition: 'all 0.15s', outline: 'none'
-            }} title={lang === 'cs' ? 'Líbí se mi' : 'Like'}
+            }} aria-label={`${playerLabel(lang, 'like')}: ${track.title}`} aria-pressed={liked} title={playerLabel(lang, 'like')}
                onMouseEnter={(e) => { if (!liked) e.currentTarget.style.color = '#fff'; }}
                onMouseLeave={(e) => { if (!liked) e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" style={{ transition: 'transform 0.15s', transform: liked ? 'scale(1.2)' : 'none' }}>
@@ -3633,15 +3651,15 @@ function ExpandMode({
 
         {/* Controls */}
         <div style={{ display:'flex', alignItems:'center', gap:28 }}>
-          <button onClick={() => setShuffle(s => !s)} aria-label="Shuffle" title="Shuffle"
+          <button onClick={() => setShuffle(s => !s)} aria-label={playerLabel(lang, 'shuffle')} aria-pressed={shuffle} title={playerLabel(lang, 'shuffle')}
             style={{ color: shuffle ? 'var(--a2)' : 'rgba(255,255,255,0.5)', display:'flex', padding:8 }}>
             <ShuffleIco />
           </button>
-          <button onClick={onPrev} aria-label="Previous" title="Previous (←)"
+          <button onClick={onPrev} aria-label={playerLabel(lang, 'previous')} title={`${playerLabel(lang, 'previous')} (←)`}
             style={{ color:'rgba(255,255,255,0.85)', display:'flex', padding:8 }}>
             <PrevIco />
           </button>
-          <button onClick={() => setIsPlaying(!isPlaying)} aria-label={isPlaying ? 'Pause' : 'Play'} title={isPlaying ? 'Pause' : 'Play'}
+          <button onClick={() => setIsPlaying(p => !p)} aria-label={`${playerLabel(lang, isPlaying ? 'pause' : 'play')}: ${track.title}`} title={playerLabel(lang, isPlaying ? 'pause' : 'play')}
             style={{
               width:72, height:72, borderRadius:'50%',
               background:'#fff', color:'#000',
@@ -3658,12 +3676,12 @@ function ExpandMode({
               )}
             </div>
           </button>
-          <button onClick={onNext} aria-label="Next" title="Next (→)"
+          <button onClick={onNext} aria-label={playerLabel(lang, 'next')} title={`${playerLabel(lang, 'next')} (→)`}
             style={{ color:'rgba(255,255,255,0.85)', display:'flex', padding:8 }}>
             <NextIco />
           </button>
           <button onClick={() => setRepeat(r => r === 'off' ? 'all' : r === 'all' ? 'one' : 'off')}
-            aria-label={`Repeat: ${repeat}`} title={`Repeat: ${repeat}`}
+            aria-label={playerLabel(lang, 'repeat_' + repeat)} title={playerLabel(lang, 'repeat_' + repeat)}
             style={{ color: repeat !== 'off' ? 'var(--a2)' : 'rgba(255,255,255,0.5)', display:'flex', padding:8 }}>
             {repeat === 'one' ? <RepeatOneIco /> : <RepeatIco />}
           </button>
@@ -3671,12 +3689,12 @@ function ExpandMode({
 
         {/* Volume */}
         <div style={{ display:'flex', alignItems:'center', gap:12, width:'min(280px, 80vw)', color:'rgba(255,255,255,0.7)' }}>
-          <button onClick={() => setMuted(m => !m)} aria-label="Mute" style={{ color: muted ? 'var(--a2)' : 'inherit', display:'flex' }}>
+          <button onClick={() => setMuted(m => !m)} aria-label={playerLabel(lang, muted ? 'unmute' : 'mute')} aria-pressed={muted} style={{ color: muted ? 'var(--a2)' : 'inherit', display:'flex' }}>
             {muted ? <MuteIco /> : <VolIco />}
           </button>
           <input id="expanded-player-volume" name="volume" type="range" min="0" max="1" step="0.01" value={muted ? 0 : vol}
             onChange={e => { setVol(+e.target.value); setMuted(false); }}
-            style={{ flex:1 }} aria-label="Volume" />
+            style={{ flex:1 }} aria-label={playerLabel(lang, 'volume')} />
         </div>
       </div>
 
@@ -3911,23 +3929,33 @@ Object.assign(window, { QueueDrawer });
 const { useState: __useS_ex, useEffect: __useE_ex, useMemo: __useM_ex } = React;
 
 // ── Newsletter ──────────────────────────────────────────────────────────
+function newsletterFormEndpoint(value) {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || !['buttondown.com', 'buttondown.email'].includes(url.hostname) ||
+        !/^\/api\/emails\/embed-subscribe\/[^/]+\/?$/.test(url.pathname) || url.username || url.password) return '';
+    url.hostname = 'buttondown.com';
+    return url.href;
+  } catch { return ''; }
+}
+
 function NewsletterSection({ lang }) {
   const [ref, vis] = useInView();
   const [email, setEmail] = __useS_ex('');
-  const [status, setStatus] = __useS_ex('idle'); // idle | sending | ok | err
-  const endpoint = window.NEWSLETTER_ENDPOINT;
+  const [status, setStatus] = __useS_ex('idle'); // idle | invalid | offline | handoff
+  const endpoint = newsletterFormEndpoint(window.NEWSLETTER_ENDPOINT);
+  const cs = lang === 'cs';
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) { setStatus('err'); return; }
-    if (!endpoint) { setStatus('ok'); return; } // friendly fallback
-    setStatus('sending');
-    try {
-      const form = new FormData();
-      form.append('email', email);
-      await fetch(endpoint, { method:'POST', body: form, mode:'no-cors' });
-      setStatus('ok'); setEmail('');
-    } catch { setStatus('err'); }
+  const onSubmit = (e) => {
+    if (!endpoint || status === 'handoff') { e.preventDefault(); return; }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) {
+      e.preventDefault(); setStatus('invalid'); e.currentTarget.elements.email.focus(); return;
+    }
+    if (navigator.onLine === false) { e.preventDefault(); setStatus('offline'); return; }
+    setEmail(email.trim());
+    setStatus('handoff');
+    // Buttondown requires a native form POST: its response handles errors,
+    // CAPTCHA and double opt-in. Never infer acceptance from a popup or fetch.
   };
 
   return (
@@ -3959,12 +3987,12 @@ function NewsletterSection({ lang }) {
           {tx(lang,'newsletter_desc')}
         </p>
 
-        {status === 'ok' ? (
-          <p style={{ color:'var(--a1)', fontWeight:600, fontSize:15, position:'relative' }}>
-            ✓ {tx(lang,'newsletter_ok')}
+        {!endpoint ? (
+          <p role="status" style={{ color:'var(--muted)', fontSize:14 }}>
+            {cs ? 'Odběr novinek je dočasně nedostupný. Zkus to prosím později.' : 'Newsletter signup is temporarily unavailable. Please try again later.'}
           </p>
         ) : (
-          <form onSubmit={onSubmit} style={{
+          <form action={endpoint} method="post" target="_blank" rel="noopener" noValidate onSubmit={onSubmit} style={{
             display:'flex', gap:8, maxWidth:420, margin:'0 auto',
             flexWrap:'wrap', position:'relative',
           }}>
@@ -3974,28 +4002,41 @@ function NewsletterSection({ lang }) {
               type="email" required
               autoComplete="email"
               value={email}
-              onChange={e => { setEmail(e.target.value); if (status === 'err') setStatus('idle'); }}
+              onChange={e => { setEmail(e.target.value); setStatus('idle'); }}
               placeholder={tx(lang,'newsletter_email')}
-              aria-label={tx(lang,'newsletter_email')}
+              aria-label={cs ? 'E-mail pro odběr novinek' : 'Email for the newsletter'}
+              aria-invalid={status === 'invalid'} aria-describedby="nl-help nl-status"
               style={{
                 flex:'1 1 220px', minWidth:0, padding:'12px 16px',
                 background:'var(--card)',
-                border:`1px solid ${status==='err' ? '#f87171' : 'var(--border)'}`,
+                border:`1px solid ${status==='invalid' ? 'var(--a1)' : 'var(--border)'}`,
                 borderRadius:50,
                 color:'var(--text)', fontFamily:'inherit', fontSize:14,
                 outline:'none', transition:'border-color 0.2s',
               }}
             />
-            <button type="submit" disabled={status === 'sending'} style={{
+            <input type="hidden" name="embed" value="1" />
+            <button type="submit" disabled={status === 'handoff'} style={{
               padding:'12px 26px', borderRadius:50,
-              background:'var(--a1)', color: status === 'sending' ? 'var(--muted)' : 'var(--bg)',
+              background:'var(--a1)', color:'var(--bg)',
               fontWeight:600, fontSize:14, fontFamily:'inherit',
-              border:'1px solid var(--a1)', cursor: status === 'sending' ? 'wait' : 'pointer',
+              border:'1px solid var(--a1)', cursor: status === 'handoff' ? 'default' : 'pointer',
               boxShadow:'0 0 20px var(--glow)',
               transition:'transform 0.15s',
             }}>
-              {tx(lang,'newsletter_sub')}
+              {status === 'handoff' ? (cs ? 'Předáno k ověření' : 'Continue in new tab') : tx(lang,'newsletter_sub')}
             </button>
+            <p id="nl-help" style={{ flexBasis:'100%', color:'var(--muted)', fontSize:13, lineHeight:1.6, marginTop:8 }}>
+              {cs ? 'Přihlášení dokončíš u Buttondownu v novém okně. Odběr je potřeba potvrdit e-mailem.' : 'Complete signup with Buttondown in a new tab. Email confirmation is required.'}
+            </p>
+            <p id="nl-status" role="status" aria-live="polite" aria-atomic="true" style={{ flexBasis:'100%', color:'var(--text)', fontSize:14, lineHeight:1.6 }}>
+              {status === 'invalid' && (cs ? 'Zadej platnou e-mailovou adresu.' : 'Enter a valid email address.')}
+              {status === 'offline' && (cs ? 'Jsi offline. Připoj se k internetu a zkus to znovu.' : 'You are offline. Reconnect and try again.')}
+              {status === 'handoff' && (cs ? 'Ověř výsledek v novém okně — tento web zatím přijetí odběru nepotvrzuje. Pokud se okno neotevřelo nebo nastala chyba, zkus to znovu.' : 'Check the result in the new tab — signup is not confirmed here. If the tab did not open or an error occurred, try again.')}
+            </p>
+            {status === 'handoff' && <button type="button" onClick={() => setStatus('idle')} style={{ margin:'0 auto', padding:'10px 16px', color:'var(--a1)', textDecoration:'underline' }}>
+              {cs ? 'Zkusit znovu' : 'Try again'}
+            </button>}
           </form>
         )}
       </div>
@@ -4817,7 +4858,7 @@ function App() {
       <Nav lang={lang} setLang={setLang} mode={tw.mode || 'auto'} setMode={(v) => setTweak('mode', v)} />
       <main>
         <Hero lang={lang} onPlay={handlePlay} />
-        <MusicSection lang={lang} onPlay={handlePlay} onOpenAlbum={handleOpenAlbum} currentTrack={playerTrack} playing={playing} />
+        <MusicSection lang={lang} onPlay={handlePlay} onToggle={() => setPlaying(p => !p)} onOpenAlbum={handleOpenAlbum} currentTrack={playerTrack} playing={playing} />
         <AppsSection lang={lang} onOpen={handleOpenAppModal} />
         <ComparisonSection lang={lang} />
         <StatsSection lang={lang} />
@@ -4891,6 +4932,7 @@ function App() {
 function Root() {
   const [v, setV] = __useS_app(() => window.__jwContentVersion || 0);
   __useE_app(() => {
+    window.__jwAppReady?.();
     const onUpd = () => setV(window.__jwContentVersion || 0);
     window.addEventListener('jw-data-updated', onUpd);
     // Pojistka: data mohla dorazit mezi prvním renderem a připojením listeneru.
@@ -4900,4 +4942,10 @@ function Root() {
   return <App key={v} />;
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<Root />);
+class StartupBoundary extends React.Component {
+  constructor(props) { super(props); this.state = {failed:false}; }
+  static getDerivedStateFromError() { return {failed:true}; }
+  componentDidCatch(error) { console.error('[App]', error); window.__jwBootFailed?.(); }
+  render() { return this.state.failed ? null : this.props.children; }
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<StartupBoundary><Root /></StartupBoundary>);

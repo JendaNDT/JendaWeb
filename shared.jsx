@@ -69,6 +69,40 @@ const tx = (lang, key) => {
   return fallbacks[lang]?.[key] ?? key;
 };
 const slugify = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+// Player controls share names and keyboard behavior in every visualizer mode.
+function playerLabel(lang, key) {
+  const labels = {
+    play:['Přehrát','Play'], pause:['Pozastavit','Pause'], previous:['Předchozí skladba','Previous track'],
+    next:['Další skladba','Next track'], seek:['Pozice ve skladbě','Track position'],
+    volume:['Hlasitost','Volume'], mute:['Ztlumit','Mute'], unmute:['Zapnout zvuk','Unmute'],
+    shuffle:['Náhodné pořadí','Shuffle'], expand:['Rozbalit přehrávač','Expand player'],
+    collapse:['Sbalit přehrávač','Collapse player'], close:['Zavřít přehrávač','Close player'],
+    like:['Líbí se mi','Like'], download:['Stáhnout','Download'],
+    repeat_off:['Opakování vypnuto','Repeat off'], repeat_all:['Opakovat seznam','Repeat all'], repeat_one:['Opakovat skladbu','Repeat track'],
+  };
+  return labels[key]?.[lang === 'cs' ? 0 : 1] || key;
+}
+
+function seekSliderProps(currentTime, duration, onSeek, lang) {
+  const total = Number.isFinite(duration) ? Math.max(0, duration) : 0;
+  const position = Math.max(0, Math.min(total, Number.isFinite(currentTime) ? currentTime : 0));
+  return {
+    role:'slider', tabIndex:total > 0 ? 0 : -1, 'aria-disabled':total === 0,
+    'aria-label':playerLabel(lang, 'seek'), 'aria-orientation':'horizontal',
+    'aria-valuemin':0, 'aria-valuemax':total, 'aria-valuenow':position,
+    'aria-valuetext':`${fmtTime(position)} ${lang === 'cs' ? 'z' : 'of'} ${fmtTime(total)}`,
+    onKeyDown(e) {
+      if (e.altKey || e.ctrlKey || e.metaKey) return;
+      const targets = { ArrowLeft:position - 5, ArrowDown:position - 5, ArrowRight:position + 5, ArrowUp:position + 5,
+        Home:0, End:total, PageDown:position - total / 10, PageUp:position + total / 10 };
+      if (!(e.key in targets)) return;
+      e.preventDefault(); e.stopPropagation();
+      if (total > 0) onSeek(Math.max(0, Math.min(total, targets[e.key])));
+    },
+  };
+}
+
 const preferredScrollBehavior = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
 function scrollToSection(id) {
   document.getElementById(id)?.scrollIntoView({ behavior:preferredScrollBehavior(), block:'start' });

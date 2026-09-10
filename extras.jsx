@@ -2,23 +2,33 @@
 const { useState: __useS_ex, useEffect: __useE_ex, useMemo: __useM_ex } = React;
 
 // ── Newsletter ──────────────────────────────────────────────────────────
+function newsletterFormEndpoint(value) {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || !['buttondown.com', 'buttondown.email'].includes(url.hostname) ||
+        !/^\/api\/emails\/embed-subscribe\/[^/]+\/?$/.test(url.pathname) || url.username || url.password) return '';
+    url.hostname = 'buttondown.com';
+    return url.href;
+  } catch { return ''; }
+}
+
 function NewsletterSection({ lang }) {
   const [ref, vis] = useInView();
   const [email, setEmail] = __useS_ex('');
-  const [status, setStatus] = __useS_ex('idle'); // idle | sending | ok | err
-  const endpoint = window.NEWSLETTER_ENDPOINT;
+  const [status, setStatus] = __useS_ex('idle'); // idle | invalid | offline | handoff
+  const endpoint = newsletterFormEndpoint(window.NEWSLETTER_ENDPOINT);
+  const cs = lang === 'cs';
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) { setStatus('err'); return; }
-    if (!endpoint) { setStatus('ok'); return; } // friendly fallback
-    setStatus('sending');
-    try {
-      const form = new FormData();
-      form.append('email', email);
-      await fetch(endpoint, { method:'POST', body: form, mode:'no-cors' });
-      setStatus('ok'); setEmail('');
-    } catch { setStatus('err'); }
+  const onSubmit = (e) => {
+    if (!endpoint || status === 'handoff') { e.preventDefault(); return; }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) {
+      e.preventDefault(); setStatus('invalid'); e.currentTarget.elements.email.focus(); return;
+    }
+    if (navigator.onLine === false) { e.preventDefault(); setStatus('offline'); return; }
+    setEmail(email.trim());
+    setStatus('handoff');
+    // Buttondown requires a native form POST: its response handles errors,
+    // CAPTCHA and double opt-in. Never infer acceptance from a popup or fetch.
   };
 
   return (
@@ -50,12 +60,12 @@ function NewsletterSection({ lang }) {
           {tx(lang,'newsletter_desc')}
         </p>
 
-        {status === 'ok' ? (
-          <p style={{ color:'var(--a1)', fontWeight:600, fontSize:15, position:'relative' }}>
-            ✓ {tx(lang,'newsletter_ok')}
+        {!endpoint ? (
+          <p role="status" style={{ color:'var(--muted)', fontSize:14 }}>
+            {cs ? 'Odběr novinek je dočasně nedostupný. Zkus to prosím později.' : 'Newsletter signup is temporarily unavailable. Please try again later.'}
           </p>
         ) : (
-          <form onSubmit={onSubmit} style={{
+          <form action={endpoint} method="post" target="_blank" rel="noopener" noValidate onSubmit={onSubmit} style={{
             display:'flex', gap:8, maxWidth:420, margin:'0 auto',
             flexWrap:'wrap', position:'relative',
           }}>
@@ -65,28 +75,41 @@ function NewsletterSection({ lang }) {
               type="email" required
               autoComplete="email"
               value={email}
-              onChange={e => { setEmail(e.target.value); if (status === 'err') setStatus('idle'); }}
+              onChange={e => { setEmail(e.target.value); setStatus('idle'); }}
               placeholder={tx(lang,'newsletter_email')}
-              aria-label={tx(lang,'newsletter_email')}
+              aria-label={cs ? 'E-mail pro odběr novinek' : 'Email for the newsletter'}
+              aria-invalid={status === 'invalid'} aria-describedby="nl-help nl-status"
               style={{
                 flex:'1 1 220px', minWidth:0, padding:'12px 16px',
                 background:'var(--card)',
-                border:`1px solid ${status==='err' ? '#f87171' : 'var(--border)'}`,
+                border:`1px solid ${status==='invalid' ? 'var(--a1)' : 'var(--border)'}`,
                 borderRadius:50,
                 color:'var(--text)', fontFamily:'inherit', fontSize:14,
                 outline:'none', transition:'border-color 0.2s',
               }}
             />
-            <button type="submit" disabled={status === 'sending'} style={{
+            <input type="hidden" name="embed" value="1" />
+            <button type="submit" disabled={status === 'handoff'} style={{
               padding:'12px 26px', borderRadius:50,
-              background:'var(--a1)', color: status === 'sending' ? 'var(--muted)' : 'var(--bg)',
+              background:'var(--a1)', color:'var(--bg)',
               fontWeight:600, fontSize:14, fontFamily:'inherit',
-              border:'1px solid var(--a1)', cursor: status === 'sending' ? 'wait' : 'pointer',
+              border:'1px solid var(--a1)', cursor: status === 'handoff' ? 'default' : 'pointer',
               boxShadow:'0 0 20px var(--glow)',
               transition:'transform 0.15s',
             }}>
-              {tx(lang,'newsletter_sub')}
+              {status === 'handoff' ? (cs ? 'Předáno k ověření' : 'Continue in new tab') : tx(lang,'newsletter_sub')}
             </button>
+            <p id="nl-help" style={{ flexBasis:'100%', color:'var(--muted)', fontSize:13, lineHeight:1.6, marginTop:8 }}>
+              {cs ? 'Přihlášení dokončíš u Buttondownu v novém okně. Odběr je potřeba potvrdit e-mailem.' : 'Complete signup with Buttondown in a new tab. Email confirmation is required.'}
+            </p>
+            <p id="nl-status" role="status" aria-live="polite" aria-atomic="true" style={{ flexBasis:'100%', color:'var(--text)', fontSize:14, lineHeight:1.6 }}>
+              {status === 'invalid' && (cs ? 'Zadej platnou e-mailovou adresu.' : 'Enter a valid email address.')}
+              {status === 'offline' && (cs ? 'Jsi offline. Připoj se k internetu a zkus to znovu.' : 'You are offline. Reconnect and try again.')}
+              {status === 'handoff' && (cs ? 'Ověř výsledek v novém okně — tento web zatím přijetí odběru nepotvrzuje. Pokud se okno neotevřelo nebo nastala chyba, zkus to znovu.' : 'Check the result in the new tab — signup is not confirmed here. If the tab did not open or an error occurred, try again.')}
+            </p>
+            {status === 'handoff' && <button type="button" onClick={() => setStatus('idle')} style={{ margin:'0 auto', padding:'10px 16px', color:'var(--a1)', textDecoration:'underline' }}>
+              {cs ? 'Zkusit znovu' : 'Try again'}
+            </button>}
           </form>
         )}
       </div>

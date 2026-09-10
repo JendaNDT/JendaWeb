@@ -1,15 +1,19 @@
 // sw.js — Service worker for offline-first PWA
-const VERSION = 'jw-v108';
+// site-runtime:start
+const VERSION = "jw-v109-c98dc0ca616f00f8";
+const RUNTIME = [
+  "/site-assets/app.9098bc01cc268571.js",
+  "/site-assets/data.d8033fe27fe6919c.js",
+  "/site-assets/supabase-data.4d8170e487cb9876.js"
+];
+// site-runtime:end
 const SHELL = [
   '/',
   '/index.html',
-  `/data.js?v=${VERSION}`,
-  `/supabase-data.js?v=${VERSION}`,
-  `/combined.jsx?v=${VERSION}`,
+  ...RUNTIME,
   // Lokální knihovny (dříve CDN) — nutné pro offline boot
   '/vendor/react.production.min.js',
   '/vendor/react-dom.production.min.js',
-  '/vendor/babel.min.js',
   // Self-hostované fonty
   '/vendor/fonts.css',
   '/vendor/fonts/syne-latin-400-normal.woff2',
@@ -42,18 +46,16 @@ const SHELL = [
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(VERSION).then((cache) => cache.addAll(SHELL).catch(() => {}))
+    caches.open(VERSION).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k.startsWith('jw-v') && k !== VERSION).map((k) => caches.delete(k)))
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (e) => {
@@ -74,8 +76,9 @@ self.addEventListener('fetch', (e) => {
   if (isHTML) {
     e.respondWith(
       fetch(req).then((res) => {
+        if (!res.ok) throw new Error('HTML request failed');
         const copy = res.clone();
-        caches.open(VERSION).then((c) => c.put(req, copy)).catch(() => {});
+        e.waitUntil(caches.open(VERSION).then((c) => c.put(req, copy)).catch(() => {}));
         return res;
       }).catch(() => caches.match(req).then((m) => m || caches.match('/index.html')))
     );
@@ -84,7 +87,7 @@ self.addEventListener('fetch', (e) => {
       caches.match(req).then((cached) => cached || fetch(req).then((res) => {
         if (res.ok && url.origin === location.origin) {
           const copy = res.clone();
-          caches.open(VERSION).then((c) => c.put(req, copy)).catch(() => {});
+          e.waitUntil(caches.open(VERSION).then((c) => c.put(req, copy)).catch(() => {}));
         }
         return res;
       }).catch(() => cached))

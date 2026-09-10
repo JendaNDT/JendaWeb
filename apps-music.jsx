@@ -529,7 +529,7 @@ function AlbumCard({ album, lang, onPlay, onOpenAlbum, onFilter, selected, nowPl
   );
 }
 
-function TrackRow({ track, album, idx, active, playing, onPlay }) {
+function TrackRow({ track, album, idx, active, playing, onPlay, onToggle, lang }) {
   const [hov, setHov] = __useS(false);
   const [liked, setLiked] = __useS(() => window.isItemLiked(window.LIKES_TRACKS_KEY, track.id));
   const [likeCount, setLikeCount] = __useS(track.likes || 0);
@@ -563,54 +563,42 @@ function TrackRow({ track, album, idx, active, playing, onPlay }) {
     try { window.dispatchEvent(new CustomEvent('jw-track-like-toggled', { detail: { trackId: track.id, liked: nextLiked, likes: globalTrack?.likes || 0 } })); } catch (e) {}
   };
 
+  const playLabel = `${playerLabel(lang, active && playing ? 'pause' : 'play')}: ${track.title}`;
   return (
-    <div style={{
-      display:'flex', alignItems:'center', gap:14,
-      padding:'10px 14px', borderRadius:10,
-      background: active ? 'color-mix(in srgb, var(--a1) 12%, transparent)' : hov ? 'var(--card)' : 'transparent',
-      border:`1px solid ${active ? 'color-mix(in srgb, var(--a1) 40%, transparent)' : 'transparent'}`,
-      transition:'all 0.15s', cursor:'pointer',
-    }}
-    onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-    onClick={() => onPlay(track, window.TRACKS_DATA || [])}>
-      <div style={{ width:28, textAlign:'center', color: active ? 'var(--a1)' : 'var(--muted)', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-        {active && playing ? <EqBars /> : (hov || active) ? <PlayIco /> : <span style={{ fontSize:13 }}>{idx + 1}</span>}
-      </div>
-      <div style={{ width:38, height:38, borderRadius:7, flexShrink:0, backgroundImage:`url("${trackArt(track, album)}")`, backgroundSize:'cover' }} />
-      <div style={{ flex:1, minWidth:0 }}>
-        <div style={{ fontSize:14, fontWeight:600, color: active?'var(--a1)':'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{track.title}</div>
-        <div style={{ fontSize:12, color:'var(--muted)', marginTop:1 }}>{album?.title || ''}</div>
-      </div>
-      <div style={{ display:'flex', alignItems:'center', gap:10, flexShrink:0 }}>
-        {track.plays > 0 && (
-          <span title={`${track.plays}× přehráno`} style={{ fontSize:12, color:'var(--muted)', opacity:0.7, fontVariantNumeric:'tabular-nums', display:'flex', alignItems:'center', gap:3 }}>
-            <span style={{ fontSize:8 }}>▶</span>{track.plays >= 1000 ? (track.plays/1000).toFixed(1).replace('.0','')+'k' : track.plays}
-          </span>
-        )}
-        <button onClick={handleLike} style={{
-          background: 'none', border: 'none',
-          color: liked ? 'var(--a1)' : 'var(--muted)',
-          opacity: liked ? 1 : 0.6,
-          display: 'flex', alignItems: 'center', gap: 4,
-          cursor: 'pointer', padding: '4px 6px', borderRadius: 6,
-          fontSize: 12, transition: 'all 0.15s', outline: 'none'
-        }} onMouseEnter={(e) => { if (!liked) e.currentTarget.style.color = 'var(--text)'; }}
-           onMouseLeave={(e) => { if (!liked) e.currentTarget.style.color = 'var(--muted)'; }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2.5" style={{ transition: 'transform 0.15s', transform: liked ? 'scale(1.2)' : 'none' }}>
+    <div className="track-row" data-active={active || undefined}
+      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}>
+      <button type="button" className="track-play" aria-label={playLabel}
+        onClick={() => active ? onToggle() : onPlay(track)}>
+        <span className="track-number" aria-hidden="true">
+          {active && playing ? <EqBars /> : (hov || active) ? <PlayIco /> : idx + 1}
+        </span>
+        <span className="track-art" aria-hidden="true" style={{ backgroundImage:`url("${trackArt(track, album)}")` }} />
+        <span className="track-copy">
+          <span className="track-title">{track.title}</span>
+          <span className="track-album">{album?.title || ''}</span>
+        </span>
+      </button>
+      <div className="track-actions">
+        <span className="track-plays" title={lang === 'cs' ? `${track.plays || 0}× přehráno` : `${track.plays || 0} plays`}>
+          {track.plays > 0 && <><span aria-hidden="true">▶ </span>{track.plays >= 1000 ? (track.plays/1000).toFixed(1).replace('.0','')+'k' : track.plays}</>}
+        </span>
+        <button type="button" className="track-action" onClick={handleLike}
+          aria-label={`${playerLabel(lang, 'like')}: ${track.title}`} aria-pressed={liked}
+          style={{ color:liked ? 'var(--a1)' : 'var(--muted)' }}>
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
-          {likeCount > 0 && <span style={{ fontVariantNumeric: 'tabular-nums' }}>{likeCount}</span>}
+          {likeCount > 0 && <span>{likeCount}</span>}
         </button>
-        {track.downloadUrl && (
-          <a href={track.downloadUrl} onClick={e => e.stopPropagation()} aria-label="Download" style={{ color:'var(--muted)', opacity:0.6, display:'flex' }}><DlIco /></a>
-        )}
-        <span style={{ fontSize:13, color:'var(--muted)' }}>{track.duration}</span>
+        {track.downloadUrl && <a className="track-action" href={track.downloadUrl}
+          aria-label={`${playerLabel(lang, 'download')}: ${track.title}`}><DlIco /></a>}
+        <span className="track-duration">{track.duration}</span>
       </div>
     </div>
   );
 }
 
-function MusicSection({ lang, onPlay, onOpenAlbum, currentTrack, playing }) {
+function MusicSection({ lang, onPlay, onToggle, onOpenAlbum, currentTrack, playing }) {
   const [ref, vis] = useInView();
   const [tracksRef, tracksVis] = useInView();
   const [albumFilter, setAlbumFilter] = __useS('all');
@@ -684,7 +672,7 @@ function MusicSection({ lang, onPlay, onOpenAlbum, currentTrack, playing }) {
             <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
               {tracks.length === 0 && <p style={{ color:'var(--muted)', lineHeight:1.6 }}>{lang === 'cs' ? 'Skladby teď nejsou dostupné. Zkus se sem vrátit s připojením k internetu.' : 'Tracks are currently unavailable. Please return with an internet connection.'}</p>}
               {filteredTracks.map((tr, i) => (
-                <TrackRow key={tr.id} track={tr} album={albumMap[tr.album]} idx={i} active={currentTrack?.id === tr.id} playing={playing} onPlay={(t) => onPlay(t, filteredTracks)} />
+                <TrackRow key={tr.id} lang={lang} onToggle={onToggle} track={tr} album={albumMap[tr.album]} idx={i} active={currentTrack?.id === tr.id} playing={playing} onPlay={(t) => onPlay(t, filteredTracks)} />
               ))}
             </div>
           </div>
