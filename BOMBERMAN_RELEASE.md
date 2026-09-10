@@ -22,13 +22,13 @@ The bytes were built from game commit `d980bc1d78ff1e5af4653e381a80bf74665aec3b`
 
 The `desktop_download_choices` migration adds `apps.downloads` (an array of labeled download URLs, primary/secondary role, version and display notes) and allows macOS / Windows + macOS. Existing single-link apps retain their behavior. Admin editing preserves the new download metadata and offers the new platform values. RLS and permissions are unchanged. Only BomberMan's catalog content is replaced; likes and the record ID are retained.
 
-`index.html` and `sw.js` use `jw-v104`; binary routes still bypass service-worker caching. Deployment follows the existing main → Vercel integration. The two screenshots are unmodified captures of the 2.1.1 game / packaged Mac LAN checks.
+`index.html` and `sw.js` use `jw-v105`; both catalog script URLs carry the same version so an older service worker cannot supply a mapper without download choices. Binary routes still bypass service-worker caching. Deployment follows the existing main → Vercel integration. The two screenshots are unmodified captures of the 2.1.1 game / packaged Mac LAN checks.
 
 ## Validation and limits
 
 - The seven-stage local native Mac release verification passed, including packaged LAN operation. All four package contents were inspected. The current files were rehashed before upload.
 - All public GitHub downloads returned HTTP 200, the expected bytes and matching SHA-256. EXE, ZIP and DMG container signatures were checked.
 - Site and admin JSX compile; all other fallback app records are unchanged. Card and detail, both languages, Windows/macOS filtering, and 390 px layout were inspected in the browser. Download links are separate from the card's detail link, with no nested anchors.
-- Public jenda.cool downloads and the deployed catalog must be checked after deployment before reporting publication complete.
+- All four packages and the checksum file were also downloaded through the public jenda.cool redirects: HTTP 200, correct file signatures, lengths and matching SHA-256. The live catalog is checked after deployment.
 - Windows is unsigned; the Mac is ad-hoc signed and not notarized. OS warnings or blocking remain possible.
 - Native Windows runtime and physical Windows–Mac crossplay have not been verified. GitHub game CI did not start because of the account's billing/spending limit. The user accepted these known limits for this publication. Multiplayer is LAN only.

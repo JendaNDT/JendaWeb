@@ -1,10 +1,10 @@
 // sw.js — Service worker for offline-first PWA
-const VERSION = 'jw-v104';
+const VERSION = 'jw-v105';
 const SHELL = [
   '/',
   '/index.html',
-  '/data.js',
-  '/supabase-data.js',
+  `/data.js?v=${VERSION}`,
+  `/supabase-data.js?v=${VERSION}`,
   `/combined.jsx?v=${VERSION}`,
   // Lokální knihovny (dříve CDN) — nutné pro offline boot
   '/vendor/react.production.min.js',

@@ -995,13 +995,13 @@
       });
     }
   </script>
-  <script src="data.js" defer></script>
+  <script src="data.js?v=jw-v105" defer></script>
   <!-- Fáze 3: přepíše globály z data.js obsahem ze Supabase (s offline cache) -->
-  <script src="supabase-data.js" defer></script>
+  <script src="supabase-data.js?v=jw-v105" defer></script>
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       (function() {
-        const VERSION = 'jw-v104'; // Match sw.js version
+        const VERSION = 'jw-v105'; // Match sw.js and catalog script URLs
         const jsxFiles = [
           'combined.jsx'
         ];
