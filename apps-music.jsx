@@ -13,12 +13,12 @@ const APP_VISUALS = {
   'rt-asistent': { src:'/screenshots/showcase/rt-asistent-v1.jpg', kind:'desktop', cs:'Radiografické výpočty přehledně.', en:'Radiography calculations, clearly.' },
 };
 
-function AppDownloads({ app, lang, compact = false }) {
+function AppDownloads({ app, lang }) {
   const downloads = appDownloads(app);
   const primary = downloads.filter(d => d.primary);
   const extra = downloads.filter(d => !d.primary);
   if (!primary.length) return null;
-  return <div className={`app-downloads${compact ? ' app-downloads-card' : ''}`}>
+  return <div className="app-downloads">
     {primary[0].version && <div className="app-download-version">{lang === 'cs' ? 'Verze ' : 'Version '}{primary[0].version}</div>}
     <div className="app-download-primary">
       {primary.map(d => <a key={d.url} href={d.url} download className="app-download-button">
@@ -26,7 +26,7 @@ function AppDownloads({ app, lang, compact = false }) {
         <small>{lang === 'cs' ? d.note_cs : d.note_en}</small>
       </a>)}
     </div>
-    {!compact && extra.length > 0 && <div className="app-download-extra">
+    {extra.length > 0 && <div className="app-download-extra">
       <span>{lang === 'cs' ? 'Další balíčky:' : 'Other packages:'}</span>
       {extra.map(d => <a key={d.url} href={d.url} download>{lang === 'cs' ? d.label_cs : d.label_en}</a>)}
     </div>}
@@ -64,7 +64,6 @@ function AppCard({ app, lang, mode = 'live', onOpen }) {
         <div className="app-card-action"><span>{lang === 'cs' ? 'Prohlédnout aplikaci' : 'Explore the app'}</span><span aria-hidden="true">↗</span></div>
       </div>
     </a>
-    {mode === 'live' && <AppDownloads app={app} lang={lang} compact />}
     </article>
   );
 }

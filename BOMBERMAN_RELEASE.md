@@ -2,7 +2,7 @@
 
 Public catalog: https://jenda.cool/#app=bomberman
 
-The existing BomberMan record (ID 31) is updated from 2.0.6. The card and detail offer two primary downloads: Windows Setup and Apple Silicon DMG. Portable EXE and Mac ZIP are secondary links in the detail. Czech and English copy, Windows/macOS filters and the offline fallback agree. No browser edition is published.
+The existing BomberMan record (ID 31) is updated from 2.0.6. The small catalog card opens the detail and has no download buttons. The expanded detail offers two primary downloads: Windows Setup and Apple Silicon DMG. Portable EXE and Mac ZIP are secondary links in the detail. Czech and English copy, Windows/macOS filters and the offline fallback agree. No browser edition is published.
 
 ## Distribution
 
@@ -22,7 +22,7 @@ The bytes were built from game commit `d980bc1d78ff1e5af4653e381a80bf74665aec3b`
 
 The `desktop_download_choices` migration adds `apps.downloads` (an array of labeled download URLs, primary/secondary role, version and display notes) and allows macOS / Windows + macOS. Existing single-link apps retain their behavior. Admin editing preserves the new download metadata and offers the new platform values. RLS and permissions are unchanged. Only BomberMan's catalog content is replaced; likes and the record ID are retained.
 
-`index.html` and `sw.js` use `jw-v105`; both catalog script URLs carry the same version so an older service worker cannot supply a mapper without download choices. Binary routes still bypass service-worker caching. Deployment follows the existing main → Vercel integration. The two screenshots are unmodified captures of the 2.1.1 game / packaged Mac LAN checks.
+`index.html` and `sw.js` use `jw-v106`; both catalog script URLs carry the same version so an older service worker cannot supply a mapper without download choices. Binary routes still bypass service-worker caching. Deployment follows the existing main → Vercel integration. The two screenshots are unmodified captures of the 2.1.1 game / packaged Mac LAN checks.
 
 ## Validation and limits
 
