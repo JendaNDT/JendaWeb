@@ -660,7 +660,7 @@ function AppForm({ initial, onClose, onSaved, notify }) {
       <div style={{ display: 'flex', gap: 12 }}>
         <Field label="Platforma">
           <select value={f.platform} onChange={(e) => set('platform', e.target.value)}>
-            <option value="PWA">PWA</option><option value="Android">Android</option><option value="Windows">Windows</option>
+            <option value="PWA">PWA</option><option value="Android">Android</option><option value="Windows">Windows</option><option value="macOS">macOS</option><option value="Windows / macOS">Windows / macOS</option>
           </select>
         </Field>
         <Field label="Barva"><input type="color" value={f.color} onChange={(e) => set('color', e.target.value)} style={{ height: 44, padding: 4 }} /></Field>
@@ -1271,7 +1271,8 @@ function OverviewTab({ data, goTab }) {
   const topLikedTrack = t.reduce(function (best, x) { return (Number(x.likes) || 0) > (Number(best && best.likes) || 0) ? x : best; }, null);
   const pwa = ap.filter(function (x) { return x.platform === 'PWA'; }).length;
   const android = ap.filter(function (x) { return x.platform === 'Android'; }).length;
-  const windows = ap.filter(function (x) { return x.platform === 'Windows'; }).length;
+  const windows = ap.filter(function (x) { return String(x.platform || '').split(' / ').includes('Windows'); }).length;
+  const macos = ap.filter(function (x) { return String(x.platform || '').split(' / ').includes('macOS'); }).length;
   const appNoLink = ap.filter(function (x) { return !x.link || x.link === '#'; }).length;
   const socNoLink = so.filter(function (x) { return !x.url || x.url === '#'; }).length;
   const totalAppLikes = ap.reduce(function (s, x) { return s + (Number(x.likes) || 0); }, 0);
@@ -1291,7 +1292,7 @@ function OverviewTab({ data, goTab }) {
       </div>
       <div className="sectionlabel">Aplikace & sítě</div>
       <div className="statgrid">
-        <StatCard num={ap.length} lbl="aplikací" sub={pwa + '× PWA · ' + android + '× Android · ' + windows + '× Windows'} />
+        <StatCard num={ap.length} lbl="aplikací" sub={pwa + '× PWA · ' + android + '× Android · ' + windows + '× Windows · ' + macos + '× macOS'} />
         <StatCard num={ap.length - appNoLink} lbl="appek s odkazem" sub={appNoLink ? (appNoLink + ' bez odkazu') : 'všechny s odkazem'} />
         <StatCard num={so.length} lbl="sociálních sítí" sub={socNoLink ? (socNoLink + ' bez odkazu') : 'všechny s odkazem'} />
         <StatCard num={totalAppLikes.toLocaleString('cs')} lbl="lajků celkem" sub={topLikedApp && totalAppLikes > 0 ? ('nejvíc: ' + topLikedApp.name + ' (' + topLikedApp.likes + '❤️)') : 'zatím žádné'} />

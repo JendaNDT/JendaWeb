@@ -3,7 +3,7 @@ const { useState: __useS, useEffect: __useE, useLayoutEffect: __useL, useMemo: _
 
 const APP_VISUALS = {
   rocker: { src:'/screenshots/rocker/metronome-desktop-v1.jpg', kind:'desktop', cs:'Metronom pro tvoje cvičení.', en:'A metronome for your practice.' },
-  bomberman: { src:'/screenshots/bomberman-2.0.5/gameplay.png', kind:'desktop', cs:'Bomby, bludiště a arkádová akce.', en:'Bombs, mazes and arcade action.' },
+  bomberman: { src:'/screenshots/bomberman-2.1.1/battle.png', kind:'desktop', cs:'Bomby, bludiště a společná hra v LAN.', en:'Bombs, mazes and LAN multiplayer.' },
   'fyzika-pastelkou': { src:'/screenshots/fyzika-pastelkou/android-water.png', kind:'landscape', cs:'Kresli. Zkoušej. Objevuj.', en:'Draw. Try. Discover.' },
   georeminder: { src:'/screenshots/showcase/georeminder-dark-v1.png', kind:'phone', cs:'Připomínka na správném místě.', en:'A reminder in the right place.' },
   engitab: { src:'/screenshots/showcase/engitab-dark-v1.png', kind:'phone', cs:'Celá dílna v kapse.', en:'Your workshop, in your pocket.' },
@@ -13,6 +13,26 @@ const APP_VISUALS = {
   'rt-asistent': { src:'/screenshots/showcase/rt-asistent-v1.jpg', kind:'desktop', cs:'Radiografické výpočty přehledně.', en:'Radiography calculations, clearly.' },
 };
 
+function AppDownloads({ app, lang, compact = false }) {
+  const downloads = appDownloads(app);
+  const primary = downloads.filter(d => d.primary);
+  const extra = downloads.filter(d => !d.primary);
+  if (!primary.length) return null;
+  return <div className={`app-downloads${compact ? ' app-downloads-card' : ''}`}>
+    {primary[0].version && <div className="app-download-version">{lang === 'cs' ? 'Verze ' : 'Version '}{primary[0].version}</div>}
+    <div className="app-download-primary">
+      {primary.map(d => <a key={d.url} href={d.url} download className="app-download-button">
+        <span><DlIco />{lang === 'cs' ? d.label_cs : d.label_en}</span>
+        <small>{lang === 'cs' ? d.note_cs : d.note_en}</small>
+      </a>)}
+    </div>
+    {!compact && extra.length > 0 && <div className="app-download-extra">
+      <span>{lang === 'cs' ? 'Další balíčky:' : 'Other packages:'}</span>
+      {extra.map(d => <a key={d.url} href={d.url} download>{lang === 'cs' ? d.label_cs : d.label_en}</a>)}
+    </div>}
+  </div>;
+}
+
 function AppCard({ app, lang, mode = 'live', onOpen }) {
   const visual = mode === 'live' ? (APP_VISUALS[slugify(app.name)] || {
     src: app.screenshots?.[0] || app.icon_url,
@@ -20,12 +40,13 @@ function AppCard({ app, lang, mode = 'live', onOpen }) {
     cs: app.name, en: app.name,
   }) : null;
   return (
-    <a href={'#app=' + slugify(app.name)} className={`app-card app-sheen ${visual ? 'app-showcase' : 'app-study'}`}
-       style={{ '--app-accent': app.color }} onPointerMove={moveSurfaceLight}
+    <article className={`app-card app-sheen ${visual ? 'app-showcase' : 'app-study'}`}
+       style={{ '--app-accent': app.color }} onPointerMove={moveSurfaceLight}>
+    <a href={'#app=' + slugify(app.name)} className="app-card-overview"
        onClick={e => {
          if (!onOpen || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
          e.preventDefault();
-         onOpen(app, e.currentTarget);
+         onOpen(app, e.currentTarget.closest('.app-card'));
        }}>
       {visual && <div className={`app-stage app-stage-${visual.kind}`}>
         <span className="app-stage-caption">{lang === 'cs' ? visual.cs : visual.en}</span>
@@ -43,6 +64,8 @@ function AppCard({ app, lang, mode = 'live', onOpen }) {
         <div className="app-card-action"><span>{lang === 'cs' ? 'Prohlédnout aplikaci' : 'Explore the app'}</span><span aria-hidden="true">↗</span></div>
       </div>
     </a>
+    {mode === 'live' && <AppDownloads app={app} lang={lang} compact />}
+    </article>
   );
 }
 
@@ -108,7 +131,7 @@ function AppsSection({ lang, onOpen }) {
   const studies = apps.filter(a => !isLiveApp(a));
   const q = query.trim().toLocaleLowerCase();
   const matches = a => (!q || [a.name, a.cs, a.en].some(t => String(t || '').toLocaleLowerCase().includes(q)))
-    && (filter === 'all' || a.platform === filter);
+    && (filter === 'all' || appSupportsPlatform(a, filter));
   const matchingLive = live.filter(matches);
   const matchingStudies = studies.filter(matches);
   const featured = featuredAppSlugs.map(slug => matchingLive.find(a => slugify(a.name) === slug)).filter(Boolean);
@@ -116,7 +139,7 @@ function AppsSection({ lang, onOpen }) {
   const orderedLive = [...featured, ...otherLive];
   const pills = [
     { key: 'all', label: lang === 'cs' ? 'Vše' : 'All', count: live.length },
-    ...['PWA', 'Android', 'Windows'].map(key => ({ key, label: key, count: live.filter(a => a.platform === key).length })),
+    ...['PWA', 'Android', 'Windows', 'macOS'].map(key => ({ key, label: key, count: live.filter(a => appSupportsPlatform(a, key)).length })),
   ];
   const cards = (items, mode = 'live') => <AppGrid items={items} mode={mode} lang={lang} onOpen={onOpen} />;
 
@@ -125,7 +148,7 @@ function AppsSection({ lang, onOpen }) {
       <div ref={ref} className={`fade-up${vis?' in-view':''}`} style={{ maxWidth:1200, margin:'0 auto' }}>
         <SectionLabel color="a1" num="02">{tx(lang,'apps_title')}</SectionLabel>
         <p style={{ color:'var(--muted)', fontSize:16, marginBottom:28 }}>
-          {lang === 'cs' ? `${live.length} aplikací k vyzkoušení · Android, Windows a web` : `${live.length} apps to try · Android, Windows and web`}
+          {lang === 'cs' ? `${live.length} aplikací k vyzkoušení · Android, Windows, macOS a web` : `${live.length} apps to try · Android, Windows, macOS and web`}
         </p>
         <div className="apps-tools">
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
@@ -171,6 +194,7 @@ function AppsSection({ lang, onOpen }) {
 
 function AppDetailModal({ app, lang, onClose, onShare }) {
   const isPWA = app.platform === 'PWA';
+  const hasDownloadChoices = appDownloads(app).some(d => d.primary);
   const copy = appCopy(app, lang);
   const screenshots = [...(app.screenshots || [])];
   const visual = APP_VISUALS[slugify(app.name)];
@@ -344,7 +368,8 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
           display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10,
           borderTop: '1px solid var(--border)', paddingTop: 18
         }}>
-          {app.link && app.link !== '#' && (
+          {hasDownloadChoices && <AppDownloads app={app} lang={lang} />}
+          {!hasDownloadChoices && app.link && app.link !== '#' && (
             <button onClick={handleLaunch} disabled={downloading} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               padding: '11px 22px', borderRadius: 10, flex: '1 0 160px',

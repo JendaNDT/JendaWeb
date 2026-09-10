@@ -26,6 +26,31 @@
       "source": "/rt-asistent",
       "destination": "/rt-asistent/",
       "permanent": true
+    },
+    {
+      "source": "/binaries/bomberman-2.1.1/BomberMan-2.1.1-mac-arm64.dmg",
+      "destination": "https://github.com/JendaNDT/JendaWeb/releases/download/bomberman-v2.1.1/BomberMan-2.1.1-mac-arm64.dmg",
+      "permanent": true
+    },
+    {
+      "source": "/binaries/bomberman-2.1.1/BomberMan-2.1.1-mac-arm64.zip",
+      "destination": "https://github.com/JendaNDT/JendaWeb/releases/download/bomberman-v2.1.1/BomberMan-2.1.1-mac-arm64.zip",
+      "permanent": true
+    },
+    {
+      "source": "/binaries/bomberman-2.1.1/BomberMan-2.1.1-portable.exe",
+      "destination": "https://github.com/JendaNDT/JendaWeb/releases/download/bomberman-v2.1.1/BomberMan-2.1.1-portable.exe",
+      "permanent": true
+    },
+    {
+      "source": "/binaries/bomberman-2.1.1/BomberMan-Setup-2.1.1.exe",
+      "destination": "https://github.com/JendaNDT/JendaWeb/releases/download/bomberman-v2.1.1/BomberMan-Setup-2.1.1.exe",
+      "permanent": true
+    },
+    {
+      "source": "/binaries/bomberman-2.1.1/SHA256SUMS.txt",
+      "destination": "https://github.com/JendaNDT/JendaWeb/releases/download/bomberman-v2.1.1/SHA256SUMS.txt",
+      "permanent": true
     }
   ],
   "rewrites": [

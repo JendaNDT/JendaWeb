@@ -1,30 +1,34 @@
-# BomberMan 2.0.5 for Windows — 2026-09-09
+# BomberMan 2.1.1 — Windows and Apple Silicon Mac
 
-The user requested a Windows application download on jenda.cool. The catalog detail is `/#app=bomberman`; no browser edition is being published.
+Public catalog: https://jenda.cool/#app=bomberman
 
-- Artifact: `/binaries/bomberman-2.0.5/BomberMan-2.0.5-portable.exe`
-- Size: 104158434 bytes (104.2 MB / 99.33 MiB), below GitHub's 100 MiB file limit.
-- SHA-256: `9f9e91ddd07f15e7f86059aa29b1ed3016c8ab5b0b8b8d8e2969ec9413e7c052`
-- Source: JendaNDT/BomberMan commit `a8b7a4d75a6f11107118784c61d445b85864928a`; existing Windows portable build, unchanged.
-- Requirements: Windows 10/11 x64. Portable, no installation. Unsigned; the catalog explicitly notes that Windows may warn or block it.
-- Supabase `apps`: reserved ID 31, platform Windows, sort -2. The identity sequence was behind the existing manually inserted ID 30; advancing it reserved the next free ID without changing existing rows.
-- Database migration adds Windows to the platform check; RLS and permissions stay intact. The admin form and counters support Windows.
-- Offline fallback matches the catalog. `index.html` and `sw.js`: `jw-v100`.
-- Binary downloads bypass the portfolio service worker. Existing RT Asistent worker isolation is preserved.
-- Versioned download has attachment, octet-stream and immutable caching headers.
+The existing BomberMan record (ID 31) is updated from 2.0.6. The card and detail offer two primary downloads: Windows Setup and Apple Silicon DMG. Portable EXE and Mac ZIP are secondary links in the detail. Czech and English copy, Windows/macOS filters and the offline fallback agree. No browser edition is published.
 
-## Screenshots
+## Distribution
 
-`screenshots/bomberman-2.0.5/gameplay.png` is an unmodified Chromium capture of version 2.0.5 running the story mode, Czech, default scanlines off. `menu.png` is the earlier real Electron menu capture with the Quit option. The icon comes from the game's own build assets. No generated marketing mockups.
+Packages are publicly hosted as assets of the JendaWeb release `bomberman-v2.1.1`, with versioned redirects from `/binaries/bomberman-2.1.1/`. This avoids the 100 MiB ordinary Git file limit and the existing Supabase Free upload limit. The game source repository remains private. The automatically attached source archives in this public release contain JendaWeb, not the game.
 
-## Validation before publication
+The bytes were built from game commit `d980bc1d78ff1e5af4653e381a80bf74665aec3b`, merged as `0c80b8966a253c171313bc2f5ac1146613250a60`. The merged tree matches the tested source. Game version 2.1.1, network protocol 3, build fingerprint `572938d2fed40f134b1617fd37945039`.
 
-- Combined JSX and admin JSX compile with the site's bundled Babel; diff whitespace check passes.
-- Czech detail, installation notes, Windows filter and English detail verified in the local browser.
-- At 390 px, the detail has no horizontal overflow; icon and both screenshots load. No captured browser console errors in the local preview.
-- The local preview uses data.js rather than changing the live catalog before the assets are available.
-- Game runtime had already passed its Windows checks. Capture run also passed all 48 QHD/4K emulation checks; physical QHD/4K monitors were not tested. This does not assert that the unsigned packaged EXE passes Windows application control.
+| File | Bytes | SHA-256 |
+|---|---:|---|
+| BomberMan-2.1.1-mac-arm64.dmg | 111434740 | `ab67e2d3a7b8c8c5df3b8f28b80e424fc0e8d920e7982e7ec0a1a2d7490d559e` |
+| BomberMan-2.1.1-mac-arm64.zip | 122614189 | `51c34dbcc5bcab3c09becd9a1ab7031d31adcdcb55c11fb3df6c040ef8324d38` |
+| BomberMan-2.1.1-portable.exe | 104765246 | `42f10843c07950a5ac2231120379f1afa106303c850fc30f49052541dc8a61db` |
+| BomberMan-Setup-2.1.1.exe | 105195563 | `3c9bbb3c79a615f74196108b4fa71b23d1f478888704766f31e4e10d0176a16f` |
+| SHA256SUMS.txt | 379 | `23b31ce871812d76731ee61901fb0e8be4c6cd0566d3f5ae626228c8f98784bf` |
 
-## Publication order
+## Catalog and deployment
 
-Push site assets and catalog support through the existing main → Vercel integration, verify the entire deployed EXE against SHA-256, then add the live Supabase row. Verify the public catalog and its download button afterward.
+The `desktop_download_choices` migration adds `apps.downloads` (an array of labeled download URLs, primary/secondary role, version and display notes) and allows macOS / Windows + macOS. Existing single-link apps retain their behavior. Admin editing preserves the new download metadata and offers the new platform values. RLS and permissions are unchanged. Only BomberMan's catalog content is replaced; likes and the record ID are retained.
+
+`index.html` and `sw.js` use `jw-v104`; binary routes still bypass service-worker caching. Deployment follows the existing main → Vercel integration. The two screenshots are unmodified captures of the 2.1.1 game / packaged Mac LAN checks.
+
+## Validation and limits
+
+- The seven-stage local native Mac release verification passed, including packaged LAN operation. All four package contents were inspected. The current files were rehashed before upload.
+- All public GitHub downloads returned HTTP 200, the expected bytes and matching SHA-256. EXE, ZIP and DMG container signatures were checked.
+- Site and admin JSX compile; all other fallback app records are unchanged. Card and detail, both languages, Windows/macOS filtering, and 390 px layout were inspected in the browser. Download links are separate from the card's detail link, with no nested anchors.
+- Public jenda.cool downloads and the deployed catalog must be checked after deployment before reporting publication complete.
+- Windows is unsigned; the Mac is ad-hoc signed and not notarized. OS warnings or blocking remain possible.
+- Native Windows runtime and physical Windows–Mac crossplay have not been verified. GitHub game CI did not start because of the account's billing/spending limit. The user accepted these known limits for this publication. Multiplayer is LAN only.

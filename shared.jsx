@@ -76,6 +76,9 @@ function scrollToSection(id) {
 
 // Presentation uses the same availability rules for cards, filters and counters.
 const isLiveApp = app => !!(app.link && app.link.trim() && app.link.trim() !== '#');
+const appSupportsPlatform = (app, platform) => String(app.platform || '').split(' / ').includes(platform);
+const appDownloads = app => Array.isArray(app.downloads) ? app.downloads.filter(d =>
+  d && typeof d.url === 'string' && /^(?:\/[^/]|https:\/\/)/.test(d.url)) : [];
 const isPlayableTrack = track => !!(track.audioUrl && track.audioUrl.trim() && track.audioUrl.trim() !== '#');
 const publishedAlbums = () => (window.ALBUMS || []).filter(album =>
   (window.TRACKS_DATA || []).some(track => track.album === album.id && isPlayableTrack(track)));
