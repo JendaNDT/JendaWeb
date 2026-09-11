@@ -1,31 +1,22 @@
-# BomberMan 2.2.0 — teams, map voting and achievement progress
+# BomberMan 2.3.0 — five save slots and durable desktop saves
 
-Catalog: https://jenda.cool/#app=bomberman
+Prepared catalog update for https://jenda.cool/#app=bomberman. Publication is pending upload of the verified packages to the public JendaWeb release `bomberman-v2.3.0`. Do not merge this web update before the release assets are available.
 
-This update adds 2v2 team battles with shared scoring, ten-second voting for the next arena theme, and achievement progress. The existing BomberMan record (ID 31) and its download counter are retained. The small catalog card opens the detail; Windows Setup and Apple Silicon DMG are the main download choices there, with portable EXE and Mac ZIP as alternatives.
+Five manual positions are available for saving and loading, with overwrite confirmation and separate per-mode autosaves. The desktop app acknowledges saves after writing them to a stable user-data file with a backup. Existing manual saves become slot one. Manual saves remain available after loading and game over. The portable EXE stores saves in user data on that computer, not alongside the executable.
 
-## Distribution
+## Packages
 
-The public JendaWeb release `bomberman-v2.2.0` hosts the packages. Versioned `/binaries/bomberman-2.2.0/` redirects provide the website links. Existing versioned downloads remain available. The private game source repository is unchanged by this web publication; GitHub's automatic source archives in the public release contain JendaWeb, not the game.
-
-The packages were built from `d63f5ad3f41b034e8b547f1f445c5577bcc3dcbd`, merged as `e2a7a91e83ec62e963b750bfa0064974298c9101`. The merged tree equals the tested source. Game version 2.2.0, network protocol 4, build identity `8bbbd497eea166c722bb78f534d49898`. All players in a LAN match need this matching version.
+Same four binaries as the private BomberMan release, without publishing private source to this repository. `/binaries/bomberman-2.3.0/` redirects point to the public release; earlier versioned downloads stay available.
 
 | File | Bytes | SHA-256 |
 |---|---:|---|
-| BomberMan-2.2.0-mac-arm64.dmg | 111404295 | `4e4b4d87dd7aeea2f43a0ba59beb9275d06f65a5507bc04006d0d8f8cb45eb7e` |
-| BomberMan-2.2.0-mac-arm64.zip | 122618508 | `94e67527253be8771a6e5fab8c3cd1b6d63599474c5ec22fab39799a93d5be90` |
-| BomberMan-Setup-2.2.0.exe | 105199002 | `08c83dd14642e81884c2e747b46fc8952b388ad1b250e0472535adc324c17eaa` |
-| BomberMan-2.2.0-portable.exe | 104768676 | `8b98a5b330f23bd5935a2a1aaef5b941be20469ba96539ddd074b41897a98285` |
-| SHA256SUMS.txt | 379 | `af0bdc2e7c8c6ce749e6cac02abfb16c16152b3f5960fc7c6d4455552dbb2dcd` |
+| BomberMan-2.3.0-mac-arm64.dmg | 111388764 | `7de02418d8a9082e1f2cfc31e47653c500a1c12d1f9cc97c30fd863cbbcccb22` |
+| BomberMan-2.3.0-mac-arm64.zip | 122622530 | `65e422816c82ea7f49f5a182619e7746ebc2eb30b6b61c9519387de209eacda6` |
+| BomberMan-Setup-2.3.0.exe | 105202108 | `5e70a329a017ad403d587db3b7cb062f716dbfc29b946bf307143f56faf38b0b` |
+| BomberMan-2.3.0-portable.exe | 104771766 | `c269d14380a53d73e303eed9a103c205039f695a265c80a720c2c9ddff31a900` |
 
-## Catalog and deployment
+## Verification
 
-Supabase `public.apps` is the primary catalog and `data.js` is its offline fallback. The update changes only BomberMan's descriptions, download URLs, file-size labels and screenshots. No schema or access-policy changes are needed.
+The complete local macOS arm64 release gate passed all eight stages, including native packaged save/restart/selected-load tests, LAN tests and both DMG/ZIP container checks. Windows x64 Setup and portable were cross-built and both containers checked. Native Windows execution, physical Windows–Mac crossplay and a physical power cut have not been tested. Windows binaries are unsigned; Mac has an ad-hoc signature without notarization.
 
-The catalog script URLs, page loader and service worker share cache version `jw-v108`. Downloads bypass the offline cache. Deployment uses the existing main-to-Vercel integration. New screenshots show the team battle, map vote and achievement progress.
-
-## Validation and limits
-
-The seven-stage local Mac release check passed, including packaged LAN operation. All four package containers were inspected and their current bytes rehashed against that evidence. The source tree matches the merged GitHub main. The web update passes syntax and catalog checks; other fallback entries are unchanged.
-
-Native Windows operation and physical two-computer Windows–Mac play have not been verified. GitHub game CI ended without executing test steps. Windows packages are unsigned; Mac packages have an ad-hoc signature without notarization. Multiplayer is LAN only.
+The website retains catalog record 31 and its counters. `data.js` is the fallback; the production Supabase row must receive matching descriptions, links, screenshots and download sizes after the assets and website deployment are live. No schema or permissions change is required. The production build generates matching fingerprinted catalog assets, HTML and service worker.
