@@ -111,8 +111,38 @@ function scrollToSection(id) {
 // Presentation uses the same availability rules for cards, filters and counters.
 const isLiveApp = app => !!(app.link && app.link.trim() && app.link.trim() !== '#');
 const appSupportsPlatform = (app, platform) => String(app.platform || '').split(' / ').includes(platform);
+function downloadParts(link) {
+  if (typeof link !== 'string' || !link.startsWith('[')) return null;
+  try {
+    const parts = JSON.parse(link);
+    return Array.isArray(parts) && parts.length > 0 && parts.every(url =>
+      typeof url === 'string' && /^\/binaries\/[^?#\\]+\.part\d+$/.test(url)) ? parts : null;
+  } catch { return null; }
+}
+async function downloadChunkedFile(link, expectedBytes, onProgress = () => {}) {
+  const parts = downloadParts(link);
+  if (!parts) throw new Error('Invalid download');
+  const blobs = [];
+  for (const url of parts) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Download unavailable');
+    blobs.push(await response.blob());
+    onProgress(Math.round(blobs.length / parts.length * 100));
+  }
+  const blob = new Blob(blobs, { type:'application/octet-stream' });
+  if (Number.isSafeInteger(expectedBytes) && blob.size !== expectedBytes) throw new Error('Incomplete download');
+  const objectUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = objectUrl;
+  anchor.download = decodeURIComponent(parts[0].split('/').pop()).replace(/^\d+_/, '').replace(/\.part\d+$/, '');
+  document.body.appendChild(anchor);
+  try { anchor.click(); } finally {
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+  }
+}
 const appDownloads = app => Array.isArray(app.downloads) ? app.downloads.filter(d =>
-  d && typeof d.url === 'string' && /^(?:\/[^/]|https:\/\/)/.test(d.url)) : [];
+  d && typeof d.url === 'string' && (/^(?:\/[^/]|https:\/\/)/.test(d.url) || downloadParts(d.url))) : [];
 const isDownloadLink = link => typeof link === 'string' &&
   (link.includes('/storage/v1/object/public/binaries/') || link.startsWith('[') || /\.(apk|zip|dmg|exe|tar\.gz|ipa|pkg)(?:[?#].*)?$/i.test(link));
 const appHasDownloads = app => app.platform !== 'PWA' && isLiveApp(app) &&

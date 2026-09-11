@@ -13,6 +13,8 @@ node tests/music-newsletter.cjs
 node tests/contact.cjs
 node tests/startup-build.cjs
 node tests/gallery-input.cjs
+node tests/download-counts.cjs
+node tests/multipart-downloads.cjs
 ```
 
 `python3 build_jsx.py` remains a compatibility entry point and invokes the same
