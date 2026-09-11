@@ -36,22 +36,47 @@ function AppDownloadCount({ app, lang }) {
 }
 
 function AppDownloads({ app, lang }) {
+  const busy = __useR(false);
+  const [progress, setProgress] = __useS(null);
+  const [error, setError] = __useS(false);
   const downloads = appDownloads(app);
   const primary = downloads.filter(d => d.primary);
   const extra = downloads.filter(d => !d.primary);
+  const startChunked = async d => {
+    if (busy.current) return;
+    busy.current = true;
+    setError(false); setProgress(0);
+    void apiRecordDownload(app, d.url);
+    try { await downloadChunkedFile(d.url, d.bytes, setProgress); }
+    catch { setError(true); }
+    finally { busy.current = false; setProgress(null); }
+  };
+  const downloadControl = (d, main) => {
+    const chunked = !!downloadParts(d.url);
+    const Tag = chunked ? 'button' : 'a';
+    const props = chunked
+      ? { type:'button', disabled:progress !== null, onClick:() => startChunked(d) }
+      : { href:d.url, download:true, onClick:() => { void apiRecordDownload(app, d.url); } };
+    return <Tag key={d.url} {...props} className={main ? 'app-download-button' : undefined}>
+      {main ? <><span><DlIco />{lang === 'cs' ? d.label_cs : d.label_en}</span>
+        <small>{lang === 'cs' ? d.note_cs : d.note_en}</small></>
+        : (lang === 'cs' ? d.label_cs : d.label_en)}
+    </Tag>;
+  };
   if (!primary.length) return null;
   return <div className="app-downloads">
     {primary[0].version && <div className="app-download-version">{lang === 'cs' ? 'Verze ' : 'Version '}{primary[0].version}</div>}
     <div className="app-download-primary">
-      {primary.map(d => <a key={d.url} href={d.url} download className="app-download-button" onClick={() => { void apiRecordDownload(app, d.url); }}>
-        <span><DlIco />{lang === 'cs' ? d.label_cs : d.label_en}</span>
-        <small>{lang === 'cs' ? d.note_cs : d.note_en}</small>
-      </a>)}
+      {primary.map(d => downloadControl(d, true))}
     </div>
     {extra.length > 0 && <div className="app-download-extra">
       <span>{lang === 'cs' ? 'Další balíčky:' : 'Other packages:'}</span>
-      {extra.map(d => <a key={d.url} href={d.url} download onClick={() => { void apiRecordDownload(app, d.url); }}>{lang === 'cs' ? d.label_cs : d.label_en}</a>)}
+      {extra.map(d => downloadControl(d, false))}
     </div>}
+    <div role="status" aria-live="polite">
+      {progress !== null && (lang === 'cs' ? `Stahuji… ${progress} %` : `Downloading… ${progress}%`)}
+      {error && (lang === 'cs' ? 'Stažení se nepodařilo. Zkus to prosím znovu.' : 'Download failed. Please try again.')}
+    </div>
   </div>;
 }
 

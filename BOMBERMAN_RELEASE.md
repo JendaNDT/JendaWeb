@@ -1,12 +1,12 @@
 # BomberMan 2.3.0 — five save slots and durable desktop saves
 
-Prepared catalog update for https://jenda.cool/#app=bomberman. Publication is pending upload of the verified packages to the public JendaWeb release `bomberman-v2.3.0`. Do not merge this web update before the release assets are available.
+Catalog update for https://jenda.cool/#app=bomberman. The four verified desktop packages are distributed directly by the website using its existing multipart binary format. GitHub Release publication is separate and still pending.
 
 Five manual positions are available for saving and loading, with overwrite confirmation and separate per-mode autosaves. The desktop app acknowledges saves after writing them to a stable user-data file with a backup. Existing manual saves become slot one. Manual saves remain available after loading and game over. The portable EXE stores saves in user data on that computer, not alongside the executable.
 
 ## Packages
 
-Same four binaries as the private BomberMan release, without publishing private source to this repository. `/binaries/bomberman-2.3.0/` redirects point to the public release; earlier versioned downloads stay available.
+The four final binaries are stored as 20 MiB parts in `binaries/bomberman-2.3.0/`, following the existing admin uploader format. The download buttons fetch every part in order, verify the total byte size and save one correctly named installer or archive. `manifest.json` records the part order and whole-file hashes; `SHA256SUMS.txt` is also directly available. Earlier versioned downloads stay available. Private game source is not included.
 
 | File | Bytes | SHA-256 |
 |---|---:|---|
@@ -19,4 +19,4 @@ Same four binaries as the private BomberMan release, without publishing private 
 
 The complete local macOS arm64 release gate passed all eight stages, including native packaged save/restart/selected-load tests, LAN tests and both DMG/ZIP container checks. Windows x64 Setup and portable were cross-built and both containers checked. Native Windows execution, physical Windows–Mac crossplay and a physical power cut have not been tested. Windows binaries are unsigned; Mac has an ad-hoc signature without notarization.
 
-The website retains catalog record 31 and its counters. `data.js` is the fallback; the production Supabase row must receive matching descriptions, links, screenshots and download sizes after the assets and website deployment are live. No schema or permissions change is required. The production build generates matching fingerprinted catalog assets, HTML and service worker.
+The website retains catalog record 31 and its counters. `data.js` is the fallback; the production Supabase row must receive matching descriptions, links, screenshots and download sizes after the assets and website deployment are live. Multipart primary and secondary download controls are covered by isolated handler tests, including failure and repeat-click behavior. No schema or permissions change is required. The production build generates matching fingerprinted catalog assets, HTML and service worker.
