@@ -1,3 +1,6 @@
 # Keep hashed offline releases reproducible across Windows and Linux.
 rt-asistent/** text=auto eol=lf
 rt-asistent-src/** text=auto eol=lf
+
+# Versioned third-party notices retain the exact bytes covered by SHA256SUMS.
+binaries/**/THIRD-PARTY-NOTICES.txt -text -whitespace
