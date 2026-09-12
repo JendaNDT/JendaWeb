@@ -1,0 +1,68 @@
+{
+  "version": "2.3.2",
+  "testedCommit": "a0f37b5b0a5b61871dde39f3becf46abea207fc0",
+  "network": {
+    "protocol": 4,
+    "build": "295f386b292ed056b3f42fb2a3a45c8f",
+    "gameVersion": "2.3.2"
+  },
+  "files": [
+    {
+      "name": "BomberMan-Setup-2.3.2.exe",
+      "containerContentsVerified": true,
+      "bytes": 105202394,
+      "sha256": "6542ac70cfa4a0458743ee9ea3b562b2768eff35620188e5e3fec63f8a7e32be",
+      "parts": [
+        "/binaries/bomberman-2.3.2/BomberMan-Setup-2.3.2.exe.part0",
+        "/binaries/bomberman-2.3.2/BomberMan-Setup-2.3.2.exe.part1",
+        "/binaries/bomberman-2.3.2/BomberMan-Setup-2.3.2.exe.part2",
+        "/binaries/bomberman-2.3.2/BomberMan-Setup-2.3.2.exe.part3",
+        "/binaries/bomberman-2.3.2/BomberMan-Setup-2.3.2.exe.part4",
+        "/binaries/bomberman-2.3.2/BomberMan-Setup-2.3.2.exe.part5"
+      ]
+    },
+    {
+      "name": "BomberMan-2.3.2-portable.exe",
+      "containerContentsVerified": true,
+      "bytes": 104772033,
+      "sha256": "45bb85bb5e818633906950cd0677612d1b706210b4dda650e5caeb0c16d24622",
+      "parts": [
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-portable.exe.part0",
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-portable.exe.part1",
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-portable.exe.part2",
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-portable.exe.part3",
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-portable.exe.part4"
+      ]
+    },
+    {
+      "name": "BomberMan-2.3.2-mac-arm64.dmg",
+      "containerContentsVerified": true,
+      "bytes": 111388919,
+      "sha256": "34958bf5890f91ce5af480ce7f2ca3d3da18c4f461096fe5f7854feef214a5ad",
+      "parts": [
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-mac-arm64.dmg.part0",
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-mac-arm64.dmg.part1",
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-mac-arm64.dmg.part2",
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-mac-arm64.dmg.part3",
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-mac-arm64.dmg.part4",
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-mac-arm64.dmg.part5"
+      ]
+    },
+    {
+      "name": "BomberMan-2.3.2-mac-arm64.zip",
+      "containerContentsVerified": true,
+      "bytes": 122623023,
+      "sha256": "1819ae7fca11653768a67d5beb2fd67a2185f9a37379fe13c587285a5ecfcb6b",
+      "parts": [
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-mac-arm64.zip.part0",
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-mac-arm64.zip.part1",
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-mac-arm64.zip.part2",
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-mac-arm64.zip.part3",
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-mac-arm64.zip.part4",
+        "/binaries/bomberman-2.3.2/BomberMan-2.3.2-mac-arm64.zip.part5"
+      ]
+    }
+  ],
+  "sourceCommit": "fea93f307821602d31a946612fa4276eba8e5c66",
+  "sourceTag": "v2.3.2"
+}
