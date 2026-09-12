@@ -32,7 +32,18 @@ for (const file of ['shared.jsx', 'apps-music.jsx']) {
 }
 vm.runInContext(fs.readFileSync(path.join(root, 'data.js'), 'utf8'), context);
 const app = context.window.APPS_DATA.find(a => a.id === 31);
-const manifest = JSON.parse(fs.readFileSync(path.join(root, 'binaries/bomberman-2.3.0/manifest.json')));
+const releaseVersion = app.downloads[0].version;
+assert.match(releaseVersion, /^\d+\.\d+\.\d+$/);
+assert.ok(app.downloads.every(download => download.version === releaseVersion), 'all controls use the same release');
+const manifest = JSON.parse(fs.readFileSync(path.join(root, 'binaries', `bomberman-${releaseVersion}`, 'manifest.json')));
+assert.equal(manifest.version, releaseVersion);
+for (const download of app.downloads) {
+  const parts = JSON.parse(download.url);
+  const expected = manifest.files.find(file => file.parts[0] === parts[0]);
+  assert.ok(expected, 'each control points to an artifact in the release manifest');
+  assert.deepEqual(parts, expected.parts, 'the catalog preserves every part in manifest order');
+  assert.equal(download.bytes, expected.bytes, 'the catalog validates the complete artifact size');
+}
 const walk = node => node && typeof node === 'object' ? [node, ...node.props.children.flatMap(walk)] : [];
 const render = lang => { cursor = 0; return walk(context.AppDownloads({ app, lang })); };
 const controls = lang => render(lang).filter(n => n.type === 'button');

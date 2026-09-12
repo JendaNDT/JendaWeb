@@ -1,0 +1,4 @@
+c64210ab01d6013beeb1277d07fb298d9cef189879bd2f4730f3baeed8acacac  BomberMan-2.3.1-mac-arm64.dmg
+5977ab3a436982d4772c5643a40228d72df9cc10e8c1a7b12c5852ab5f552002  BomberMan-2.3.1-mac-arm64.zip
+307b6699ccefd0f246ae143c5f68097dd3ffdd0af2764bf2c4173453985bab82  BomberMan-Setup-2.3.1.exe
+0ff0d2465dd432f86e0e477a78260a3c541c7164a3afa2b2f6e54060d9fa089d  BomberMan-2.3.1-portable.exe
