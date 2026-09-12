@@ -1,27 +1,30 @@
-# Fyzika pastelkou — 2026-09-12
+# Fyzika pastelkou — 2026-09-13
 
-Version 0.1.2-android.4 (code 4) is an **unverified alpha** published with
-the owner's explicit one-release exception from gameplay QA. It includes
-152 mission definitions in 12 chapters. New missions may require fixes.
-This is not a claim that the whole catalog or the current Android runtime
-has been tested.
+Version 0.1.3-android.5 (code 5) delivers the D65 tablet interface and teacher
+editor. It adds a full-screen mission picker, larger controls, gesture help,
+resumable work, local task libraries and authoring of mechanical and electrical
+scenes. It remains an **alpha**: all 67 existing winning recordings replay,
+but 85 of the 152 mission definitions still await gameplay verification.
+Content completeness gates remain open. Physical tablet, Windows and sessions
+with children/teachers have not been certified by the emulator tests.
 
-The signed ARM64 APK requires Android 9+ and Vulkan. It uses the same
-signing certificate as the previous release. The complete archive is
-11,986,429 bytes, SHA-256
-`6c4f49f6beb6f8902e74db1765a069609f64e71fa835b03a92cad8a46ad6905b`.
-The versioned folder includes installation notes and the checksum.
+The signed ARM64 APK requires Android 9+ and Vulkan. It uses the original
+signing certificate and can update the previous release without uninstalling.
+The exact size and SHA-256 are recorded in the versioned SHA256SUMS.txt.
+The folder also includes installation notes, third-party notices and the
+unchanged MPL-2.0 source archive for generational-arena 0.2.9. The app source
+and macOS installer remain private.
 
-Only the Fyzika record (Supabase `apps.id = 29`) and its matching fallback
-description/link change. Existing screenshots remain and are described
-as showing the previous version. Other apps and music remain unchanged.
-The primary CMS row is switched only after the new URL is deployed and
-the complete public download matches the signed original.
+Only the Fyzika record (Supabase apps.id = 29), its fallback data, and its
+versioned public artifacts/screenshots are updated. Existing app and download
+counters are preserved. The CMS is switched only after deployment and a full
+public download matches the locally signed APK.
 
-`node build_site.cjs` regenerates the catalog fingerprint and matching
-HTML/service-worker version; `--check` passes. One version-specific APK
-MIME/attachment/immutable-cache rule is added to `vercel.json`. APKs are
-not added to the PWA precache. Older downloads remain available.
+The four screenshots show the current Android interface, captured on an API 35
+ARM64 emulator. They are not evidence of physical tablet performance.
 
-Only the APK and public installation information are distributed here.
-Application source, the macOS installer and signing credentials stay private.
+The supported build regenerates the catalog fingerprint and matching HTML and
+service-worker cache version. A version-specific APK MIME/attachment/cache
+rule is added. APKs stay outside the PWA precache; old downloads remain available.
+GitHub Actions for the private app remain disabled; validation and signing
+were performed locally through the supported project entry points.
