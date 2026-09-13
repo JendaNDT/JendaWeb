@@ -1,8 +1,10 @@
 # Fyzika pastelkou — 2026-09-13
 
-Version 0.1.7-android.9 (code 9) fixes backwards keyboard navigation and
-lets Tab leave a group of text fields for the surrounding buttons without
-losing draft values. It includes the previous task-link, TalkBack and readability fixes. It retains the D65 tablet
+Version 0.1.8-android.10 (code 10) adds specific first-step hints to eight Atlas
+tasks after repeated empty attempts. The hint stops firing when the relevant
+path or weight crayon has actually been used. All 152 empty-attempt checks now
+pass; the 85 missing winning recordings remain a separate open gate.
+It includes the previous keyboard, task-link, TalkBack and readability fixes. It retains the D65 tablet
 interface and teacher editor: a full-screen mission picker, larger controls, gesture help,
 resumable work, local task libraries and authoring of mechanical and electrical
 scenes. It remains an **alpha**: all 67 existing winning recordings replay,
