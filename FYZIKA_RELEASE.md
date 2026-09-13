@@ -1,7 +1,9 @@
 # Fyzika pastelkou — 2026-09-13
 
-Version 0.1.3-android.5 (code 5) delivers the D65 tablet interface and teacher
-editor. It adds a full-screen mission picker, larger controls, gesture help,
+Version 0.1.4-android.6 (code 6) improves text-field and success-message
+contrast in the shared renderer. It also restores the form examples and
+preserves larger text when the form is rebuilt. It retains the D65 tablet
+interface and teacher editor: a full-screen mission picker, larger controls, gesture help,
 resumable work, local task libraries and authoring of mechanical and electrical
 scenes. It remains an **alpha**: all 67 existing winning recordings replay,
 but 85 of the 152 mission definitions still await gameplay verification.
@@ -20,8 +22,9 @@ versioned public artifacts/screenshots are updated. Existing app and download
 counters are preserved. The CMS is switched only after deployment and a full
 public download matches the locally signed APK.
 
-The four screenshots show the current Android interface, captured on an API 35
-ARM64 emulator. They are not evidence of physical tablet performance.
+The screenshots show the D65 interface: the mission, play and editor views
+come from 0.1.3; the circuit win is a fresh 0.1.4 capture. All were captured
+on an API 35 ARM64 emulator. They are not evidence of physical tablet performance.
 
 The supported build regenerates the catalog fingerprint and matching HTML and
 service-worker cache version. A version-specific APK MIME/attachment/cache
