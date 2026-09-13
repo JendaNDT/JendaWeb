@@ -1,8 +1,8 @@
 # Fyzika pastelkou — 2026-09-13
 
-Version 0.1.5-android.7 (code 7) fixes TalkBack host navigation and typing
-announcements, and adds a clear return to play that preserves the teacher
-draft and child drawing. It includes the previous readability fixes. It retains the D65 tablet
+Version 0.1.6-android.8 (code 8) puts custom related tasks first, displays
+human-readable task names, and explains blocked deletions without falsely
+calling the drawing damaged. It includes the previous TalkBack and readability fixes. It retains the D65 tablet
 interface and teacher editor: a full-screen mission picker, larger controls, gesture help,
 resumable work, local task libraries and authoring of mechanical and electrical
 scenes. It remains an **alpha**: all 67 existing winning recordings replay,
