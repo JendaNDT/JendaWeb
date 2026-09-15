@@ -1626,7 +1626,7 @@ const { useState: __useS, useEffect: __useE, useLayoutEffect: __useL, useMemo: _
 const APP_VISUALS = {
   rocker: { src:'/screenshots/rocker/metronome-desktop-v1.jpg', kind:'desktop', cs:'Metronom pro tvoje cvičení.', en:'A metronome for your practice.' },
   bomberman: { src:'/screenshots/bomberman-2.1.1/battle.png', kind:'desktop', cs:'Bomby, bludiště a společná hra v LAN.', en:'Bombs, mazes and LAN multiplayer.' },
-  'fyzika-pastelkou': { src:'/screenshots/fyzika-pastelkou/android-water.png', kind:'landscape', cs:'Kresli. Zkoušej. Objevuj.', en:'Draw. Try. Discover.' },
+  'fyzika-pastelkou': { src:'/screenshots/fyzika-pastelkou-0.1.10/android-water.png', kind:'landscape', cs:'Kresli. Zkoušej. Objevuj.', en:'Draw. Try. Discover.' },
   georeminder: { src:'/screenshots/showcase/georeminder-dark-v1.png', kind:'phone', cs:'Připomínka na správném místě.', en:'A reminder in the right place.' },
   engitab: { src:'/screenshots/showcase/engitab-dark-v1.png', kind:'phone', cs:'Celá dílna v kapse.', en:'Your workshop, in your pocket.' },
   nekourim: { src:'/screenshots/showcase/nekourim-dark-v1.png', kind:'phone', cs:'Každý den bez cigarety se počítá.', en:'Every smoke-free day counts.' },
