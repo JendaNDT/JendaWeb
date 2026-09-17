@@ -1,4 +1,36 @@
-# Fyzika pastelkou — 2026-09-17, general stroke refinement
+# Fyzika pastelkou — 2026-09-17, teacher editor completion
+
+Release **0.1.14-android.16 (code 16)** completes the agreed teacher editor
+features. Teachers draw fixed lines and free bodies into their tasks, refine
+them with an explicit comparison preview, and retain the original samples.
+Laboratory setup values are independent of child permissions; controls and
+sound panels can be added or removed. Optical editing adds a screen, blocking
+obstacles and direct settings groups. Validated undo/redo history survives
+restarting. Drawn lessons and drafts with history need this version or newer
+on the receiving device; older files remain readable.
+
+Signed APK: **14,161,631 bytes**, SHA-256
+`3914526ef159602a9f24659c70f890130a87cdf83278785d78e931c1a6245639`.
+Original release signature, package identity, non-debuggable manifest, licence
+assets and 16 KB ZIP/ELF alignment are verified. Updating the exact public
+code 15 APK to code 16 preserved all eleven files, including preferences,
+after installation and first launch. Signed-app drawing, comparison preview, cancellation, confirmation and
+undo/redo across two restarts passed. All 32 selected ARM64 core tests,
+20 instrumentation tests and release lint passed; one fixture generator was
+intentionally ignored and lint retained five existing warnings. The test
+assertion was updated for draft format 4; the signed artifact is unchanged.
+Production publication is pending its separate receipt.
+
+The app is still an alpha. Atlas counts remain 152 definitions, 77 recorded
+solutions and 75 awaiting gameplay verification. Physical tablet, pen/palm,
+Windows and child acceptance remain deferred. Application source and signing
+material stay private. Only Fyzika's descriptions, APK link and screenshot list
+change; other applications and counters are preserved. The lead screenshot is an unedited native capture from this signed APK.
+The five versioned
+release files include installation instructions and upstream licence material.
+GitHub Actions remain disabled by the author; local tests are not CI.
+
+# Previous release — 2026-09-17, general stroke refinement
 
 Release **0.1.13-android.15 (code 15)** adds manual refinement of a general
 mechanical stroke. Menu → Nástroje → Zpřesnit tah shows the original and
