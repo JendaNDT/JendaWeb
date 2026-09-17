@@ -1,4 +1,39 @@
-# Fyzika pastelkou — 2026-09-17
+# Fyzika pastelkou — 2026-09-17, general stroke refinement
+
+Release **0.1.13-android.15 (code 15)** adds manual refinement of a general
+mechanical stroke. Menu → Nástroje → Zpřesnit tah shows the original and
+proposed path before confirmation; undo restores the original. The helper
+reduces small wobble, straightens nearly straight segments and smooths curves
+while preserving distinct corners and endpoints. It does not recognize named
+shape templates. Fixed and movable crayon strokes are supported during
+preparation and teacher trials; attached strokes, wires, ropes and liquids
+are left unchanged. Confirmed paths are saved alongside original samples;
+older apps reject the new construction format, including nested transfers.
+
+The release also includes named editor choices, angles shown in degrees and
+specific explanations when a task cannot be shared. Existing laboratories,
+custom lesson transfer and optical composition remain included. The regular
+Atlas still has 152 definitions, 77 recorded winning solutions and 75 awaiting
+gameplay verification; the new demonstration is outside that catalog.
+
+Signed APK: **14,087,903 bytes**, SHA-256
+`d88f8d52b5a6487d146f44a56481a5f128d8fd8cb7203b4dca096e815456f8c2`.
+Original certificate, release identity, non-debuggable manifest, embedded
+notices and 16 KB ZIP/ELF alignment verified. The exact public code 14 → 15
+upgrade preserved all nine local files after installation and first launch.
+The new screenshot is an unedited capture from this signed release on an
+API 35 ARM64 emulator. Other screenshots retain their versioned paths.
+
+Validation includes 1342 opt-in core tests, 18 new tests in the default build,
+58 integration checks, nine GPU captures, 39 checks executed as ARM64 Android binaries (18 new refinement checks), release lint and 20 instrumentation tests. Signed-app preview,
+confirm/cancel, undo/redo and restart were also checked. Exact evidence and
+intentional ignored reports are recorded in the private D84 protocol. GitHub Actions remain disabled; local results are
+not CI. Physical tablet, pen/palm, native Windows and child acceptance remain
+open. Application source and signing material stay private. Only Fyzika's
+catalog descriptions, APK link and screenshots change; other rows and
+counters are preserved. Publication is pending final verification.
+
+## Previous release — 0.1.12
 
 Release **0.1.12-android.14 (code 14)** adds verified transfer of
 custom laboratory lessons and free optical composition in the teacher editor.
