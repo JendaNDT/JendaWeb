@@ -19,13 +19,20 @@ undo/redo across two restarts passed. All 32 selected ARM64 core tests,
 20 instrumentation tests and release lint passed; one fixture generator was
 intentionally ignored and lint retained five existing warnings. The test
 assertion was updated for draft format 4; the signed artifact is unchanged.
-Production publication is pending its separate receipt.
+Production publication succeeded. All five public files and the native
+screenshot match their local hashes. The primary catalog matches the fallback;
+only the four intended Fyzika fields changed and the other 28 rows were preserved.
+An existing isolated Chrome session moved to the new PWA cache on ordinary
+reload. Expanded release notes and the new image loaded; the actual download
+button saved the exact signed APK. One QA click changed the initiated-download
+count from 17 to 18, not an installation count. No page errors were recorded.
+The private D85 report contains the full public-download and browser receipt.
 
 The app is still an alpha. Atlas counts remain 152 definitions, 77 recorded
 solutions and 75 awaiting gameplay verification. Physical tablet, pen/palm,
 Windows and child acceptance remain deferred. Application source and signing
 material stay private. Only Fyzika's descriptions, APK link and screenshot list
-change; other applications and counters are preserved. The lead screenshot is an unedited native capture from this signed APK.
+change; other applications and counters are preserved. The new screenshot is an unedited native capture from this signed APK.
 The five versioned
 release files include installation instructions and upstream licence material.
 GitHub Actions remain disabled by the author; local tests are not CI.
