@@ -1,9 +1,9 @@
 // sw.js — Service worker for offline-first PWA
 // site-runtime:start
-const VERSION = "jw-v109-b3ce8f45e86a2250";
+const VERSION = "jw-v109-f02e3d78ad98a422";
 const RUNTIME = [
   "/site-assets/app.8e54d23341ae1b0a.js",
-  "/site-assets/data.d1582d54055d8817.js",
+  "/site-assets/data.bb7bff77a637ca2a.js",
   "/site-assets/supabase-data.4d8170e487cb9876.js"
 ];
 // site-runtime:end
