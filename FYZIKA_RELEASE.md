@@ -31,7 +31,13 @@ intentional ignored reports are recorded in the private D84 protocol. GitHub Act
 not CI. Physical tablet, pen/palm, native Windows and child acceptance remain
 open. Application source and signing material stay private. Only Fyzika's
 catalog descriptions, APK link and screenshots change; other rows and
-counters are preserved. Publication is pending final verification.
+counters are preserved. Production publication succeeded: all five public files
+match their local hashes, and the primary catalog matches the fallback. Other
+28 rows and all unrelated fields were preserved. The existing browser session
+updated its PWA cache on ordinary reload; the new screenshot and expanded notes
+loaded. One actual Stáhnout click downloaded the exact APK and increased the
+initiated-download count from 16 to 17 (not an installation count). No page
+errors were recorded. The private D84 receipt contains the full evidence.
 
 ## Previous release — 0.1.12
 
