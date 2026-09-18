@@ -1,4 +1,41 @@
-# Fyzika pastelkou — 2026-09-17, illustrated experiment groups
+# Fyzika pastelkou — 2026-09-18, drawing controls and attempt replay
+
+Release **0.1.16-android.18 (code 18)** improves navigation, contextual
+stroke editing and rotation, undo/redo labels, visible-scene teacher forms,
+resource indicators and optional haptics (off by default). The last attempt
+can be replayed, slowed and inspected frame by frame without changing the
+simulation or the current drawing. Earlier features remain included.
+
+Signed APK: **14,284,511 bytes**, SHA-256
+`eb745cead25b7aec100018dc0bd1f4edd7d5f42973b3a42a01cc2b0228f411b5`.
+Build source: `be778a0c2a5fb6cd1bdf012aac12b8af636e1f7d`.
+Original certificate, production package identity, non-debuggable manifest,
+16 KB ZIP/ELF alignment and embedded licences are verified. Updating the
+exact public code 17 APK preserved all ten files at installation. First
+launch added only haptics=false to the profile and retained the previous
+profile as its backup; the other eight files were unchanged. All 22 native
+instrumentation checks and release lint passed (five existing warnings).
+Selected signed-app touch checks covered preparation, drawing, running,
+pausing, replay, stepping, returning and the author overview. The new
+1280×800 screenshot is an unedited capture of this exact signed release.
+
+This remains an alpha requiring Android 9+, ARM64 and Vulkan. The regular
+Atlas remains 152 definitions / 77 recordings / 75 awaiting gameplay proof;
+the 72 experimental entries are separate. Ten existing full-suite failures
+were reproduced on the implementation baseline; the private D87 protocol
+records their scope. Physical tablet, pen/palm, native Windows, assistive
+technology use and child acceptance remain open. GitHub Actions are disabled;
+local checks are not CI. The user expressly authorized this alpha release.
+
+Only Fyzika's descriptions, APK link and screenshots change in the primary
+catalog and offline fallback. Other applications, counters and old URLs are
+preserved. Public files are the APK, installation notes, checksums, notices
+and upstream MPL source archive. Application sources, signing material and
+Mac installer remain private. The supported build generates matching HTML,
+service-worker and asset fingerprints. Publication verification is recorded
+in the private release protocol after deployment.
+
+# Previous release — 2026-09-17, illustrated experiment groups
 
 Release **0.1.15-android.17 (code 17)** makes all 72 experimental lessons
 available through **Menu → Další pokusy** in five illustrated groups.
