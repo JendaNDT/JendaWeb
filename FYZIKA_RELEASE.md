@@ -1,3 +1,31 @@
+# Fyzika pastelkou — 2026-09-18, renderer stabilization
+
+Release **0.1.17-android.19 (code 19)** fixes drawing colors when switching
+paper/chalkboard, improves resource gauge contrast and separates used and
+remaining material, and fits recorded lessons below permanent controls.
+Manual pan/zoom and existing recordings are preserved.
+
+Signed APK: **14,288,607 bytes**, SHA-256
+`fee593851cd06e33509f671665108c4dc84adc8ae3cfcc8a0712f9f19fd26870`. Source: `bf4a650f474d160a048bab1954b5d2912d8214f0`.
+Original production certificate, non-debuggable manifest and 16 KB ZIP/ELF
+alignment verified. Upgrade from the exact public code 18 APK preserved
+all ten data files at installation and first launch. All 22 instrumentation
+tests pass; release lint has no errors and five existing warnings.
+
+This is an explicitly authorized alpha. Atlas remains 152 definitions /
+77 recordings / 75 pending. Three content completeness tests remain red;
+seven previous technical/test failures were fixed. The 72 experimental
+entries remain separate. Physical tablet, pen/palm, Windows and child
+acceptance are open. GitHub Actions stay disabled; local checks are not CI.
+
+Only Fyzika descriptions, APK link and screenshots change in the primary
+catalog and fallback. Other rows and unrelated columns are preserved.
+Sources, signing material and Mac installer remain private.
+
+---
+
+Earlier release evidence follows unchanged.
+
 # Fyzika pastelkou — 2026-09-18, drawing controls and attempt replay
 
 Release **0.1.16-android.18 (code 18)** improves navigation, contextual
