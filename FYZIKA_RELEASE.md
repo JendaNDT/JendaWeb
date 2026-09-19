@@ -1,3 +1,42 @@
+# Fyzika pastelkou — 2026-09-19, water and oil in narrow channels
+
+Release **0.1.18-android.20 (code 20)** improves water and oil flow through
+narrow drawn channels and bends. The finer liquid simulation preserves
+quantity, saved drawings, goals and recorded attempts, at a higher
+computational cost, especially for large liquid supplies.
+
+Signed APK: **14,292,703 bytes**, SHA-256
+`a770338edc1b8488e50b31b0758fd93dbd4b1073b753dbb0c508e09092bcc155`.
+Build source: `95afbc483a7e8868add283bb467d30438534608b`; app main and
+annotated v0.1.18: `3159be366966a92275f6104a5b820407f5da7ae4`.
+Production inputs are unchanged between build source and tag. Original
+production certificate, v3 signature, non-debuggable manifest and 16 KB
+ZIP/ELF alignment are verified.
+
+Local release evidence: 22/22 Android instrumentation and 10/10 targeted
+ARM64 liquid/contact/buoyancy tests pass on an emulator. Hydrostatic error
+peaks at 1.0453% within a 5% tolerance. Release lint reports zero errors
+and five existing warnings. Upgrade from the exact public code 19 APK
+preserves all ten data files after installation and first launch. The
+installed APK matches the release hash; the signed app runs, a buoyancy
+lesson reaches its goal, both liquids render, and the crash buffer is empty.
+
+This remains an explicitly authorized alpha. Higher compute costs are
+accepted, but physical tablet performance, pen/palm, native Windows,
+child/teacher acceptance and existing content-completeness gates remain
+open. GitHub Actions are disabled by project decision; these are local
+checks, not successful CI.
+
+Only Fyzika cs/en descriptions and the APK link change in the catalog and
+fallback. The product introduction, screenshots, counters and other apps
+are preserved. Public artifacts are the APK, installation notes, checksums,
+third-party notices and the upstream MPL archive. Application sources,
+Mac package and signing material remain private. Older URLs remain valid.
+
+---
+
+Earlier release evidence follows unchanged.
+
 # Fyzika pastelkou — 2026-09-18, renderer stabilization
 
 Release **0.1.17-android.19 (code 19)** fixes drawing colors when switching
