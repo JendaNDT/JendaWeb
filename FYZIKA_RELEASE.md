@@ -1,3 +1,49 @@
+# Fyzika pastelkou — 2026-09-19, lighter water and oil simulation
+
+Release **0.1.19-android.21 (code 21)** reduces the computation required
+by water and oil after reports of stuttering with 0.1.18 on a tablet.
+The approved resolution compromise preserves liquid quantity, mass,
+saved drawings, goals and recorded attempts. The narrowest channels may
+hold liquid back; smooth performance on physical tablets remains unverified.
+
+Signed APK: **14,292,703 bytes**, SHA-256
+`d78c7647e1e40adc7a14846c12e694b42c5e6ac82ed55cb89cee821ff05095b8`.
+Build source: `b5e81ac14a5909777da993c61c9790fbf99f1d2f`; app PR 39 merge
+and annotated v0.1.19 target: `14187f186a9e3fed9f453433d228442f707b75a3`.
+All five public files match the tagged tree byte for byte. Production inputs
+are unchanged between build and tag. The original production certificate,
+v3 signature, non-debuggable manifest, no INTERNET permission, ARM64,
+Android 9 minimum, and 16 KB ZIP/ELF alignment are verified.
+
+App release evidence: 32 host physics/replay and 59 contract checks,
+two successful GPU water missions, 15 Android ARM64 physics checks,
+22 instrumentation tests and 31 Swift release tests. Android release lint
+has zero errors and five existing warnings. Upgrade from the exact public
+code 20 APK preserves all ten data files after installation and first start.
+Installed base.apk matches this release hash; the signed emulator app
+completes the buoyancy goal, renders water and oil, and has an empty crash buffer.
+
+Three isolated Mac M4 runs with the same maximum liquid quantity reduce
+the median mean liquid step from 24.329 ms to 9.106 ms (62.6%). This measures
+liquid computation, not tablet FPS or whole-frame time. Maximum single-kind
+particle count changes from 7200 to 3200. A 0.32 m channel passes about
+51–53% through two bends in 10 seconds; 0.24–0.28 m remains unreliable.
+These technical measurements are not promises for every device or drawing.
+
+This is an authorized alpha. Physical tablet performance, pen/palm,
+native Windows, child/teacher acceptance and existing content gates remain
+open. GitHub Actions stay disabled by project decision; local QA is not CI.
+Only Fyzika cs/en descriptions and the APK link change in catalog/fallback.
+The product introduction, eight screenshots, counters, other fields/apps and
+older public URLs remain. Public artifacts are only the APK, installation
+notes, checksums, third-party notices and upstream MPL archive. App sources,
+Mac package and signing material remain private.
+
+---
+
+Earlier release evidence follows unchanged.
+
+
 # Fyzika pastelkou — 2026-09-19, water and oil in narrow channels
 
 Release **0.1.18-android.20 (code 20)** improves water and oil flow through
