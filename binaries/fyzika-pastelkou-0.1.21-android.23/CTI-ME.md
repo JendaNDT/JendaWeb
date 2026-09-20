@@ -1,10 +1,15 @@
 # Fyzika pastelkou pro Android — instalace
 
-Novinka 0.1.20: přehlednější nabídky seskupují související volby. Nástroje
-ukazují svůj účel, výběr i důvod nedostupnosti; **Soubor** najdeš přes
-**Menu → Pro dospělé → Soubor**. Nabídky využívají větší tabletovou
-obrazovku, přizpůsobují se otočení i většímu písmu a ovládají se prstem
-nebo perem. Dosavadní kresby, úlohy, zálohy a funkce zůstávají zachované.
+Novinka 0.1.21: Android používá skutečně dostupnou plochu kolem
+systémové navigace. Přizpůsobí se klasickým třem navigačním tlačítkům
+i gestům a po otočení tabletu bezpečnou plochu znovu přepočítá. Panel
+a kreslicí plocha tak zůstávají mimo systémové ovládání.
+
+Z předchozí 0.1.20: přehlednější nabídky seskupují související volby.
+Nástroje ukazují svůj účel, výběr i důvod nedostupnosti; **Soubor** najdeš
+přes **Menu → Pro dospělé → Soubor**. Nabídky využívají větší tabletovou
+obrazovku a přizpůsobují se otočení i většímu písmu. Dosavadní kresby,
+úlohy, zálohy a funkce zůstávají zachované.
 
 Z předchozí 0.1.19: výpočet vody a oleje používá méně částic než 0.1.18 při
 stejném množství kapaliny. Jejich velikost je kompromisem mezi průtokem
@@ -79,7 +84,7 @@ Přípravu lze měnit, spustit, zastavit a obnovit; učitelský editor nabídne
 vlastní varianty. Výklady uvádějí meze školních modelů. Jde stále o alfu,
 ne o potvrzení ověření každé úlohy s dětmi nebo na každém zařízení.
 
-Balíček `Fyzika-pastelkou-0.1.20-android.22.apk` je alfa pro Android tablety
+Balíček `Fyzika-pastelkou-0.1.21-android.23.apk` je alfa pro Android tablety
  a telefony. Vyžaduje 64bitový ARM Android 9 nebo novější a Vulkan.
 Funguje bez účtu, internetu, telemetrie a cloudové zálohy.
 
