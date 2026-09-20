@@ -1,5 +1,5 @@
 // Fullscreen app screenshots with keyboard, swipe, pinch and bounded panning.
-function ScreenshotGallery({ images, initialIndex, title, lang, onClose }) {
+function ScreenshotGallery({ images, captions = [], initialIndex, title, lang, onClose }) {
   const [index, setIndex] = React.useState(initialIndex);
   const [view, setView] = React.useState({ scale:1, x:0, y:0 });
   const [interacting, setInteracting] = React.useState(false);
@@ -110,7 +110,7 @@ function ScreenshotGallery({ images, initialIndex, title, lang, onClose }) {
           onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onLostPointerCapture={up}
           onDoubleClick={() => zoom(viewRef.current.scale>1 ? 1 : 2)}>
           {failed ? <p>{cs ? 'Náhled se nepodařilo načíst.' : 'The screenshot could not be loaded.'}</p>
-            : <img key={index} ref={picture} src={images[index]} alt={`${title} — ${cs ? 'ukázka' : 'screenshot'} ${index+1}`}
+            : <img key={index} ref={picture} src={images[index]} alt={captions[index] || `${title} — ${cs ? 'ukázka' : 'screenshot'} ${index+1}`}
               draggable={false} onError={() => setFailed(true)} style={{ transform:`translate(${view.x}px, ${view.y}px) scale(${view.scale})` }} />}
         </div>
         {images.length>1 && <>
@@ -119,6 +119,7 @@ function ScreenshotGallery({ images, initialIndex, title, lang, onClose }) {
         </>}
       </div>
       <footer className="gallery-footer">
+        {captions[index] && <p className="gallery-description" aria-live="polite" aria-atomic="true">{captions[index]}</p>}
         <div className="gallery-caption"><span aria-live="polite" aria-atomic="true">{index+1} / {images.length}</span><span className="gallery-hint">{cs ? 'Přejetím listuj · Přibliž tlačítkem nebo dvěma prsty' : 'Swipe to browse · Zoom with buttons or two fingers'}</span><a href={images[index]} target="_blank" rel="noopener">{cs ? 'Originál ↗' : 'Original ↗'}</a></div>
         {images.length>1 && <div className="gallery-thumbnails">
           {images.map((src,i) => <button type="button" key={src+i} aria-label={`${cs ? 'Ukázka' : 'Screenshot'} ${i+1}`} aria-current={i===index ? 'true' : undefined}

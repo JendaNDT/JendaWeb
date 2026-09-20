@@ -4,13 +4,22 @@ const { useState: __useS, useEffect: __useE, useLayoutEffect: __useL, useMemo: _
 const APP_VISUALS = {
   rocker: { src:'/screenshots/rocker/metronome-desktop-v1.jpg', kind:'desktop', cs:'Metronom pro tvoje cvičení.', en:'A metronome for your practice.' },
   bomberman: { src:'/screenshots/bomberman-2.1.1/battle.png', kind:'desktop', cs:'Bomby, bludiště a společná hra v LAN.', en:'Bombs, mazes and LAN multiplayer.' },
-  'fyzika-pastelkou': { src:'/screenshots/fyzika-pastelkou-0.1.10/android-water.png', kind:'landscape', cs:'Kresli. Zkoušej. Objevuj.', en:'Draw. Try. Discover.' },
+  'fyzika-pastelkou': { src:'/screenshots/fyzika-pastelkou-0.1.23/experiment.png', kind:'landscape', cs:'Kresli. Zkoušej. Objevuj.', en:'Draw. Try. Discover.' },
   georeminder: { src:'/screenshots/showcase/georeminder-dark-v1.png', kind:'phone', cs:'Připomínka na správném místě.', en:'A reminder in the right place.' },
   engitab: { src:'/screenshots/showcase/engitab-dark-v1.png', kind:'phone', cs:'Celá dílna v kapse.', en:'Your workshop, in your pocket.' },
   nekourim: { src:'/screenshots/showcase/nekourim-dark-v1.png', kind:'phone', cs:'Každý den bez cigarety se počítá.', en:'Every smoke-free day counts.' },
   ballista: { src:'/screenshots/showcase/ballista-dark-v1.png', kind:'phone', cs:'Nástroje pro sportovní střelbu.', en:'Tools for sport shooting.' },
   vandrak: { src:'/screenshots/showcase/vandrak-dark-v1.png', kind:'phone', cs:'Výbava na každou výpravu.', en:'Tools for every outdoor trip.' },
   'rt-asistent': { src:'/screenshots/showcase/rt-asistent-v1.jpg', kind:'desktop', cs:'Radiografické výpočty přehledně.', en:'Radiography calculations, clearly.' },
+};
+
+// Captions follow the image URL, including when a catalog changes its order.
+const APP_SCREENSHOT_CAPTIONS = {
+  '/screenshots/fyzika-pastelkou-0.1.23/experiment.png': { cs:'Nakresli cestu přes jablíčko do koše.', en:'Draw a path past the apple and into the basket.' },
+  '/screenshots/fyzika-pastelkou-0.1.23/water-oil.png': { cs:'Zkoumej, jak se tělesa chovají ve vodě a oleji.', en:'Explore how objects behave in water and oil.' },
+  '/screenshots/fyzika-pastelkou-0.1.23/magnifier.png': { cs:'Lupa pomáhá přesně připojit drát.', en:'Use the magnifier to connect a wire precisely.' },
+  '/screenshots/fyzika-pastelkou-0.1.23/repeat.png': { cs:'Sbal lištu a zopakuj pokus jedním klepnutím.', en:'Collapse the toolbar and repeat an experiment with one tap.' },
+  '/screenshots/fyzika-pastelkou-0.1.23/editor.png': { cs:'Připrav vlastní úlohu v editoru.', en:'Create your own lesson in the editor.' },
 };
 
 function AppReleaseStage({ app, lang }) {
@@ -246,9 +255,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
   const screenshots = [...(app.screenshots || [])];
   const visual = APP_VISUALS[slugify(app.name)];
   if (!screenshots.length && visual) screenshots.push(visual.src);
-  // Lead with the existing playable water scene instead of toolbar settings.
-  const water = screenshots.findIndex(src => src.endsWith('/android-water.png'));
-  if (slugify(app.name) === 'fyzika-pastelkou' && water > 0) screenshots.unshift(screenshots.splice(water, 1)[0]);
+  const screenshotCaptions = screenshots.map(src => APP_SCREENSHOT_CAPTIONS[src]?.[lang] || '');
   const caseStudyUrl = window.CASE_STUDIES?.[app.id] || app.case_study_url;
   const isDownload = isDownloadLink(app.link);
   
@@ -495,15 +502,16 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
             }}>
               {screenshots.map((src, idx) => (
                 <button type="button" key={idx} onClick={() => setGalleryIndex(idx)} className="app-gallery-slide"
-                  aria-label={`${lang === 'cs' ? 'Zvětšit ukázku' : 'Enlarge screenshot'} ${idx + 1}`} style={{
+                  aria-label={`${lang === 'cs' ? 'Zvětšit ukázku' : 'Enlarge screenshot'} ${idx + 1}${screenshotCaptions[idx] ? ': ' + screenshotCaptions[idx] : ''}`} style={{
                   scrollSnapAlign: 'center', flex: '0 0 100%',
-                  display: 'flex', justifyContent: 'center', alignItems: 'center',
+                  display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center',
                   background: '#070504', borderRadius: 10, overflow: 'hidden',
                   border: '1px solid var(--border)', height: 'clamp(240px, 48vh, 420px)'
                 }}>
-                  <img src={src} alt={`${app.name} — ${lang === 'cs' ? 'ukázka' : 'screenshot'} ${idx + 1}`} loading="lazy" style={{
-                    width: '100%', height: '100%', objectFit: 'contain'
+                  <img src={src} alt={screenshotCaptions[idx] || `${app.name} — ${lang === 'cs' ? 'ukázka' : 'screenshot'} ${idx + 1}`} loading="lazy" style={{
+                    width: '100%', height: '100%', minHeight:0, flex:1, objectFit: 'contain'
                   }} />
+                  {screenshotCaptions[idx] && <span className="app-screenshot-caption">{screenshotCaptions[idx]}</span>}
                 </button>
               ))}
             </div>
@@ -529,7 +537,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
         </div>
       </div>
     </div>
-    {galleryIndex !== null && <ScreenshotGallery images={screenshots} initialIndex={galleryIndex} title={app.name} lang={lang} onClose={closeGallery} />}</>
+    {galleryIndex !== null && <ScreenshotGallery images={screenshots} captions={screenshotCaptions} initialIndex={galleryIndex} title={app.name} lang={lang} onClose={closeGallery} />}</>
   );
 }
 

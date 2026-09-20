@@ -774,6 +774,8 @@
     .panel-sheen:focus-within::after { opacity:.45; }
     @media (hover:hover) and (pointer:fine) { .panel-sheen:hover::before { opacity:1; } .panel-sheen:hover::after { opacity:.65; } }
     .app-gallery-slide { cursor:zoom-in; }
+    .app-screenshot-caption { flex-shrink:0; width:100%; padding:10px 14px; font:500 14px/1.4 'DM Sans',sans-serif; color:#f2f3f6; background:#101722; text-align:left; }
+    .gallery-description { margin:0 0 6px; color:#f2f3f6; font-size:15px; line-height:1.4; }
     .screenshot-gallery { position:fixed; inset:0; z-index:1000; height:100dvh; display:flex; flex-direction:column; background:#090e16; color:#f2f3f6; padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); animation:jwFade .18s ease-out; overscroll-behavior:none; outline:none; }
     .gallery-toolbar { display:flex; align-items:center; gap:24px; padding:18px clamp(16px,3vw,40px); border-bottom:1px solid #ffffff12; flex-shrink:0; }
     .gallery-heading { flex:1; min-width:0; }
@@ -795,7 +797,8 @@
     .gallery-stage.is-interacting img { transition:none; }
     .screenshot-gallery .gallery-arrow { position:absolute; top:50%; transform:translateY(-50%); border-radius:50%; background:#101722e8; font-size:34px; box-shadow:0 4px 20px #0005; }
     .gallery-prev { left:8px; } .gallery-next { right:8px; }
-    .gallery-footer { padding:12px clamp(16px,3vw,40px) 16px; border-top:1px solid #ffffff12; flex-shrink:0; }
+    .gallery-footer { padding:12px clamp(16px,3vw,40px) 16px; border-top:1px solid #ffffff12; flex-shrink:0; overflow:visible; }
+    .gallery-footer::before { content:none; }
     .gallery-caption { display:flex; align-items:center; justify-content:space-between; gap:14px; font-size:12px; color:#aab3c2; min-height:28px; }
     .gallery-caption > span:first-child { color:#f2f3f6; font-variant-numeric:tabular-nums; white-space:nowrap; }
     .gallery-caption a { color:#fbbf24; white-space:nowrap; padding:8px 0; }
@@ -1052,7 +1055,7 @@
     }
   </script>
   <!-- site-runtime:start -->
-  <meta name="jw-release" content="jw-v109-30f54f1cb6071455">
+  <meta name="jw-release" content="jw-v109-080cc531bf48065a">
   <script>
 // Small startup guard, embedded into HTML by build_site.cjs (no extra request).
 (() => {
@@ -1097,9 +1100,9 @@
   };
 })();
 </script>
-  <script src="/site-assets/data.bf9a7b53b2399c2e.js" data-jw-required defer></script>
+  <script src="/site-assets/data.766dfbf514e9a521.js" data-jw-required defer></script>
   <script src="/site-assets/supabase-data.4d8170e487cb9876.js" data-jw-required defer></script>
-  <script src="/site-assets/app.8e54d23341ae1b0a.js" data-jw-required defer></script>
+  <script src="/site-assets/app.4c775ffc6016f008.js" data-jw-required defer></script>
   <!-- site-runtime:end -->
 </body>
 </html>

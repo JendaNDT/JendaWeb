@@ -1,0 +1,42 @@
+{
+  "appVersion": "0.1.23-android.25",
+  "captureDate": "2026-09-20",
+  "source": "Unmodified adb screencap PNGs from the released Android APK, Android API 35 emulator, 2560 x 1600 at 240 dpi. Disposable emulator data; sample scenes prepared before capture.",
+  "images": [
+    {
+      "file": "experiment.png",
+      "width": 2560,
+      "height": 1600,
+      "sha256": "f5a0484debcd4b5118b090c81a927ca65f58a9d81a60b990a6a95d6a3c67c155",
+      "bytes": 704657
+    },
+    {
+      "file": "water-oil.png",
+      "width": 2560,
+      "height": 1600,
+      "sha256": "95c8c812a2574818353f13ce53181ae9f38cef41db94c6c6631008755272661e",
+      "bytes": 1187753
+    },
+    {
+      "file": "magnifier.png",
+      "width": 2560,
+      "height": 1600,
+      "sha256": "a046ef0e9bf0759d5b881e0c89532ecef76ead205dba1b4e906ae4944c316cc0",
+      "bytes": 506300
+    },
+    {
+      "file": "repeat.png",
+      "width": 2560,
+      "height": 1600,
+      "sha256": "7ea8012ee2419ed2606260663d6c83467df028d5f213c4fa7af99cf499c086c8",
+      "bytes": 655348
+    },
+    {
+      "file": "editor.png",
+      "width": 2560,
+      "height": 1600,
+      "sha256": "fbff0fed8d095a8127f4c12789ab3d9508e62f76f41a6ceac98ffd2a008b5ece",
+      "bytes": 810446
+    }
+  ]
+}
