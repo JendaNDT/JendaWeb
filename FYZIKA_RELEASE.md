@@ -1,3 +1,38 @@
+# Fyzika pastelkou — 2026-09-20, clearer next actions
+
+Release **0.1.22-android.24 (code 24)** highlights the next lesson after
+completion in green with an arrow, or the lesson picker at the end of a topic.
+Start/resume is orange, selected options use a check mark and soft green,
+and deletion has a red outline. Rotation and large text preserve the emphasis.
+Shared physics, mission rules and saved formats are unchanged.
+
+Signed APK: **14,313,183 bytes**, SHA-256
+`6d327dc1a81fa45d6b284b973c81596f26df55ab34f79dff04dc5fcef4454a55`.
+The original production certificate is preserved:
+`c1048ef98487ca8d28898123d9c68cbba49c4d17521484d1e3284b21c52e410f`.
+V3 signature, 16 KB ZIP/ELF alignment, ARM64, Android 9 minimum, no INTERNET
+permission and a non-debuggable manifest were checked. Installed base.apk
+matches the signed release exactly.
+
+Upgrade from the exact public code 23 APK preserved all ten data files after
+installation and first launch in a disposable API35 emulator. All 24 Android
+instrumentation and 31 Swift release tests passed; Android lint has zero
+errors and four existing warnings. The required GPU test completes a lesson
+and follows the next action across desktop, tablet orientations and large text.
+Full core regression: 1,831 passed, three known content-gate failures (75
+missing recorded solutions), 26 ignored. These alpha limitations remain open,
+as do physical tablet, pen/palm, Windows and child/teacher acceptance.
+GitHub Actions remain disabled; these results are local QA.
+
+Only Fyzika's cs/en release text, APK link and versioned files are changed.
+Screenshots, counters, other apps and old download URLs are preserved.
+The CMS link must be switched only after the deployed asset's full SHA-256
+matches the release. App sources, signing material and Mac packages stay private.
+
+---
+
+Earlier release evidence follows unchanged.
+
 # Fyzika pastelkou — 2026-09-20, Android safe area
 
 Release **0.1.21-android.23 (code 23)** makes the Android drawing surface
