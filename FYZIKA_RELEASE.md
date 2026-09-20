@@ -1,3 +1,29 @@
+# Fyzika pastelkou — 2026-09-20, Android safe area
+
+Release **0.1.21-android.23 (code 23)** makes the Android drawing surface
+respect the live space owned by the operating system. It handles classic
+three-button navigation, gesture navigation, display cut-outs and rotation
+without hard-coded margins. The shared physics core, saved formats, lessons,
+stylus input path and existing palm rejection are unchanged.
+
+Signed APK: **14,309,087 bytes**, SHA-256
+`50b399d4824b4ec5e3a01c937380884cf25f909d1e18a5a97032fb7e208571b2`.
+The local packaging output verified the original production certificate
+SHA-256 `c1048ef98487ca8d28898123d9c68cbba49c4d17521484d1e3284b21c52e410f`
+and APK Signature Scheme v3. The release build completed successfully.
+GitHub Actions remain disabled, so no CI result is claimed.
+
+This release follows direct tablet use that motivated the safe-area change,
+but the newly built 0.1.21 package itself has not been separately declared a
+full physical-device, pen/palm, Windows or child/teacher acceptance pass.
+Only Fyzika's release text, APK link and versioned public files change on the
+website. Existing screenshots, counters, other applications and old download
+URLs remain preserved.
+
+---
+
+Earlier release evidence follows unchanged.
+
 # Fyzika pastelkou — 2026-09-19, lighter water and oil simulation
 
 Release **0.1.19-android.21 (code 21)** reduces the computation required
