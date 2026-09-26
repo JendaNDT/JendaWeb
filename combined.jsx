@@ -1638,6 +1638,7 @@ const APP_VISUALS = {
 
 // Captions follow the image URL, including when a catalog changes its order.
 const APP_SCREENSHOT_CAPTIONS = {
+  '/screenshots/lost-signal-web.1/mission-01.png': { cs:'Bram, Rhea a K-9 v první misi webové hry.', en:'Bram, Rhea and K-9 in the first mission of the browser game.' },
   '/screenshots/fyzika-pastelkou-0.1.23/experiment.png': { cs:'Nakresli cestu přes jablíčko do koše.', en:'Draw a path past the apple and into the basket.' },
   '/screenshots/fyzika-pastelkou-0.1.23/water-oil.png': { cs:'Zkoumej, jak se tělesa chovají ve vodě a oleji.', en:'Explore how objects behave in water and oil.' },
   '/screenshots/fyzika-pastelkou-0.1.23/magnifier.png': { cs:'Lupa pomáhá přesně připojit drát.', en:'Use the magnifier to connect a wire precisely.' },
@@ -1873,6 +1874,7 @@ function AppsSection({ lang, onOpen }) {
 
 function AppDetailModal({ app, lang, onClose, onShare }) {
   const isPWA = app.platform === 'PWA';
+  const isWebGame = app.name === 'Lost Signal' && app.link === '/lost-signal/';
   const hasDownloadChoices = appDownloads(app).some(d => d.primary);
   const copy = appCopy(app, lang);
   const screenshots = [...(app.screenshots || [])];
@@ -1983,7 +1985,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
         a.remove();
       }
     } else {
-      window.open(app.link, '_blank');
+      window.open(isWebGame && lang === 'en' ? app.link + '?lang=en' : app.link, '_blank', 'noopener');
     }
   };
 
@@ -2058,7 +2060,7 @@ function AppDetailModal({ app, lang, onClose, onShare }) {
               boxShadow: `0 4px 14px ${app.color}40`, outline: 'none'
             }} onMouseEnter={(e) => e.target.style.filter = 'brightness(1.1)'} onMouseLeave={(e) => e.target.style.filter = ''}>
               <DlIco />
-              {downloading ? (lang === 'cs' ? 'Stahuji…' : 'Downloading…') : (isPWA ? tx(lang, 'apps_open') : tx(lang, 'apps_dl'))}
+              {downloading ? (lang === 'cs' ? 'Stahuji…' : 'Downloading…') : (isWebGame ? (lang === 'cs' ? 'Hrát v prohlížeči' : 'Play in browser') : (isPWA ? tx(lang, 'apps_open') : tx(lang, 'apps_dl')))}
             </button>
           )}
 

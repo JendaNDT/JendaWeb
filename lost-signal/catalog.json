@@ -1,0 +1,14 @@
+{
+  "id": 33,
+  "name": "Lost Signal",
+  "platform": "Web",
+  "color": "#d99735",
+  "cs": "Logická plošinovka o třech hrdinech uvnitř rozbitého ovladače. Přepínej mezi Bramem, Rheou a K-9, kombinuj jejich schopnosti a dostaň celý tým k východu. Čeká tě 37 misí s příběhem a komiksovými scénami.\n\nHraj zdarma v prohlížeči na počítači nebo pomocí dotykového ovládání. Na telefonu otoč obrazovku na šířku. Hra je česky.\n\nWebová preview verze · první načtení přibližně 168 MB. Postup se ukládá v tomto prohlížeči. Fyzický iPhone zatím není ověřený.",
+  "en": "A puzzle platformer about three heroes inside a broken remote control. Switch between Bram, Rhea and K-9, combine their abilities and lead the whole team to the exit. Explore 37 missions with a story and comic scenes.\n\nPlay free in your browser with a keyboard or touch controls. Turn your phone sideways. The game itself is in Czech.\n\nWeb preview · about 168 MB on first load. Progress is saved in this browser. A physical iPhone has not yet been tested.",
+  "link": "/lost-signal/",
+  "icon_url": "/lost-signal/releases/0.3.0-web.1/index.apple-touch-icon.png",
+  "sort": 1,
+  "screenshots": [
+    "/screenshots/lost-signal-web.1/mission-01.png"
+  ]
+}

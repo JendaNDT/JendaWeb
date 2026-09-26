@@ -101,12 +101,29 @@
       "source": "/binaries/bomberman-2.2.1/SHA256SUMS.txt",
       "destination": "https://github.com/JendaNDT/JendaWeb/releases/download/bomberman-v2.2.1/SHA256SUMS.txt",
       "permanent": true
+    },
+    {
+      "source": "/lost-signal",
+      "destination": "/lost-signal/",
+      "permanent": true
     }
   ],
   "rewrites": [
     {
       "source": "/admin",
       "destination": "/admin.html"
+    },
+    {
+      "source": "/lost-signal/",
+      "destination": "/lost-signal/releases/0.3.0-web.1/index.html"
+    },
+    {
+      "source": "/lost-signal/index.html",
+      "destination": "/lost-signal/releases/0.3.0-web.1/index.html"
+    },
+    {
+      "source": "/lost-signal/releases/:version/index.wasm",
+      "destination": "/lost-signal/releases/:version/index.wasm.gz"
     }
   ],
   "headers": [
@@ -705,6 +722,50 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/lost-signal/releases/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/lost-signal/releases/:version/index.wasm",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/wasm"
+        },
+        {
+          "key": "Content-Encoding",
+          "value": "gzip"
+        }
+      ]
+    },
+    {
+      "source": "/lost-signal/releases/:version/index.wasm.gz",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/wasm"
+        },
+        {
+          "key": "Content-Encoding",
+          "value": "gzip"
+        }
+      ]
+    },
+    {
+      "source": "/lost-signal/",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }

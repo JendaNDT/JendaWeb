@@ -89,8 +89,8 @@ const request=(pathname='/',html=true)=>({method:'GET',url:'https://jenda.cool'+
   await check('PWA online navigation refreshes HTML cache',async()=>{
     const w=worker(),e=w.event('fetch',request());assert.equal(await e.response(),w.response);await e.done();assert.equal(w.puts.length,1);
   });
-  await check('PWA never intercepts installers or RT Asistent scope',()=>{
-    const w=worker();for(const url of ['/binaries/test.apk','/rt-asistent','/rt-asistent/example.js'])assert.equal(w.event('fetch',request(url,false)).response(),undefined);
+  await check('PWA never intercepts installers, RT Asistent or Lost Signal',()=>{
+    const w=worker();for(const url of ['/binaries/test.apk','/rt-asistent','/rt-asistent/example.js','/lost-signal','/lost-signal/','/lost-signal/releases/0.3.0-web.1/index.pck.part0'])assert.equal(w.event('fetch',request(url,false)).response(),undefined);
   });
   await check('Versioned assets use immutable caching and publication runs the build',()=>{
     const config=JSON.parse(read('vercel.json'));assert.equal(config.buildCommand,'node build_site.cjs');assert.equal(config.outputDirectory,'.');
