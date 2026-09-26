@@ -1,9 +1,9 @@
 // sw.js — Service worker for offline-first PWA
 // site-runtime:start
-const VERSION = "jw-v109-080cc531bf48065a";
+const VERSION = "jw-v109-167066d0ce1da077";
 const RUNTIME = [
-  "/site-assets/app.4c775ffc6016f008.js",
-  "/site-assets/data.766dfbf514e9a521.js",
+  "/site-assets/app.9f8ecf849fa150b7.js",
+  "/site-assets/data.3df50f3333da5b97.js",
   "/site-assets/supabase-data.4d8170e487cb9876.js"
 ];
 // site-runtime:end
@@ -64,6 +64,8 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   // Large app downloads belong to the browser, not the offline page cache.
   if (url.origin === location.origin && url.pathname.startsWith('/binaries/')) return;
+  // The game uses versioned HTTP assets and IndexedDB saves; do not cache it in the portfolio.
+  if (url.origin === location.origin && (url.pathname === '/lost-signal' || url.pathname.startsWith('/lost-signal/'))) return;
   // RT Asistent owns its scoped worker and cache; portfolio updates must not touch it.
   if (url.origin === location.origin && (url.pathname === '/rt-asistent' || url.pathname.startsWith('/rt-asistent/'))) return;
   // Admin je online-only — nikdy neservíruj starou verzi z cache (vždy ze sítě)

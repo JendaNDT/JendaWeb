@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<base href="/lost-signal/releases/0.3.0-web.1/">
+<meta name="theme-color" content="#102631">
+<title>Lost Signal · hrát</title>
+<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
+<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
+
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#07121c;color:#e9f0ee;font:16px system-ui,sans-serif}body{overflow:hidden}button,a,select{font:inherit}button,a{color:inherit}button,select{border:1px solid #759ca8;border-radius:9px;padding:12px 18px;background:#203948;color:#fff}button{cursor:pointer}button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #f5bc68;outline-offset:3px}button:disabled{opacity:.6;cursor:wait}header{height:40px;display:flex;justify-content:space-between;align-items:center;padding:0 max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));font-size:13px}header a{text-decoration:none}header button{padding:3px 10px;font-size:13px}#stage{height:calc(100dvh - 40px);position:relative;margin:auto}#canvas{display:block;width:100%;height:100%;touch-action:none;outline:none}#start{position:absolute;inset:0;display:grid;place-items:center;padding:20px;overflow:auto;background:radial-gradient(ellipse at top,#244958,#07121c 75%)}article{width:min(100%,530px)}h1{font-size:clamp(38px,8vw,68px);line-height:.95;margin:0 0 22px;letter-spacing:.05em}h1 span{color:#f5bc68}p{line-height:1.5;color:#bfd0d9}.tag{color:#f5bc68;font-size:13px}.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}#play{background:#f5bc68;color:#07121c;border-color:#f5bc68;font-weight:700}progress{width:100%;height:12px;accent-color:#f5bc68;margin-top:20px}#status{min-height:24px;font-size:14px}#retry{display:none}#rotate{display:none;color:#f5bc68}body.running #start{display:none}@media(pointer:coarse) and (orientation:portrait){#rotate{display:block}header{font-size:12px}}@media(max-height:500px){article{width:min(94%,840px)}h1{font-size:36px;margin:0 0 10px}p{margin:8px 0}#start{padding:12px 24px}.tag{display:none}}
+</style>
+</head>
+<body>
+<header><a href="/" id="back">← jenda.cool</a><span id="rotate">Otoč telefon na šířku</span><button id="fullscreen" type="button">Celá obrazovka</button></header>
+<div id="stage"><canvas id="canvas" tabindex="0" aria-label="Lost Signal"></canvas>
+<div id="start"><article>
+<div class="tag">WEB PREVIEW · 37 MISÍ</div><h1>LOST <span>SIGNAL</span></h1>
+<p id="intro">Tři hrdinové uvnitř rozbitého ovladače. Přepínej mezi Bramem, Rheou a K-9 a dostaň celý tým k východu.</p>
+<p id="instructions">Počítač: A/D pohyb, W/S žebříky, 1–3 hrdina, J/F/G schopnosti, E interakce, Esc pauza. Na telefonu používej dotykové ovládání a otoč ho na šířku.</p>
+<p id="saving">Postup se ukládá v tomto prohlížeči. Pro jeho zachování používej běžné okno; vymazáním dat webu se smaže i uložená hra. Hra je česky.</p>
+<div class="controls"><button id="play" type="button">Načíst a hrát</button><label><span id="control-label">Ovládání </span><select id="controls"><option value="keyboard">Klávesnice</option><option value="touch">Dotykové</option></select></label></div>
+<progress id="progress" value="0" max="1" hidden></progress><p id="status" role="status" aria-live="polite">První načtení stáhne přibližně 168 MB.</p><button id="retry" type="button">Zkusit znovu</button>
+</article></div></div>
+<noscript>Pro spuštění Lost Signal zapni JavaScript.</noscript>
+<script src="index.js"></script>
+<script>
+'use strict';
+const config = {"args":[],"canvasResizePolicy":0,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":157087252,"index.wasm":39513091},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const english = new URLSearchParams(location.search).get('lang') === 'en';
+const byId = id => document.getElementById(id);
+const text = (cs,en) => english ? en : cs;
+if (english) {
+ document.documentElement.lang='en'; document.title='Lost Signal · play';
+ const labels={intro:'Three heroes inside a broken remote control. Switch between Bram, Rhea and K-9 and lead the whole team to the exit.',instructions:'Keyboard: A/D move, W/S ladders, 1–3 hero, J/F/G abilities, E interact, Esc pause. On a phone, use touch controls and turn it sideways.',saving:'Progress is saved in this browser. Use a regular browser window; clearing site data also removes saved games. The game itself is in Czech.',play:'Load and play',fullscreen:'Full screen',rotate:'Turn your phone sideways',retry:'Try again','control-label':'Controls ',status:'The first load downloads about 168 MB.'};
+ for(const [id,value] of Object.entries(labels))byId(id).textContent=value;
+ document.querySelector('.tag').textContent='WEB PREVIEW · 37 MISSIONS';
+ byId('controls').options[0].text='Keyboard';byId('controls').options[1].text='Touch';
+}
+byId('controls').value=navigator.maxTouchPoints>0?'touch':'keyboard';
+byId('fullscreen').onclick=()=>{const enter=document.documentElement.requestFullscreen;if(enter)enter.call(document.documentElement).catch(()=>{});else byId('fullscreen').textContent=text('Otoč telefon na šířku','Turn your phone sideways');};
+byId('retry').onclick=()=>location.reload();
+function resize(){const canvas=byId('canvas'),rect=canvas.getBoundingClientRect();/* Keep GPU work bounded on high-DPI phones. */canvas.width=Math.round(rect.width);canvas.height=Math.round(rect.height);}
+window.addEventListener('resize',resize);resize();
+function failure(error){console.error(error);byId('status').textContent=text('Hru se nepodařilo načíst. Zkontroluj připojení a zkus to znovu. ','The game could not be loaded. Check your connection and try again. ')+error.message;byId('retry').style.display='inline-block';}
+async function loadPack(manifest){
+ const pack=new Uint8Array(manifest.bytes);let loaded=0,offset=0;
+ /* One chunk at a time avoids retaining a second whole pack on mobile. */
+ for(const part of manifest.parts){
+  const response=await fetch(part.file);if(!response.ok)throw new Error('HTTP '+response.status);
+  const reader=response.body.getReader();let count=0;
+  while(true){const {done,value}=await reader.read();if(done)break;pack.set(value,offset+count);count+=value.length;loaded+=value.length;byId('progress').value=loaded/manifest.bytes;byId('status').textContent=text('Načítám herní data ','Loading game data ')+Math.round(loaded/1e6)+' / '+Math.round(manifest.bytes/1e6)+' MB';}
+  if(count!==part.bytes)throw new Error('Incomplete game data');offset+=count;
+ }
+ return pack;
+}
+byId('play').onclick=async()=>{
+ byId('play').disabled=true;byId('controls').disabled=true;byId('progress').hidden=false;
+ try{
+  const missing=Engine.getMissingFeatures({threads:false});if(missing.length)throw new Error(missing.join(', '));
+  const response=await fetch('pack.json');if(!response.ok)throw new Error('HTTP '+response.status);const manifest=await response.json();
+  config.args=['--main-pack',config.executable+'.pck','--'];
+  if(byId('controls').value==='touch')config.args.push('--tablet-ui');
+  config.canvas=byId('canvas');config.canvasResizePolicy=0;config.ensureCrossOriginIsolationHeaders=false;
+  const engine=new Engine(config);
+  const [,pack]=await Promise.all([engine.init(config.executable),loadPack(manifest)]);
+  byId('status').textContent=text('Spouštím hru…','Starting the game…');
+  await engine.preloadFile(pack.buffer,config.executable+'.pck');await engine.start();
+  document.body.classList.add('running');byId('canvas').focus();resize();
+ }catch(error){failure(error);}
+};
+</script>
+</body></html>
+
