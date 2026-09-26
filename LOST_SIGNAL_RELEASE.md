@@ -38,3 +38,15 @@ launch clicks. Public production verification is recorded after deployment.
 Existing Android distribution and all other catalog rows/download counters are retained.
 The new database record is defined in `lost-signal/catalog.json`; publish it only after
 the game URL is live. The same row is present in `data.js` for offline/API-failure fallback.
+
+Production was published through PR #18, merge `8431187393b4f22edccaada99dc5a74ce4387c3f`;
+Vercel status succeeded. All 17 public files matched their SHA-256 values, including
+all eight PCK chunks. The rewritten `.wasm` response returned HTTP 200,
+`application/wasm`, `Content-Encoding: gzip` and immutable caching. Direct browser
+play on jenda.cool passed in Chromium, including pause and reload/resume.
+
+The catalog's platform constraint originally allowed only PWA and native platforms.
+The `add_web_platform` migration adds only `Web`, preserving the previous values;
+this avoids claiming that the game is an offline/installable PWA. Publication inserts
+one new Lost Signal row. The transaction compares a digest of every pre-existing
+catalog row, including counters, before and after the insert.
