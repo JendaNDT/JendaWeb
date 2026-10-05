@@ -4,7 +4,7 @@
 - Prepared a normal Paperlings catalog card (id 34), visible in Android and Windows filters, with two download buttons and a real game screenshot. Matching offline seed in data.js. `/paperlings/` provides Czech/English installation instructions.
 - Both rc2 files are in `binaries/paperlings-1.0.0-rc2/`, with public provenance, SHA-256 sums and license notices. New Android identity/signature provides a fresh installation without old progress.
 - Both release downloads were recovered from Lemmings-2026 commit 223105d47a0996e6783085868701b8c6d8068b1b and their SHA-256 values match the manifest.
-- Publication verification is pending. Switch the live Supabase record only after both complete production downloads match the release hashes. Native Windows/Android device tests remain pending. See PAPERLINGS_PUBLICATION.md.
+- Published commit 5bd2403 to main. Production deployment reached READY; both complete jenda.cool downloads returned HTTP 200, correct MIME/attachment headers and matching byte counts/SHA-256. Supabase id 34 was then inserted and verified through public REST and the live catalog. Browser checks passed in Czech/English and at 390 px, with no captured errors. Build/check, 19 startup/cache checks, download-count/gallery checks, 9 contact and 21 music/newsletter checks passed. Native Windows/Android device tests remain pending. See PAPERLINGS_PUBLICATION.md.
 
 ## 2026-09-08 — Visual studio release (APPROVED)
 
