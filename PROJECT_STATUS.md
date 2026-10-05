@@ -1,3 +1,11 @@
+## 2026-10-05 — Paperlings downloads
+
+- Author explicitly requested publication of Windows and Android downloads on jenda.cool, both with music.
+- Prepared a normal Paperlings catalog card (id 34), visible in Android and Windows filters, with two download buttons and a real game screenshot. Matching offline seed in data.js. `/paperlings/` provides Czech/English installation instructions.
+- Both rc2 files are in `binaries/paperlings-1.0.0-rc2/`, with public provenance, SHA-256 sums and license notices. New Android identity/signature provides a fresh installation without old progress.
+- Both release downloads were recovered from Lemmings-2026 commit 223105d47a0996e6783085868701b8c6d8068b1b and their SHA-256 values match the manifest.
+- Publication verification is pending. Switch the live Supabase record only after both complete production downloads match the release hashes. Native Windows/Android device tests remain pending. See PAPERLINGS_PUBLICATION.md.
+
 ## 2026-09-08 — Visual studio release (APPROVED)
 
 Prepared on `codex/visual-studio-preview`, based on deployed commit `a917807`.

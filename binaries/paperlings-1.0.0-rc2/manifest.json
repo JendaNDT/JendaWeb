@@ -1,0 +1,36 @@
+{
+  "product": "Paperlings",
+  "version": "1.0.0-rc2",
+  "source_repository": "https://github.com/JendaNDT/Lemmings-2026",
+  "source_commit": "59fc41a0a1ff14ca96fdde761591e6fee2009257",
+  "music_tracks": 4,
+  "missions": 24,
+  "android": {
+    "package": "cool.jenda.paperlings",
+    "version_code": 1000002,
+    "min_sdk": 24,
+    "abi": [
+      "armeabi-v7a",
+      "arm64-v8a"
+    ],
+    "allow_backup": false,
+    "imports_old_progress": false,
+    "certificate_sha256": "566e0d3c2b2d6fd176fd813b295f1b0e78d832a1450fa4df8d17c49a9e1a05cc"
+  },
+  "native_device_tests": {
+    "android": false,
+    "windows": false
+  },
+  "files": [
+    {
+      "name": "Paperlings-1.0.0-rc2-Windows.zip",
+      "bytes": 65356247,
+      "sha256": "df3e23b0911cec585e81101732284ced0cbfe16a90e755f07b9d5879e2f4945e"
+    },
+    {
+      "name": "Paperlings-1.0.0-rc2-Android.apk",
+      "bytes": 80456862,
+      "sha256": "2c47ab0597cb16cc639ecc9955673daa45bd9f086d3b244d0e2d65d86028b064"
+    }
+  ]
+}

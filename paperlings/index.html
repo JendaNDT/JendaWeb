@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a0f17">
+  <title>Paperlings — papírová logická hra | jenda.cool</title>
+  <meta name="description" content="Proveď origami postavičky 24 misemi. Paperlings s hudbou zdarma pro Windows a Android.">
+  <link rel="canonical" href="https://jenda.cool/paperlings/">
+  <meta property="og:title" content="Paperlings — Windows & Android">
+  <meta property="og:description" content="Papírová logická hra. 24 misí, osm dovedností a čtyři hudební skladby.">
+  <meta property="og:image" content="https://jenda.cool/paperlings/game.png">
+  <meta property="og:url" content="https://jenda.cool/paperlings/">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="icon.png" type="image/png">
+  <link rel="stylesheet" href="/vendor/fonts.css">
+  <style>
+    :root { color-scheme:dark; --bg:#0a0f17; --card:#131b26; --muted:#b4bdcb; --accent:#fbbf24; }
+    * { box-sizing:border-box; } body { margin:0; background:var(--bg); color:#f6f2eb; font:16px/1.65 'DM Sans',sans-serif; }
+    a { color:var(--accent); } a:focus-visible,button:focus-visible { outline:3px solid #fff; outline-offset:5px; }
+    .wrap { width:min(1080px,100% - 40px); margin:auto; } header { display:flex; justify-content:space-between; align-items:center; padding:24px 0; gap:20px; }
+    .brand { color:#fb923c; font:bold 22px 'Syne',sans-serif; text-decoration:none; } .languages { display:flex; gap:8px; }
+    button { font:inherit; cursor:pointer; color:var(--muted); background:none; border:1px solid #384354; border-radius:8px; padding:5px 12px; }
+    button[aria-pressed="true"] { color:var(--bg); background:var(--accent); border-color:var(--accent); }
+    .intro { padding:38px 0 24px; max-width:780px; } .heading { display:flex; align-items:center; gap:22px; } .heading img { width:88px; height:88px; }
+    h1,h2 { font-family:'Syne',sans-serif; line-height:1.12; } h1 { font-size:clamp(38px,7vw,72px); margin:8px 0 18px; letter-spacing:-.04em; }
+    h2 { font-size:26px; margin:0 0 18px; } p { margin:0 0 18px; } .intro p { font-size:21px; color:var(--muted); }
+    .tag { color:var(--accent); font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+    figure { margin:0 0 30px; } figure img { display:block; width:100%; height:auto; border:1px solid #35414e; border-radius:18px; }
+    figcaption { color:var(--muted); font-size:13px; margin-top:8px; }
+    .downloads { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+    article { border:1px solid #334052; border-radius:18px; padding:28px; background:var(--card); display:flex; flex-direction:column; }
+    .requirements { color:var(--muted); margin-bottom:22px; } .download { display:block; background:var(--accent); color:#111827; text-align:center; font-weight:800; text-decoration:none; padding:14px 18px; border-radius:10px; }
+    .download:hover { background:#fcd34d; } .install { color:#d0d7e2; font-size:15px; margin-top:20px; margin-bottom:0; }
+    .size { display:block; margin-top:8px; color:var(--muted); font-size:13px; text-align:center; }
+    .details { max-width:780px; margin:42px 0; color:var(--muted); } .details h2 { color:#f6f2eb; }
+    footer { border-top:1px solid #334052; margin-top:44px; padding:26px 0 38px; font-size:14px; color:var(--muted); }
+    @media(max-width:640px) { .wrap { width:calc(100% - 32px); } .downloads { grid-template-columns:1fr; } article { padding:24px; } .intro { padding-top:18px; } .heading { gap:12px; } .heading img { width:64px; height:64px; } .intro p { font-size:18px; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header><a class="brand" href="/">jenda.cool</a><nav class="languages" aria-label="Language"><button type="button" data-lang="cs" aria-pressed="true">CZ</button><button type="button" data-lang="en" aria-pressed="false">EN</button></nav></header>
+    <main>
+      <section class="intro">
+        <span class="tag" data-text="tag">Zdarma · 1.0.0-rc2 · s hudbou</span>
+        <div class="heading"><img src="icon.png" alt="" width="88" height="88"><h1>Paperlings</h1></div>
+        <p data-text="intro">Malé papírové postavičky, velká cesta domů. Kopej tunely, stavěj schody a proveď celý zástup nástrahami ve 24 misích.</p>
+      </section>
+      <figure><img src="game.png" alt="Origami postavičky v první misi Paperlings" width="1280" height="720" fetchpriority="high"><figcaption data-text="caption">Skutečný snímek hry. Čtyři kapitoly, osm dovedností a čtyři střídající se hudební skladby.</figcaption></figure>
+      <section class="downloads" aria-label="Downloads">
+        <article>
+          <h2>Windows</h2><p class="requirements" data-text="winReq">Windows 10 / 11 · 64 bit</p>
+          <a class="download" href="/binaries/paperlings-1.0.0-rc2/Paperlings-1.0.0-rc2-Windows.zip" download data-text="winDownload">Stáhnout pro Windows</a>
+          <span class="size" id="windows-size">ZIP · 65,4 MB</span>
+          <p class="install" data-text="winInstall">Rozbal ZIP a spusť Paperlings.exe. Ovládání myší a klávesnicí. Sestavení není digitálně podepsané; Windows může při prvním spuštění zobrazit upozornění.</p>
+        </article>
+        <article>
+          <h2>Android</h2><p class="requirements" data-text="androidReq">Android 7.0 a novější · telefon i tablet</p>
+          <a class="download" href="/binaries/paperlings-1.0.0-rc2/Paperlings-1.0.0-rc2-Android.apk" download data-text="androidDownload">Stáhnout pro Android</a>
+          <span class="size" id="android-size">APK · 80,5 MB</span>
+          <p class="install" data-text="androidInstall">Otevři stažené APK a na výzvu povol instalaci. Tato verze se instaluje jako nová aplikace vedle staré testovací hry. Začneš od první mise, bez starého postupu; nový postup se při hraní normálně ukládá.</p>
+        </article>
+      </section>
+      <section class="details">
+        <h2 data-text="howTitle">Každá postavička potřebuje plán.</h2>
+        <p data-text="how">Vyber dovednost a přiděl ji postavičce. Ostatní půjdou v jejích stopách. Když se plán zamotá, zpomal čas, udělej pauzu nebo se vrať o pět sekund. Hra je česky a funguje offline.</p>
+        <p data-text="music">Hudba je v obou verzích. Po jednotlivých misích se střídají čtyři skladby. Hlasitost si nastavíš v Nastavení → Zvuk → Hudba.</p>
+        <p data-text="preview">Jde o předběžné vydání. Balíčky a společné herní soubory prošly kontrolami v cloudu; tuto verzi ještě zbývá vyzkoušet přímo na Windows a Androidu.</p>
+        <a href="/binaries/paperlings-1.0.0-rc2/SHA256SUMS.txt" data-text="checksums">Kontrolní součty souborů</a>
+      </section>
+    </main>
+    <footer><p data-text="copyright">Paperlings © 2026 Jenda. Zdarma ke hraní, ostatní práva vyhrazena. Inspirováno Lemmings (1991); s původní hrou ani jejími vlastníky není spojeno.</p><a href="/#apps" data-text="back">← Další aplikace od Jendy</a></footer>
+  </div>
+  <script src="page.js" defer></script>
+</body>
+</html>

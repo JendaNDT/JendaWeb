@@ -1,10 +1,10 @@
 // sw.js — Service worker for offline-first PWA
 // site-runtime:start
-const VERSION = "jw-v109-167066d0ce1da077";
+const VERSION = "jw-v109-e9f76c413749ffda";
 const RUNTIME = [
-  "/site-assets/app.9f8ecf849fa150b7.js",
-  "/site-assets/data.3df50f3333da5b97.js",
-  "/site-assets/supabase-data.4d8170e487cb9876.js"
+  "/site-assets/app.7861d34c245700c0.js",
+  "/site-assets/data.6057837326277f72.js",
+  "/site-assets/supabase-data.d5ff4b3a099b14f3.js"
 ];
 // site-runtime:end
 const SHELL = [
@@ -64,6 +64,8 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   // Large app downloads belong to the browser, not the offline page cache.
   if (url.origin === location.origin && url.pathname.startsWith('/binaries/')) return;
+  // The download page must reflect the current installers, even in an installed portfolio PWA.
+  if (url.origin === location.origin && (url.pathname === '/paperlings' || url.pathname.startsWith('/paperlings/'))) return;
   // The game uses versioned HTTP assets and IndexedDB saves; do not cache it in the portfolio.
   if (url.origin === location.origin && (url.pathname === '/lost-signal' || url.pathname.startsWith('/lost-signal/'))) return;
   // RT Asistent owns its scoped worker and cache; portfolio updates must not touch it.

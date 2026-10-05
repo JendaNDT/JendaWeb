@@ -1625,6 +1625,7 @@ Object.assign(window, { Nav, Hero, BackgroundFX });
 const { useState: __useS, useEffect: __useE, useLayoutEffect: __useL, useMemo: __useM, useCallback: __useC, useRef: __useR } = React;
 
 const APP_VISUALS = {
+  paperlings: { src:'/paperlings/game.png', kind:'landscape', cs:'Proveď papírové postavičky domů.', en:'Guide the paper characters home.' },
   rocker: { src:'/screenshots/rocker/metronome-desktop-v1.jpg', kind:'desktop', cs:'Metronom pro tvoje cvičení.', en:'A metronome for your practice.' },
   bomberman: { src:'/screenshots/bomberman-2.1.1/battle.png', kind:'desktop', cs:'Bomby, bludiště a společná hra v LAN.', en:'Bombs, mazes and LAN multiplayer.' },
   'fyzika-pastelkou': { src:'/screenshots/fyzika-pastelkou-0.1.23/experiment.png', kind:'landscape', cs:'Kresli. Zkoušej. Objevuj.', en:'Draw. Try. Discover.' },
@@ -1638,6 +1639,7 @@ const APP_VISUALS = {
 
 // Captions follow the image URL, including when a catalog changes its order.
 const APP_SCREENSHOT_CAPTIONS = {
+  '/paperlings/game.png': { cs:'Origami postavičky v první misi Paperlings.', en:'Origami characters in the first Paperlings mission.' },
   '/screenshots/lost-signal-web.1/mission-01.png': { cs:'Bram, Rhea a K-9 v první misi webové hry.', en:'Bram, Rhea and K-9 in the first mission of the browser game.' },
   '/screenshots/fyzika-pastelkou-0.1.23/experiment.png': { cs:'Nakresli cestu přes jablíčko do koše.', en:'Draw a path past the apple and into the basket.' },
   '/screenshots/fyzika-pastelkou-0.1.23/water-oil.png': { cs:'Zkoumej, jak se tělesa chovají ve vodě a oleji.', en:'Explore how objects behave in water and oil.' },
