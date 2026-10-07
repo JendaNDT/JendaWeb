@@ -10,7 +10,17 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          fetch-depth: 1
+          fetch-depth: 5
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/binaries/*
+            /binaries/skoda-racer-1.16.0/
+            !/lost-signal/releases/
+            !/screenshots/
+            !/rt-asistent/
+            !/splash/
+            !/artwork/
       - name: Recover and verify original release assets
         env:
           RELEASE_URL: https://github.com/JendaNDT/-kodaRacer/releases/download/testovaci-build
