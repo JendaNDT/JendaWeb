@@ -8,5 +8,9 @@ The owner requested publication on jenda.cool for Android and Windows.
 - Original GitHub release assets match manifest.json and SHA256SUMS.txt.
 - Android APK is served directly; Windows EXE uses the existing six-part download control and is saved as SkodaRacer.exe.
 - Original game icon is from the same source commit.
-- Production publication and full download verification are pending.
+- Published and verified on 2026-10-07. Production deployment dpl_GhNjWtp2hYQPtTxppyophwKxQqw9 for commit 538aa6f5d33e8ee149a63eab2e3081a52faf5b1d reached READY on jenda.cool.
+- Full public downloads returned HTTP 200 with the expected MIME types, attachment filenames, sizes and SHA-256 values. All six Windows parts were checked individually and their combined EXE hash matches the original.
+- Supabase record 35 was inserted only after public download verification. Public REST fields match the fallback catalog.
+- Website build and 19 startup/cache checks passed, along with download-count and gallery checks. A focused check of the actual Windows download control reconstructed the original EXE and verified the repeated-click guard.
+- Live browser check confirmed the Czech detail, version, both download controls and original icon. No application-origin console errors were captured.
 - Native game execution was not tested during this distribution task.
