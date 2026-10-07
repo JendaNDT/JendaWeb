@@ -1,0 +1,56 @@
+name: Publish verified Skoda Racer distribution
+on:
+  push:
+    branches: [publication/skoda-racer-1.16.0]
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 1
+      - name: Recover and verify original release assets
+        env:
+          RELEASE_URL: https://github.com/JendaNDT/-kodaRacer/releases/download/testovaci-build
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/skoda-release
+          curl -fL --retry 3 "$RELEASE_URL/SkodaRacer.apk" -o /tmp/skoda-release/SkodaRacer.apk
+          curl -fL --retry 3 "$RELEASE_URL/SkodaRacer.exe" -o /tmp/skoda-release/SkodaRacer.exe
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          root=Path('binaries/skoda-racer-1.16.0')
+          manifest=json.loads((root/'manifest.json').read_text())
+          for entry in manifest['files']:
+              data=(Path('/tmp/skoda-release')/entry['name']).read_bytes()
+              assert len(data)==entry['bytes']
+              assert hashlib.sha256(data).hexdigest()==entry['sha256']
+              if entry['parts']:
+                  start=0
+                  for part in entry['parts']:
+                      chunk=data[start:start+part['bytes']]
+                      assert hashlib.sha256(chunk).hexdigest()==part['sha256']
+                      (root/part['name']).write_bytes(chunk)
+                      start+=part['bytes']
+                  assert start==len(data)
+              else:
+                  (root/entry['name']).write_bytes(data)
+          PY
+      - name: Check website build
+        run: |
+          node build_site.cjs --check
+          node tests/startup-build.cjs
+          node tests/download-counts.cjs
+          node tests/gallery-input.cjs
+      - name: Publish complete distribution atomically
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add binaries/skoda-racer-1.16.0/
+          git rm .github/workflows/publish-skoda-racer.yml
+          git commit -m 'Publish verified Skoda Racer Android APK and Windows EXE'
+          git push origin HEAD:main

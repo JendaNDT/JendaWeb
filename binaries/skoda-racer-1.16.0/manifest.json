@@ -1,0 +1,51 @@
+{
+  "version": "1.16.0",
+  "stage": "test",
+  "source": "https://github.com/JendaNDT/-kodaRacer",
+  "commit": "fb031160eecd0650ec786b4bd71e685a07154e14",
+  "files": [
+    {
+      "name": "SkodaRacer.apk",
+      "bytes": 53358448,
+      "sha256": "901dc876023ff081c14b7968829e52815c5cc7f5dd938ffc2ce24750db111abb",
+      "parts": []
+    },
+    {
+      "name": "SkodaRacer.exe",
+      "bytes": 110099336,
+      "sha256": "feee100fdd3354e1a15314fd49a36884de5d48ae552355e126815d72bc33c80f",
+      "parts": [
+        {
+          "name": "SkodaRacer.exe.part0",
+          "bytes": 20971520,
+          "sha256": "fa4d2d5f4d34a768ae78942b1b4c6dff09b0a22661e0209df13d8e5cc316d14c"
+        },
+        {
+          "name": "SkodaRacer.exe.part1",
+          "bytes": 20971520,
+          "sha256": "0ba32020dbd42810930a86ddabbdb8a087c1437d30be0dbcdbb774b532a764d1"
+        },
+        {
+          "name": "SkodaRacer.exe.part2",
+          "bytes": 20971520,
+          "sha256": "e9d6b2a406ec2a0cdaa0bb01e9f1dc7cb44f2e7f454aa33a7d1beaa7f37debdb"
+        },
+        {
+          "name": "SkodaRacer.exe.part3",
+          "bytes": 20971520,
+          "sha256": "9e9e50c1cf05fe37ebfabd35f90e3174a87b83ef182af9920e47659da6dfd9f4"
+        },
+        {
+          "name": "SkodaRacer.exe.part4",
+          "bytes": 20971520,
+          "sha256": "bfd8f3930874c399a6a931448c0af2a1feedd550a2accaa34e8764777da2c3a0"
+        },
+        {
+          "name": "SkodaRacer.exe.part5",
+          "bytes": 5241736,
+          "sha256": "462c7477cefe31a730a2ba19f526a3cd62167cfc8e6192e055f02b9a81106c3a"
+        }
+      ]
+    }
+  ]
+}
