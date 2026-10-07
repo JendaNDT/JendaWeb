@@ -34,4 +34,8 @@ The owner requested the newest available version. Source distribution commit be8
 - APK: 80,460,958 bytes, SHA-256 e13db4f4ac01f2b619ff743d34b948c741da8b973a90566d7f886968cb69a0aa.
 - Install over rc2 without uninstalling to retain progress. The package and signing identity are unchanged.
 - Catalog id 34 and /paperlings/ updated with platform-specific versions and installation instructions. Likes and download totals are retained.
-- Public deployment, complete download and live CMS verification pending.
+- Published and verified on 2026-10-07. Production deployment dpl_3Bn5TB385LTTWrA1wXytgXqgKiVQ for commit 57c0228008ac5ed4c2fda588931ccc65e783f578 reached READY.
+- Full public Android rc3 and Windows rc2 downloads returned HTTP 200 with correct attachment headers, MIME, sizes and original SHA-256 hashes.
+- Existing CMS id 34 was updated only after public downloads passed verification; its public response matches the fallback metadata. Likes and download totals were retained.
+- The website build, 19 startup/cache checks and download-count checks passed. Live browser verification confirmed both platform versions, the new Android link, and the Czech installation instructions on /paperlings/.
+- The Android performance improvement has not been measured on the owner's physical tablet during this publication task.
