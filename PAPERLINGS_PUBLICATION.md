@@ -26,3 +26,12 @@ Published and verified on 2026-10-05.
 The source distribution is in JendaNDT/Lemmings-2026 branch downloads/android-1.0.0-rc2.
 It holds both installers and web/JendaWeb-Paperlings-rc2.patch. The patch provides the original
 installation page and metadata. This publication additionally integrates the normal catalog card.
+
+## Android rc3 update — 2026-10-07
+
+The owner requested the newest available version. Source distribution commit be8180c299cb2d9e0d1a96a3e1746cdef9bb4e09 contains Android 1.0.0-rc3 only; Windows stays at rc2 as specified by its README.
+
+- APK: 80,460,958 bytes, SHA-256 e13db4f4ac01f2b619ff743d34b948c741da8b973a90566d7f886968cb69a0aa.
+- Install over rc2 without uninstalling to retain progress. The package and signing identity are unchanged.
+- Catalog id 34 and /paperlings/ updated with platform-specific versions and installation instructions. Likes and download totals are retained.
+- Public deployment, complete download and live CMS verification pending.

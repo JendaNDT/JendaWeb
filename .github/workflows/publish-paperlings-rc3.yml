@@ -1,0 +1,48 @@
+name: Publish verified Paperlings Android rc3
+on:
+  push:
+    branches: [publication/paperlings-android-rc3]
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 5
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/binaries/*
+            /binaries/paperlings-1.0.0-rc3/
+            !/lost-signal/releases/
+            !/screenshots/
+            !/rt-asistent/
+            !/splash/
+            !/artwork/
+      - name: Download and verify original APK
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 'https://raw.githubusercontent.com/JendaNDT/Lemmings-2026/be8180c299cb2d9e0d1a96a3e1746cdef9bb4e09/android/Paperlings-1.0.0-rc3-Android.apk' -o 'binaries/paperlings-1.0.0-rc3/Paperlings-1.0.0-rc3-Android.apk'
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p=Path('binaries/paperlings-1.0.0-rc3/Paperlings-1.0.0-rc3-Android.apk')
+          assert p.stat().st_size==80460958
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=='e13db4f4ac01f2b619ff743d34b948c741da8b973a90566d7f886968cb69a0aa'
+          PY
+      - name: Verify website
+        run: |
+          node build_site.cjs --check
+          node tests/startup-build.cjs
+          node tests/download-counts.cjs
+      - name: Publish distribution
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add binaries/paperlings-1.0.0-rc3/
+          git rm .github/workflows/publish-paperlings-rc3.yml
+          git commit -m 'Publish verified Paperlings Android rc3 APK'
+          git push origin HEAD:main
