@@ -36,4 +36,9 @@ The owner requested publication on jenda.cool for Android and Windows.
 - Android: 58,733,696 bytes; Windows: 115,601,544 bytes, delivered through six parts.
 - Czech and English descriptions include original menu and race music.
 - Existing app record, icon and counters retained.
-- Publication verification pending.
+- Production deployment dpl_EVWcBpoyqPb6SD91uyKkFsVsg8FD for commit 872af79bed0ea6c20483b06c487edf02b5b359ff reached READY on jenda.cool.
+- Public APK and all six Windows parts returned HTTP 200 with correct byte counts, MIME types, attachment headers and SHA-256 hashes; reconstructed Windows EXE matches the original.
+- Public CMS record 35 matches the fallback catalog; download_count 2 and likes 0 retained.
+- Website build, 19 startup/cache checks, download-count checks and actual multipart download control passed.
+- Live browser verified version 1.19.1, updated music description and both download controls.
+- Native game execution was not tested during this distribution update.
