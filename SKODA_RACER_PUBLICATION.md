@@ -22,4 +22,9 @@ The owner requested publication on jenda.cool for Android and Windows.
 - Android: 53,453,558 bytes; Windows: 110,194,776 bytes, delivered through six parts.
 - Updated Czech and English descriptions include the balloon battle mode.
 - Existing app record, icon and download counters are retained.
-- Publication verification pending.
+- Production deployment dpl_F2uKwrkrgkFowNk31bkgytxHUFaL for commit 9ea03226e41d199855cf9a04b103b75e82edd457 reached READY on jenda.cool.
+- Public APK and all six Windows parts returned HTTP 200 with the expected MIME types, attachment headers, byte counts and SHA-256 hashes. Reconstructed Windows EXE matches the original release hash.
+- Public CMS record 35 matches the fallback catalog; existing download_count 1 and likes 0 were retained.
+- Deterministic build, 19 startup/cache checks, download-count checks and the actual multipart Windows control passed.
+- Live browser verified Czech and English details, version 1.19.0 and both download controls.
+- Native game execution was not tested during this distribution update.
