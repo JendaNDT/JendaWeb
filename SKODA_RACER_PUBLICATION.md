@@ -28,3 +28,12 @@ The owner requested publication on jenda.cool for Android and Windows.
 - Deterministic build, 19 startup/cache checks, download-count checks and the actual multipart Windows control passed.
 - Live browser verified Czech and English details, version 1.19.0 and both download controls.
 - Native game execution was not tested during this distribution update.
+
+## Update 1.19.1 — 2026-10-08
+
+- Source commit: 6ad2d1923aa2587ebac2f4f27ee0bfe034d1a636.
+- Original APK and EXE hashes verified against GitHub release asset digests; see manifest and SHA256SUMS.txt.
+- Android: 58,733,696 bytes; Windows: 115,601,544 bytes, delivered through six parts.
+- Czech and English descriptions include original menu and race music.
+- Existing app record, icon and counters retained.
+- Publication verification pending.
