@@ -14,3 +14,12 @@ The owner requested publication on jenda.cool for Android and Windows.
 - Website build and 19 startup/cache checks passed, along with download-count and gallery checks. A focused check of the actual Windows download control reconstructed the original EXE and verified the repeated-click guard.
 - Live browser check confirmed the Czech detail, version, both download controls and original icon. No application-origin console errors were captured.
 - Native game execution was not tested during this distribution task.
+
+## Update 1.19.0 — 2026-10-08
+
+- Source commit: 14c5b935f44cf6db3a291fb4e5a1639e4cd225f5.
+- Release assets verified against the versioned manifest and original SHA256SUMS.txt.
+- Android: 53,453,558 bytes; Windows: 110,194,776 bytes, delivered through six parts.
+- Updated Czech and English descriptions include the balloon battle mode.
+- Existing app record, icon and download counters are retained.
+- Publication verification pending.
