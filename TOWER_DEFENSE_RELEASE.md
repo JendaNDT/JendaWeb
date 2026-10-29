@@ -51,3 +51,13 @@ neověřil (nástroj by vracel jeho binární obsah); stejné pravidlo jako u Lo
 v prohlížeči jsem ho zkoušel nad lokálním serverem s pravidly z `vercel.json`. Záznam `apps` id 36 byl do
 databáze vložen až po ověření adresy (počet řádků 32 → 33, ostatní řádky beze změny).
 
+### Verze 1.1.0-web.1
+Nasazeno přes PR #22 (sloučeno jako `5df0038c405a382ba6dbaadce7d9d5ff58fb426a`). Náhled větve i produkční nasazení
+Vercelu byly READY a alias `jenda.cool` míří na produkční. Na živé adrese ověřeno: `/tower-defense` (přesměrování
+na `/tower-defense/`, výsledek HTTP 200), stálá stránka (`must-revalidate`, `<base>` na `releases/1.1.0-web.1/`,
+`persistentPaths`), `releases/1.1.0-web.1/manifest.json` (HTTP 200, `immutable`, hash rozbaleného wasm
+`fc74679e…` shodný s lokálním). Samotný `index.wasm` na živém webu neověřen z téhož důvodu jako u 1.0.0-web.1;
+v prohlížeči byl zkoušen nad lokálním serverem s pravidly z `vercel.json` (hra naběhla z nové verze, vznikla jen
+databáze `/userfs/OstrovVOblacich`, volby přežily obnovení stránky, karta je v katalogu). Řádek `apps` id 36
+v Supabase aktualizován (text, ikona, čtyři snímky; počet řádků 33, ostatní beze změny). Rekordy ze starých map
+zůstávají v prohlížeči nevyužité, nové mapy mají vlastní sekci. Stará složka `1.0.0-web.1` zůstává.
