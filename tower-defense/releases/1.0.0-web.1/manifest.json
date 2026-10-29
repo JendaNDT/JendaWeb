@@ -1,0 +1,54 @@
+{
+ "name": "Ostrov v oblacích – Obrana",
+ "version": "1.0.0-web.1",
+ "engine": "Godot 4.7.2 Compatibility, single threaded",
+ "wasm_bytes": 39514754,
+ "wasm_sha256": "fc74679e3b97f76878947fcd4fbe1268cbfa6188182a2e33bbc3f5dc9bfa57d0",
+ "files": [
+  {
+   "file": "index.apple-touch-icon.png",
+   "bytes": 9726,
+   "sha256": "d423b7e1b7ea796c5cd9786a57d47a25e10af6ced667d1e9fde694240198741d"
+  },
+  {
+   "file": "index.audio.position.worklet.js",
+   "bytes": 2973,
+   "sha256": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8"
+  },
+  {
+   "file": "index.audio.worklet.js",
+   "bytes": 7298,
+   "sha256": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3"
+  },
+  {
+   "file": "index.html",
+   "bytes": 6396,
+   "sha256": "e82685f1c358e7e9fcfb816c90d77f7b8472cc77306a7299fad2749ea684f00f"
+  },
+  {
+   "file": "index.icon.png",
+   "bytes": 4462,
+   "sha256": "fd1fcfac2256f950df09a50005e0aa6b27edcddf83617fa0baf503d5d655b9a6"
+  },
+  {
+   "file": "index.js",
+   "bytes": 279815,
+   "sha256": "33c94cb3175f3333b82e2a3be5e8e86f77986f0aa2042b1631f6367a4e5bb6ba"
+  },
+  {
+   "file": "index.pck",
+   "bytes": 387760,
+   "sha256": "38c62f624f6e695456f0e58f5963aee7797cdb27817c1febb3e6dce7836ed7dd"
+  },
+  {
+   "file": "index.png",
+   "bytes": 21443,
+   "sha256": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e"
+  },
+  {
+   "file": "index.wasm.gz",
+   "bytes": 10084286,
+   "sha256": "ffa4b2930da084eb0bb1ac766ef72469ca829a2e73e10d425a4acca3cf1d9191"
+  }
+ ]
+}

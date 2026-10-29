@@ -1,0 +1,16 @@
+{
+  "id": 36,
+  "name": "Ostrov v oblacích",
+  "platform": "Web",
+  "color": "#4fa8e8",
+  "cs": "3D izometrická obrana věží na létajícím ostrově v oblacích. Postav lučištníky, kanóny, mágy a mrazivé věže, vylepši každou na čtyři úrovně a braň Srdce ostrova před dvanácti vlnami nepřátel: rychlými vlky, obrněnými golemy, draky, bossy, léčiteli i slizáky. K tomu tři ostrovy, tři obtížnosti, nekonečný režim a aktivní schopnosti jako meteor.\n\nHraj zdarma v prohlížeči. Na počítači myší a klávesnicí, na telefonu na šířku dotykem: jeden prst posouvá, dva přibližují a otáčejí. Hra je česky; grafika, zvuky i hudba vznikly v kódu.\n\nWebová verze · první načtení přibližně 11 MB. Volby a rekordy se ukládají v tomto prohlížeči. Zkoušeno v Chromiu, skutečný telefon a Safari zatím ne.",
+  "en": "A 3D isometric tower defense on a floating island in the clouds. Build archer, cannon, mage and frost towers, upgrade each to four levels and defend the Heart of the island against twelve waves of enemies: fast wolves, armored golems, drakes, bosses, healers and slimes. Plus three islands, three difficulties, an endless mode and active abilities such as a meteor.\n\nPlay free in your browser. Mouse and keyboard on a computer; on a phone turn it sideways and use touch: one finger pans, two fingers zoom and rotate. The game is in Czech; its graphics, sounds and music are all generated in code.\n\nWeb version · about 11 MB on first load. Settings and records are saved in this browser. Tested in Chromium; a physical phone and Safari have not been tested yet.",
+  "link": "/tower-defense/",
+  "icon_url": "/tower-defense/releases/1.0.0-web.1/index.apple-touch-icon.png",
+  "sort": -5,
+  "screenshots": [
+    "/screenshots/tower-defense-web.1/ostrov.jpg",
+    "/screenshots/tower-defense-web.1/stavba.jpg",
+    "/screenshots/tower-defense-web.1/telefon.jpg"
+  ]
+}
