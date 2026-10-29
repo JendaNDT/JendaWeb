@@ -1,3 +1,9 @@
+## 2026-10-29 — Ostrov v oblacích 1.2.0-web.1 (pohled shora, výraznější mřížka)
+
+- Na žádost autora nová verze hry `1.2.0-web.1` ve verzované složce `tower-defense/releases/1.2.0-web.1/` (starší `1.1.0-web.1` a `1.0.0-web.1` zůstávají nedotčené). Nově pohled shora (V / tlačítko), výraznější mřížka polí a její trvalé zapnutí (G / tlačítko). Podrobnosti: `TOWER_DEFENSE_RELEASE.md`.
+- Změněno: přepisy ve `vercel.json`, `tower-defense/index.html` (stejný soubor jako v nové složce), katalog `tower-defense/catalog.json` + řádek v `data.js` (text, ikona, pět snímků v `screenshots/tower-defense-web.3/`), popisky v `apps-music.jsx`, testy `tests/tower-defense.cjs` a `tests/startup-build.cjs`. Vygenerované soubory sestaveny `node build_site.cjs`.
+- Ověřeno: `build_site.cjs` + `--check` a všechny testy z `BUILD.md`.
+
 ## 2026-10-29 — Ostrov v oblacích 1.1.0-web.1 (větší mapy, dvě prostředí)
 
 - Na žádost autora nová verze hry `1.1.0-web.1` ve verzované složce `tower-defense/releases/1.1.0-web.1/` (stará `1.0.0-web.1` zůstává nedotčená). Nově: tři velké mapy místo tří původních (víc bran, rozcestí, spojení cest, kopce se bonusem dosahu věží), minimapa, druhé prostředí Vesmírná stanice. Podrobnosti: `TOWER_DEFENSE_RELEASE.md`.

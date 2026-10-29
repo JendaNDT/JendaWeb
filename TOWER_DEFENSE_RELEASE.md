@@ -1,6 +1,6 @@
 # Ostrov v oblacích (Tower Defense) – webová hra
 
-Veřejná adresa: `/tower-defense/`. Aktuální verze: `/tower-defense/releases/1.1.0-web.1/` (předchozí `1.0.0-web.1` zůstává ve složce beze změny).
+Veřejná adresa: `/tower-defense/`. Aktuální verze: `/tower-defense/releases/1.2.0-web.1/` (předchozí `1.1.0-web.1` a `1.0.0-web.1` zůstávají ve složce beze změny).
 Hra je 3D izometrická obrana věží (Godot 4.7.2, režim Kompatibilita, bez vláken) se dvěma prostředími (Ostrov v oblacích, sci-fi Vesmírná stanice) a třemi velkými mapami s více branami, rozcestími a kopci. Texty jsou česky,
 grafika, zvuk i hudba vznikají v kódu, takže stránka nepotřebuje žádné další soubory. Zdroj hry je v
 repozitáři `JendaNDT/Tower-Defense`; sem patří jen výsledný export.
@@ -24,11 +24,11 @@ stránky (`"persistentPaths":["/userfs/OstrovVOblacich"]` v `index.html`) – uk
 (režim, obtížnost) přežijí obnovení stránky. Při přípravě nové verze se musí `persistentPaths` do
 `index.html` znovu doplnit (export ho nevytváří) a `<base href>` nastavit na novou složku.
 
-## Jak vznikla verze 1.1.0-web.1 (stejně jako 1.0.0-web.1)
+## Jak vznikla verze 1.2.0-web.1 (stejně jako dřívější)
 1. V repozitáři hry: `godot --headless --export-release Web` (export do `docs/`), Godot 4.7.2.
-2. Do `tower-defense/releases/1.1.0-web.1/` zkopírovat `index.js`, `index.pck`, `index.audio*.js`,
+2. Do `tower-defense/releases/1.2.0-web.1/` zkopírovat `index.js`, `index.pck`, `index.audio*.js`,
    `index.icon.png`, `index.apple-touch-icon.png`, `index.png` a `index.wasm` zabalit `gzip -9 -n` jako
-   `index.wasm.gz`. `index.html` upravit: za `<meta charset>` vložit `<base href="/tower-defense/releases/1.1.0-web.1/">`
+   `index.wasm.gz`. `index.html` upravit: za `<meta charset>` vložit `<base href="/tower-defense/releases/1.2.0-web.1/">`
    a do `GODOT_CONFIG` přidat `"persistentPaths":["/userfs/OstrovVOblacich"]`; stejný soubor je i
    `tower-defense/index.html`.
 3. `manifest.json` s velikostmi a SHA-256 všech souborů a hashem rozbaleného wasm.
@@ -61,3 +61,11 @@ v prohlížeči byl zkoušen nad lokálním serverem s pravidly z `vercel.json` 
 databáze `/userfs/OstrovVOblacich`, volby přežily obnovení stránky, karta je v katalogu). Řádek `apps` id 36
 v Supabase aktualizován (text, ikona, čtyři snímky; počet řádků 33, ostatní beze změny). Rekordy ze starých map
 zůstávají v prohlížeči nevyužité, nové mapy mají vlastní sekci. Stará složka `1.0.0-web.1` zůstává.
+
+### Verze 1.2.0-web.1
+Nově pohled shora (klávesa V, tlačítko; plynulý přechod na sklon 90° se zarovnáním na čtvercovou síť), výraznější
+mřížka polí (světlá čára s tmavým lemem) a její trvalé zapnutí (klávesa G, tlačítko). Stejný engine (Godot 4.7.2),
+`index.wasm` je beze změny (stejný hash `fc74679e…`), mění se `index.pck` a `index.html`. Nová složka
+`releases/1.2.0-web.1/`, přepisy ve `vercel.json`, katalog (text, ikona, pět snímků v `screenshots/tower-defense-web.3/`),
+`data.js`, popisky v `apps-music.jsx` a testy ukazují na novou verzi. Řádek `apps` id 36 v Supabase se upravuje až po
+sloučení a ověření živé adresy (viz níže, oddíl publikace této verze).
