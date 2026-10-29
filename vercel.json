@@ -137,11 +137,11 @@
     },
     {
       "source": "/tower-defense/",
-      "destination": "/tower-defense/releases/1.0.0-web.1/index.html"
+      "destination": "/tower-defense/releases/1.1.0-web.1/index.html"
     },
     {
       "source": "/tower-defense/index.html",
-      "destination": "/tower-defense/releases/1.0.0-web.1/index.html"
+      "destination": "/tower-defense/releases/1.1.0-web.1/index.html"
     },
     {
       "source": "/tower-defense/releases/:version/index.wasm",

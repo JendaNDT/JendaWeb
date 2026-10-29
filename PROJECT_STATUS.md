@@ -1,3 +1,10 @@
+## 2026-10-29 — Ostrov v oblacích 1.1.0-web.1 (větší mapy, dvě prostředí)
+
+- Na žádost autora nová verze hry `1.1.0-web.1` ve verzované složce `tower-defense/releases/1.1.0-web.1/` (stará `1.0.0-web.1` zůstává nedotčená). Nově: tři velké mapy místo tří původních (víc bran, rozcestí, spojení cest, kopce se bonusem dosahu věží), minimapa, druhé prostředí Vesmírná stanice. Podrobnosti: `TOWER_DEFENSE_RELEASE.md`.
+- Změněno: přepisy ve `vercel.json` míří na novou verzi, `tower-defense/index.html` je stejný soubor jako v nové složce, záznam v katalogu (`tower-defense/catalog.json`, id 36) a stejný řádek v `data.js` mají nový text a čtyři nové snímky (`screenshots/tower-defense-web.2/`), popisky snímků v `apps-music.jsx`, testy `tests/tower-defense.cjs` a `tests/startup-build.cjs` ukazují na novou verzi. Vygenerované soubory (`combined.jsx`, `site-assets/`, `index.html`, `sw.js`) sestaveny `node build_site.cjs`.
+- Rekordy se ukládají do nové sekce (mapy jsou jiné), starý záznam zůstává v prohlížeči nevyužitý; úložiště `/userfs/OstrovVOblacich` se nemění.
+- Ověřeno: `build_site.cjs` + `--check` a všechny testy z `BUILD.md` (vč. `tests/tower-defense.cjs`: 9 souborů, 10 922 163 bajtů, hashe, gzip wasm).
+
 ## 2026-10-29 — Ostrov v oblacích (webová hra)
 
 - Na žádost autora přidána webová hra **Ostrov v oblacích** (3D izometrická obrana věží, Godot 4.7.2) na `/tower-defense/`, verze `1.0.0-web.1`. Podrobnosti, postup a omezení: `TOWER_DEFENSE_RELEASE.md`.
