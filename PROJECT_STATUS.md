@@ -3,6 +3,7 @@
 - Na žádost autora přidána webová hra **Ostrov v oblacích** (3D izometrická obrana věží, Godot 4.7.2) na `/tower-defense/`, verze `1.0.0-web.1`. Podrobnosti, postup a omezení: `TOWER_DEFENSE_RELEASE.md`.
 - Stejný postup jako u Lost Signal: statické soubory ve verzované složce, stálá adresa přes přepis, wasm jako gzip, service worker hru nekešuje. První načtení ~11 MB. Karta v katalogu (platforma Web, id 36) + záložní řádek v `data.js`; `apps-music.jsx` rozpoznává webové hry obecně (platforma `Web` a odkaz na vlastní stránku), ne jen podle názvu Lost Signal.
 - Hra má vlastní úložiště `/userfs/OstrovVOblacich`, aby při souběžném hraní nesmazala uložení Lost Signal (viz dokument).
+- Publikováno přes PR #20 (merge `47346bc`), Vercel READY, `jenda.cool/tower-defense/` odpovídá; řádek `apps` id 36 vložen do Supabase po ověření (viz `TOWER_DEFENSE_RELEASE.md`, oddíl Publikace).
 - Ověřeno: `build_site.cjs` + `--check`, všechny testy z `BUILD.md` vč. nového `tests/tower-defense.cjs`, v prohlížeči hra na stálé adrese (lokální server s pravidly z `vercel.json`), oddělená databáze a pamatování voleb, karta na hlavní stránce. Skutečný telefon a Safari nezkoušeny.
 
 ## 2026-10-05 — Paperlings downloads

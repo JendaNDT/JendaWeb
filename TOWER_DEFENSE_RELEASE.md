@@ -41,3 +41,13 @@ události) na Godotu 4.7.2 i 4.6.3. **Nezkoušeno:** skutečný telefon, Safari/
 
 Záznam v katalogu je `tower-defense/catalog.json` (platforma `Web`, id 36, řazení −5 = nahoře) a stejný řádek je
 v `data.js` jako záložní data. Do databáze Supabase se vkládá až po nasazení a ověření adresy.
+
+## Publikace
+Nasazeno přes PR #20 (sloučeno jako `47346bca25bcf91a4e669c66e4f2498b2d494ac1`), produkční nasazení Vercelu
+bylo READY a alias `jenda.cool` na něj míří. Na živé adrese ověřeno: `/tower-defense` (přesměrování na
+`/tower-defense/`), stálá stránka (HTTP 200, `must-revalidate`, `<base>` i `persistentPaths`), `manifest.json`
+verze (HTTP 200, neměnné ukládání). Samotný `index.wasm` (gzip, `application/wasm`) jsem na živém webu
+neověřil (nástroj by vracel jeho binární obsah); stejné pravidlo jako u Lost Signal, které je ověřené, a
+v prohlížeči jsem ho zkoušel nad lokálním serverem s pravidly z `vercel.json`. Záznam `apps` id 36 byl do
+databáze vložen až po ověření adresy (počet řádků 32 → 33, ostatní řádky beze změny).
+
