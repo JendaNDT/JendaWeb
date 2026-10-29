@@ -1641,6 +1641,9 @@ const APP_VISUALS = {
 const APP_SCREENSHOT_CAPTIONS = {
   '/paperlings/game.png': { cs:'Origami postavičky v první misi Paperlings.', en:'Origami characters in the first Paperlings mission.' },
   '/screenshots/lost-signal-web.1/mission-01.png': { cs:'Bram, Rhea a K-9 v první misi webové hry.', en:'Bram, Rhea and K-9 in the first mission of the browser game.' },
+  '/screenshots/tower-defense-web.1/ostrov.jpg': { cs:'Létající ostrov se čtyřmi biomy, řekou a vodopádem.', en:'The floating island with four biomes, a river and a waterfall.' },
+  '/screenshots/tower-defense-web.1/stavba.jpg': { cs:'Věž vyrůstá ze země i s prachem a měkkým stínem.', en:'A tower growing out of the ground with dust and a soft shadow.' },
+  '/screenshots/tower-defense-web.1/telefon.jpg': { cs:'Telefon na šířku: označené pole a potvrzení stavby.', en:'Phone in landscape: the chosen cell and the build confirmation.' },
   '/screenshots/fyzika-pastelkou-0.1.23/experiment.png': { cs:'Nakresli cestu přes jablíčko do koše.', en:'Draw a path past the apple and into the basket.' },
   '/screenshots/fyzika-pastelkou-0.1.23/water-oil.png': { cs:'Zkoumej, jak se tělesa chovají ve vodě a oleji.', en:'Explore how objects behave in water and oil.' },
   '/screenshots/fyzika-pastelkou-0.1.23/magnifier.png': { cs:'Lupa pomáhá přesně připojit drát.', en:'Use the magnifier to connect a wire precisely.' },
@@ -1876,7 +1879,7 @@ function AppsSection({ lang, onOpen }) {
 
 function AppDetailModal({ app, lang, onClose, onShare }) {
   const isPWA = app.platform === 'PWA';
-  const isWebGame = app.name === 'Lost Signal' && app.link === '/lost-signal/';
+  const isWebGame = app.platform === 'Web' && typeof app.link === 'string' && app.link.startsWith('/') && app.link.endsWith('/');
   const hasDownloadChoices = appDownloads(app).some(d => d.primary);
   const copy = appCopy(app, lang);
   const screenshots = [...(app.screenshots || [])];

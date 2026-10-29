@@ -15,6 +15,8 @@ node tests/startup-build.cjs
 node tests/gallery-input.cjs
 node tests/download-counts.cjs
 node tests/multipart-downloads.cjs
+node tests/lost-signal.cjs
+node tests/tower-defense.cjs
 ```
 
 `python3 build_jsx.py` remains a compatibility entry point and invokes the same

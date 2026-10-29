@@ -108,6 +108,11 @@
       "permanent": true
     },
     {
+      "source": "/tower-defense",
+      "destination": "/tower-defense/",
+      "permanent": true
+    },
+    {
       "source": "/paperlings",
       "destination": "/paperlings/",
       "permanent": true
@@ -129,6 +134,18 @@
     {
       "source": "/lost-signal/releases/:version/index.wasm",
       "destination": "/lost-signal/releases/:version/index.wasm.gz"
+    },
+    {
+      "source": "/tower-defense/",
+      "destination": "/tower-defense/releases/1.0.0-web.1/index.html"
+    },
+    {
+      "source": "/tower-defense/index.html",
+      "destination": "/tower-defense/releases/1.0.0-web.1/index.html"
+    },
+    {
+      "source": "/tower-defense/releases/:version/index.wasm",
+      "destination": "/tower-defense/releases/:version/index.wasm.gz"
     }
   ],
   "headers": [
@@ -767,6 +784,50 @@
     },
     {
       "source": "/lost-signal/",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/tower-defense/releases/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/tower-defense/releases/:version/index.wasm",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/wasm"
+        },
+        {
+          "key": "Content-Encoding",
+          "value": "gzip"
+        }
+      ]
+    },
+    {
+      "source": "/tower-defense/releases/:version/index.wasm.gz",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/wasm"
+        },
+        {
+          "key": "Content-Encoding",
+          "value": "gzip"
+        }
+      ]
+    },
+    {
+      "source": "/tower-defense/",
       "headers": [
         {
           "key": "Cache-Control",
