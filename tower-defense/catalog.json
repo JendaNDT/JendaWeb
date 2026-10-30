@@ -3,15 +3,16 @@
   "name": "Ostrov v oblacích",
   "platform": "Web",
   "color": "#4fa8e8",
-  "cs": "3D izometrická obrana věží na létajícím ostrově v oblacích i na vesmírné stanici. Postav lučištníky, kanóny, mágy a mrazivé věže, vylepši každou na čtyři úrovně a braň Srdce před dvanácti vlnami nepřátel: rychlými vlky, obrněnými golemy, draky, bossy, léčiteli i slizáky. Tři velké mapy s více branami, rozcestími a kopci (věž na kopci dosáhne dál), minimapa, dvě prostředí, tři obtížnosti, nekonečný režim a aktivní schopnosti jako meteor.\n\nHraj zdarma v prohlížeči. Na počítači myší a klávesnicí, na telefonu na šířku dotykem: jeden prst posouvá, dva přibližují a otáčejí. Hra je česky; grafika, zvuky i hudba vznikly v kódu.\n\nWebová verze · první načtení přibližně 11 MB. Volby a rekordy se ukládají v tomto prohlížeči. Zkoušeno v Chromiu, skutečný telefon a Safari zatím ne.",
-  "en": "A 3D isometric tower defense on a floating island in the clouds and on a space station. Build archer, cannon, mage and frost towers, upgrade each to four levels and defend the Heart against twelve waves of enemies: fast wolves, armored golems, drakes, bosses, healers and slimes. Three large maps with several gates, forks and hills (a tower on a hill reaches farther), a minimap, two environments, three difficulties, an endless mode and active abilities such as a meteor.\n\nPlay free in your browser. Mouse and keyboard on a computer; on a phone turn it sideways and use touch: one finger pans, two fingers zoom and rotate. The game is in Czech; its graphics, sounds and music are all generated in code.\n\nWeb version · about 11 MB on first load. Settings and records are saved in this browser. Tested in Chromium; a physical phone and Safari have not been tested yet.",
+  "cs": "3D izometrická obrana věží na létajícím ostrově v oblacích i na vesmírné stanici. Postav lučištníky, kanóny, mágy a mrazivé věže, vylepši každou na čtyři úrovně a braň Srdce před dvanácti vlnami nepřátel: rychlými vlky, obrněnými golemy, draky, bossy, léčiteli i slizáky. Tři velké mapy s více branami, rozcestími a kopci (věž na kopci dosáhne dál), minimapa, pohled shora s výraznou mřížkou polí, dvě prostředí, tři obtížnosti, nekonečný režim a aktivní schopnosti jako meteor.\n\nHraj zdarma v prohlížeči. Na počítači myší a klávesnicí, na telefonu na šířku dotykem: jeden prst posouvá, dva přibližují a otáčejí. Hra je česky; grafika, zvuky i hudba vznikly v kódu.\n\nWebová verze · první načtení přibližně 11 MB. Volby a rekordy se ukládají v tomto prohlížeči. Zkoušeno v Chromiu, skutečný telefon a Safari zatím ne.",
+  "en": "A 3D isometric tower defense on a floating island in the clouds and on a space station. Build archer, cannon, mage and frost towers, upgrade each to four levels and defend the Heart against twelve waves of enemies: fast wolves, armored golems, drakes, bosses, healers and slimes. Three large maps with several gates, forks and hills (a tower on a hill reaches farther), a minimap, a top-down view with a clear build grid, two environments, three difficulties, an endless mode and active abilities such as a meteor.\n\nPlay free in your browser. Mouse and keyboard on a computer; on a phone turn it sideways and use touch: one finger pans, two fingers zoom and rotate. The game is in Czech; its graphics, sounds and music are all generated in code.\n\nWeb version · about 11 MB on first load. Settings and records are saved in this browser. Tested in Chromium; a physical phone and Safari have not been tested yet.",
   "link": "/tower-defense/",
-  "icon_url": "/tower-defense/releases/1.1.0-web.1/index.apple-touch-icon.png",
+  "icon_url": "/tower-defense/releases/1.2.0-web.1/index.apple-touch-icon.png",
   "sort": -5,
   "screenshots": [
-    "/screenshots/tower-defense-web.2/ostrov.jpg",
-    "/screenshots/tower-defense-web.2/kopce.jpg",
-    "/screenshots/tower-defense-web.2/stanice.jpg",
-    "/screenshots/tower-defense-web.2/telefon.jpg"
+    "/screenshots/tower-defense-web.3/ostrov.jpg",
+    "/screenshots/tower-defense-web.3/shora.jpg",
+    "/screenshots/tower-defense-web.3/mrizka.jpg",
+    "/screenshots/tower-defense-web.3/stanice.jpg",
+    "/screenshots/tower-defense-web.3/telefon.jpg"
   ]
 }
